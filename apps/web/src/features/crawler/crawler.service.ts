@@ -63,36 +63,37 @@ export class CrawlerService {
                 .from('advertisements')
                 .upsert({
                     ...normalized.ad,
-                    id: existing?.id, // Keep ID if updating
+                    id: (existing as any)?.id, // Keep ID if updating
                     user_id: '00000000-0000-0000-0000-000000000000' // SYSTEM USER or specific admin
-                }, { onConflict: 'source,source_id' })
+                } as any, { onConflict: 'source,source_id' })
                 .select()
                 .single()
 
-            if (adError || !ad) throw adError || new Error('Ad save failed')
+            const adRecord = ad as any
+            if (adError || !adRecord) throw adError || new Error('Ad save failed')
 
             // 6. Save Contacts
             await this.supabase
                 .from('contacts')
-                .upsert({ ...normalized.contacts, ad_id: ad.id })
+                .upsert({ ...normalized.contacts, ad_id: adRecord.id } as any)
 
             // 7. Save Comments
             for (const comment of normalized.comments) {
                 await this.supabase
                     .from('ad_comments')
-                    .upsert({ ...comment, ad_id: ad.id }, { onConflict: 'ad_id,comment_key' })
+                    .upsert({ ...comment, ad_id: adRecord.id } as any, { onConflict: 'ad_id,comment_key' })
             }
 
             // 8. Record Change
             await this.supabase
                 .from('profile_changes')
                 .insert({
-                    ad_id: ad.id,
+                    ad_id: adRecord.id,
                     change_type: diff.type,
                     changed_fields: diff.changedFields,
                     before_json: diff.before as any,
                     after_json: diff.after as any
-                })
+                } as any)
 
             console.log(`[Crawler] Profile ${listing.source_id} ${diff.type} successfully`)
 
