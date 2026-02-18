@@ -1,11 +1,11 @@
-import { createServerClient } from '@vm/db'
+import { createServiceRoleClient } from '@vm/db/src/service-client'
 import { parseListing, parseProfile } from './parser'
 import { normalizeTitiData } from './normalizer'
 import { diffProfile } from './diff'
 import { RawTitiListing } from './types'
 
 export class CrawlerService {
-    private supabase = createServerClient()
+    private supabase = createServiceRoleClient()
     private readonly SOURCE = 'titi'
     private readonly BASE_URL = 'https://www.titi.co.il'
 
