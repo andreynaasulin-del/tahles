@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createBrowserClient as createClient } from '@vm/db'
+import { createBrowserClient as createClient } from '@vm/db/src/client'
 import {
     BarChart3,
     Users,
