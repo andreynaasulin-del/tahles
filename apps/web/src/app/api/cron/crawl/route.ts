@@ -22,11 +22,12 @@ export async function GET(request: NextRequest) {
 
     const crawler = new CrawlerService()
 
-    // We run it asynchronously to avoid Vercel timeout in some cases, 
-    // though for MVP we might want to wait for response
+    // For debugging the 500 error, we will await it and log
+    console.log('[API] Starting crawler service...')
+
     try {
-        // Start crawl (non-blocking)
-        crawler.runFullCrawl()
+        await crawler.runFullCrawl()
+        console.log('[API] Crawler finished')
 
         return NextResponse.json({
             success: true,
