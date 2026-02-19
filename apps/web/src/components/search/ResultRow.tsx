@@ -37,7 +37,7 @@ function formatLastSeen(min: number): string {
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return 'New'
   const date = new Date(dateStr)
-  return new Intl.DateTimeFormat('d MMMM yyyy').format(date)
+  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
 }
 
 const SERVICE_STYLES: Record<string, { emoji: string; label: string }> = {
