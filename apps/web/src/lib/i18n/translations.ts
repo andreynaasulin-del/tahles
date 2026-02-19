@@ -1,9 +1,9 @@
 export type Locale = 'en' | 'ru' | 'he'
 
 export const LOCALES: { id: Locale; label: string; flag: string; dir: 'ltr' | 'rtl' }[] = [
-  { id: 'en', label: 'English',  flag: '🇬🇧', dir: 'ltr' },
-  { id: 'ru', label: 'Русский',  flag: '🇷🇺', dir: 'ltr' },
-  { id: 'he', label: 'עברית',   flag: '🇮🇱', dir: 'rtl' },
+  { id: 'en', label: 'English', flag: '🇬🇧', dir: 'ltr' },
+  { id: 'ru', label: 'Русский', flag: '🇷🇺', dir: 'ltr' },
+  { id: 'he', label: 'עברית', flag: '🇮🇱', dir: 'rtl' },
 ]
 
 export type TranslationKey =
@@ -129,6 +129,9 @@ export type TranslationKey =
   | 'sheets'
   | 'load_more_label'
   | 'language'
+  | 'starting_at'
+  | 'contacts'
+  | 'unlock'
 
 type TranslationDict = Record<TranslationKey, string>
 
@@ -241,6 +244,9 @@ const en: TranslationDict = {
   sheets: 'Sheets',
   load_more_label: 'Load more',
   language: 'Language',
+  starting_at: 'Starting at',
+  contacts: 'Contacts',
+  unlock: 'Unlock',
 }
 
 const ru: TranslationDict = {
@@ -352,6 +358,9 @@ const ru: TranslationDict = {
   sheets: 'Листы',
   load_more_label: 'Загрузить ещё',
   language: 'Язык',
+  starting_at: 'От',
+  contacts: 'Контакты',
+  unlock: 'Открыть',
 }
 
 const he: TranslationDict = {
@@ -463,6 +472,9 @@ const he: TranslationDict = {
   sheets: 'רשימות',
   load_more_label: 'טען עוד',
   language: 'שפה',
+  starting_at: 'החל מ',
+  contacts: 'אנשי קשר',
+  unlock: 'פתיחה',
 }
 
 export const translations: Record<Locale, TranslationDict> = { en, ru, he }

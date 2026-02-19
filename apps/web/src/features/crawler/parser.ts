@@ -1,38 +1,37 @@
 import * as cheerio from 'cheerio'
 import { RawTitiListing, RawTitiProfile, RawTitiComment } from './types'
 
+
 export function parseListing(html: string): RawTitiListing[] {
     const $ = cheerio.load(html)
     const results: RawTitiListing[] = []
 
-    // Note: Selectors are based on common patterns and initial HTML analysis
-    // They may need adjustment if the site structure changes
-    $('.catalog-item, .girl-preview, .item').each((_, el) => {
+    // Новые селекторы: ищем li внутри listing_box
+    $('.listing_box li[id^="fli_"]').each((_, el) => {
         const $el = $(el)
-        const url = $el.find('a').attr('href')
+        const $link = $el.find('.picture a')
+        const url = $link.attr('href')
         if (!url) return
 
-        const source_id = url.split('/').pop()?.replace('.html', '') || ''
-        const name = $el.find('.name, h3').text().trim()
-        const age = parseInt($el.find('.age').text().replace(/\D/g, '')) || null
-        const city = $el.find('.city, .location').text().trim() || null
+        const source_id = url.split('-').pop()?.replace('.html', '') || ''
+        const name = $link.attr('title')?.split(',')[0].trim() || ''
+        const city = $el.find('li[id$="_country_level1"] div').text().trim()
 
-        // Price extraction logic
-        const priceText = $el.find('.price').text().replace(/\D/g, '')
-        const price = priceText ? parseInt(priceText) : null
+        // Фото превью
+        const preview_image = $el.find('.picture img').attr('src') || null
 
         results.push({
             source_id,
-            url: url.startsWith('http') ? url : `https://www.titi.co.il${url}`,
+            url: url.startsWith('http') ? url : `https://www.titti.co.il${url}`,
             name,
-            city,
-            age,
-            price_min: price,
+            city: city || null,
+            age: null, // Возраст теперь часто внутри title линка
+            price_min: null,
             price_max: null,
-            preview_image: $el.find('img').attr('src') || null,
-            is_verified: $el.find('.verified, .check').length > 0,
-            is_vip: $el.find('.vip, .premium').length > 0,
-            views_today: parseInt($el.find('.views').text().replace(/\D/g, '')) || null,
+            preview_image,
+            is_verified: $el.find('.verifiedIcon').length > 0,
+            is_vip: $el.find('.hot_exclusive').length > 0,
+            views_today: null,
             online_status: $el.find('.online').length > 0,
         })
     })
@@ -43,47 +42,41 @@ export function parseListing(html: string): RawTitiListing[] {
 export function parseProfile(html: string, listingData: RawTitiListing): RawTitiProfile {
     const $ = cheerio.load(html)
 
-    // Gallery
+    // Gallery: теперь картинки часто в .picture или .photos
     const photos: string[] = []
-    $('.gallery img, .photos img, .main-image img').each((_, el) => {
+    $('img[src*="/files/"]').each((_, el) => {
         const src = $(el).attr('src')
-        if (src) photos.push(src)
+        if (src && !src.includes('logo')) photos.push(src)
     })
 
-    // Categories & Tags
-    const categories: string[] = []
-    $('.tags a, .categories span').each((_, el) => {
-        categories.push($(el).text().trim())
-    })
+    // Извлекаем данные из таблицы характеристик
+    const getValue = (label: string) => {
+        return $(`.table-cell:contains("${label}")`).find('.value').text().trim()
+    }
 
-    // Contacts
-    const phone = $('.phone, .tel').text().trim()
-    const whatsapp = $('.whatsapp').attr('href')?.split('phone=')[1] || undefined
-    const telegram = $('.telegram').attr('href')?.split('/').pop() || undefined
+    const ageStr = getValue('Age')
+    const age = parseInt(ageStr) || listingData.age
 
-    // Comments
-    const comments: RawTitiComment[] = []
-    $('.comment, .review').each((_, el) => {
-        const $c = $(el)
-        comments.push({
-            comment_key: $c.attr('id') || Math.random().toString(36).substring(7),
-            author: $c.find('.author').text().trim() || null,
-            text: $c.find('.text, .content').text().trim() || null,
-            rating: parseInt($c.find('.rating').attr('data-score') || '') || null,
-            date_raw: $c.find('.date').text().trim() || null,
-        })
-    })
+    // Контакты (телефон пока под звездочками в HTML, но мы берем ID для ревизии)
+    const phoneId = $('.show_phone').attr('data-id')
+    const phone = $('.show_phone').parent().find('a').text().trim()
 
     return {
         ...listingData,
-        description: $('.description, .about').text().trim() || null,
+        age,
+        description: $('.description-content').text().trim() || null,
         photos: Array.from(new Set(photos)),
-        categories,
-        languages: [], // Extract if available
-        service_type: html.includes('outcall') ? 'outcall' : 'incall',
-        contacts: { phone, whatsapp, telegram },
-        comments,
-        rating_avg: parseFloat($('.rating-avg').text()) || null,
-        rating_count: parseInt($('.rating-count').text().replace(/\D/g, '')) || null,
+        categories: [],
+        languages: [],
+        service_type: html.includes('Outcall') ? 'outcall' : 'incall',
+        contacts: {
+            phone: phone.includes('*') ? phone : phone,
+            whatsapp: undefined,
+            telegram: undefined
+        },
+        comments: [],
+        rating_avg: null,
+        rating_count: null,
     }
 }
+

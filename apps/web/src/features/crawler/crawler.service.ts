@@ -1,116 +1,118 @@
+
 import { createServiceRoleClient } from '@vm/db/src/service-client'
-import { parseListing, parseProfile } from './parser'
 import { normalizeTitiData } from './normalizer'
 import { diffProfile } from './diff'
 import { RawTitiListing } from './types'
+import { TittiAdapter } from './adapters/titti.adapter'
+import { SiteParser } from './parser.interface'
 
 export class CrawlerService {
     private supabase = createServiceRoleClient()
-    private readonly SOURCE = 'titi'
-    private readonly BASE_URL = 'https://www.titi.co.il'
+    private adapters: SiteParser[] = [
+        new TittiAdapter(),
+        // Добавим остальные, когда пробьем Cloudflare
+    ]
 
-    /**
-     * Main entry point: Crawl the titi.co.il listing and update all profiles
-     */
+
+
     async runFullCrawl() {
-        console.log('[Crawler] Starting full crawl cycle...')
+        console.log('🚀 [Crawler] Starting DEEP multi-site crawl...');
 
-        try {
-            // 1. Fetch Listing
-            const listingHtml = await this.fetchPage(this.BASE_URL)
-            const listings = parseListing(listingHtml)
-            console.log(`[Crawler] Found ${listings.length} listings`)
+        const { data: users } = await this.supabase.from('users').select('id').limit(1);
+        const systemUserId = users?.[0]?.id;
 
-            for (const listing of listings) {
-                await this.processProfile(listing)
-                // Respectful jitter (300-1200ms)
-                await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 900))
-            }
-
-            console.log('[Crawler] Full crawl cycle completed')
-        } catch (error) {
-            console.error('[Crawler] Error during crawl:', error)
+        if (!systemUserId) {
+            console.error('🛑 ERROR: No users found. Skipping.');
+            return;
         }
+
+        for (const adapter of this.adapters) {
+            console.log(`\n📂 [Crawler] Target: ${adapter.source}`);
+
+            // Проходим по первым 10 страницам для каждого источника (глубокий парсинг)
+            for (let page = 1; page <= 10; page++) {
+                try {
+                    const url = page === 1 ? adapter.baseUrl : `${adapter.baseUrl}/page/${page}/`;
+                    console.log(`📄 [Crawler] Fetching page ${page}: ${url}`);
+
+                    const html = await this.fetchPage(url);
+                    const listings = adapter.parseListing(html);
+
+                    if (listings.length === 0) {
+                        console.log(`🏁 [Crawler] No more listings on page ${page}. Moving to next source.`);
+                        break;
+                    }
+
+                    console.log(`✅ [Crawler] Found ${listings.length} listings on page ${page}`);
+
+                    for (const listing of listings) {
+                        await this.processProfile(adapter, listing, systemUserId);
+                        // Рандомная пауза чтобы не забанили
+                        await new Promise(r => setTimeout(r, 1000 + Math.random() * 2000));
+                    }
+                } catch (error: any) {
+                    console.error(`❌ [Crawler] Error on page ${page}:`, error.message);
+                    if (error.message.includes('403')) break; // Cloudflare block
+                }
+            }
+        }
+        console.log('✨ [Crawler] Full cycle finished. Sleeping before next round...');
     }
 
-    private async processProfile(listing: RawTitiListing) {
-        try {
-            // 1. Fetch Profile Details
-            const profileHtml = await this.fetchPage(listing.url)
-            const rawProfile = parseProfile(profileHtml, listing)
 
-            // 2. Normalize
+    private async processProfile(adapter: SiteParser, listing: RawTitiListing, userId: string) {
+        try {
+            const profileHtml = await this.fetchPage(listing.url)
+            const rawProfile = adapter.parseProfile(profileHtml, listing)
             const normalized = normalizeTitiData(rawProfile)
 
-            // 3. Find existing
+            // Проверяем наличие
             const { data: existing } = await this.supabase
                 .from('advertisements')
                 .select('*')
-                .eq('source', this.SOURCE)
+                .eq('source', adapter.source)
                 .eq('source_id', listing.source_id)
                 .single()
 
-            // 4. Diff
             const diff = diffProfile(existing as any, normalized.ad)
+            if (diff.type === 'unchanged') return
 
-            if (diff.type === 'unchanged') {
-                console.log(`[Crawler] Profile ${listing.source_id} unchanged. Skipping update.`)
-                return
-            }
-
-            // 5. Save/Update Advertisement
             const { data: ad, error: adError } = await this.supabase
                 .from('advertisements')
                 .upsert({
                     ...normalized.ad,
-                    id: (existing as any)?.id, // Keep ID if updating
-                    user_id: '00000000-0000-0000-0000-000000000000' // SYSTEM USER or specific admin
-                } as any, { onConflict: 'source,source_id' })
+                    nickname: listing.name, // Поле nickname обязательное в миграции
+                    source: adapter.source,
+                    source_id: listing.source_id,
+                    id: (existing as any)?.id,
+                    user_id: userId
+                } as any)
+
                 .select()
                 .single()
 
             const adRecord = ad as any
             if (adError || !adRecord) throw adError || new Error('Ad save failed')
 
-            // 6. Save Contacts
             await this.supabase
                 .from('contacts')
                 .upsert({ ...normalized.contacts, ad_id: adRecord.id } as any)
 
-            // 7. Save Comments
-            for (const comment of normalized.comments) {
-                await this.supabase
-                    .from('ad_comments')
-                    .upsert({ ...comment, ad_id: adRecord.id } as any, { onConflict: 'ad_id,comment_key' })
-            }
-
-            // 8. Record Change
-            await this.supabase
-                .from('profile_changes')
-                .insert({
-                    ad_id: adRecord.id,
-                    change_type: diff.type,
-                    changed_fields: diff.changedFields,
-                    before_json: diff.before as any,
-                    after_json: diff.after as any
-                } as any)
-
-            console.log(`[Crawler] Profile ${listing.source_id} ${diff.type} successfully`)
-
+            console.log(`[Crawler] Saved ${adapter.source}:${listing.source_id} (${listing.name})`)
         } catch (error) {
-            console.error(`[Crawler] Failed to process profile ${listing.source_id}:`, error)
+            console.error(`[Crawler] Failed ${adapter.source}:${listing.source_id}:`, error)
         }
     }
 
     private async fetchPage(url: string): Promise<string> {
         const res = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,he;q=0.6'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                'Accept-Language': 'he-IL,he;q=0.9,ru-RU;q=0.8,ru;q=0.7,en-US;q=0.6,en;q=0.5'
             }
         })
-
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`)
+        if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`)
         return res.text()
     }
 }
+

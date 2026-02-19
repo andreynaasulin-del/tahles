@@ -62,6 +62,7 @@ function applyMockFilters(sheet: string, q: string, priceMin?: string | null, pr
   return list
 }
 
+
 // ── Real Supabase search ─────────────────────────────────────────────────────
 async function realSearch(q: string, sheet: string, city: string, priceMin: string | null, priceMax: string | null, page: number, limit: number) {
   const { createServerClient } = await import('@vm/db')
@@ -75,16 +76,25 @@ async function realSearch(q: string, sheet: string, city: string, priceMin: stri
     return { type: 'phone', query: '[REDACTED]', insights: { timesSearched: ts, trend: ts > 50 ? 'rising' : 'stable', matchCount: phoneCount ?? 0, topCity: null }, data: [], total: phoneCount ?? 0, page }
   }
 
-  let query = supabase.from('advertisements').select('id,nickname,age,verified,vip_status,online_status,price_min,price_max,city,gender,service_type,created_at', { count: 'exact' }).range((page - 1) * limit, page * limit - 1)
+  let query = supabase.from('advertisements').select('id,nickname,age,verified,vip_status,online_status,price_min,price_max,city,gender,service_type,created_at,photos', { count: 'exact' }).range((page - 1) * limit, page * limit - 1)
+
   if (q) query = query.or(`nickname.ilike.%${q}%,city.ilike.%${q}%,description.ilike.%${q}%`)
   if (sheet === 'basic') query = query.eq('vip_status', false).eq('verified', false)
   if (sheet === 'paid') query = query.eq('verified', true)
   if (sheet === 'vip' || sheet === 'vip1500') query = query.eq('vip_status', true)
   if (sheet === 'up1000') query = query.lte('price_min', 1000)
+  if (sheet === 'under25') query = query.lte('age', 25)
+  if (sheet === '40plus') query = query.gte('age', 40)
   if (city) query = query.ilike('city', `%${city}%`)
   if (priceMin) query = query.gte('price_min', parseInt(priceMin))
   if (priceMax) query = query.lte('price_max', parseInt(priceMax))
-  query = query.order('vip_status', { ascending: false }).order('verified', { ascending: false }).order('online_status', { ascending: false }).order('created_at', { ascending: false })
+
+  // Сортировка по весу: VIP -> Verified -> Online -> Newest
+  query = query
+    .order('vip_status', { ascending: false })
+    .order('verified', { ascending: false })
+    .order('online_status', { ascending: false })
+    .order('created_at', { ascending: false })
 
   const { data, error, count } = await query
   if (error) throw error
@@ -95,7 +105,16 @@ async function realSearch(q: string, sheet: string, city: string, priceMin: stri
   const cityMap: Record<string, number> = {}
   for (const row of (data ?? []) as R[]) { if (row.city) cityMap[row.city] = (cityMap[row.city] ?? 0) + 1 }
   const topCity = Object.entries(cityMap).sort((a, b) => b[1] - a[1])[0]
-  return { type: 'text', query: q, insights: q ? { timesSearched: ts, trend: ts > 40 ? 'rising' : 'stable', matchCount: total, topCity: topCity?.[0] ?? null, localFrequency: topCity?.[1] ?? 0 } : null, data: data ?? [], total, page, pageSize: limit }
+
+  return {
+    type: 'text',
+    query: q,
+    insights: q ? { timesSearched: ts, trend: ts > 40 ? 'rising' : 'stable', matchCount: total, topCity: topCity?.[0] ?? null, localFrequency: topCity?.[1] ?? 0 } : null,
+    data: data ?? [],
+    total,
+    page,
+    pageSize: limit
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -105,7 +124,10 @@ export async function GET(request: NextRequest) {
     const validated = SearchSchema.parse(rawParams)
 
     const { q, sheet, city, price_min: priceMin, price_max: priceMax, page } = validated
-    const limit = 20
+
+    // Используем константу из либы
+    const { DEFAULT_PAGE_SIZE } = await import('@/lib/constants')
+    const limit = DEFAULT_PAGE_SIZE
 
     const hasSupabase = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('demo.supabase'))
 
@@ -118,23 +140,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ── Mock response (Sanitized) ───────────────────────────────────────────
-    if (q && /^\+?[\d\s\-().]{6,}$/.test(q)) {
-      const ts = Math.floor(Math.random() * 80 + 20)
-      return NextResponse.json({ type: 'phone', query: '[REDACTED]', insights: { timesSearched: ts, trend: ts > 50 ? 'rising' : 'stable', matchCount: 0, topCity: null }, data: [], total: 0, page })
-    }
-
+    // ── Mock response ────────────────────────────────────────────────────────
     const filtered = applyMockFilters(sheet, q, priceMin ?? null, priceMax ?? null)
-    const pageData = filtered.slice((page - 1) * limit, page * limit)
+    const pageData = filtered.slice((page - 1) * limit, page * limit).map(ad => ({ ...ad, photos: [] }))
     const total = filtered.length
-    const ts = q ? Math.floor(total * 8 + 17) : 0
-    const cityMap: Record<string, number> = {}
-    for (const a of filtered) { if (a.city) cityMap[a.city] = (cityMap[a.city] ?? 0) + 1 }
-    const topCity = Object.entries(cityMap).sort((a, b) => b[1] - a[1])[0]
 
     return NextResponse.json({
       type: 'text', query: q,
-      insights: q ? { timesSearched: ts, trend: ts > 40 ? 'rising' : 'stable', matchCount: total, topCity: topCity?.[0] ?? null, localFrequency: topCity?.[1] ?? 0 } : null,
       data: pageData, total, page, pageSize: limit,
     })
   } catch (error) {
@@ -144,3 +156,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
+
