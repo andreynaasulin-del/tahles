@@ -78,7 +78,8 @@ export function ProfileModal({ ad, onClose }: ProfileModalProps) {
                             <img
                                 src={mainPhoto}
                                 alt={ad.nickname}
-                                className="w-full h-full object-cover scale-[1.08] object-[center_20%]"
+                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.1]"
+                                style={{ objectPosition: 'center 20%', transform: 'scale(1.08)' }}
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-white/20 bg-white/5 text-4xl font-bold">
@@ -99,7 +100,12 @@ export function ProfileModal({ ad, onClose }: ProfileModalProps) {
                         <div className="grid grid-cols-2 gap-1 p-1">
                             {otherPhotos.map((photo, i) => (
                                 <div key={i} className="aspect-[3/4] relative overflow-hidden">
-                                    <img src={photo} className="w-full h-full object-cover scale-[1.08] object-[center_20%]" alt="" />
+                                    <img
+                                        src={photo}
+                                        className="w-full h-full object-cover"
+                                        alt=""
+                                        style={{ objectPosition: 'center 20%', transform: 'scale(1.08)' }}
+                                    />
                                 </div>
                             ))}
                         </div>
