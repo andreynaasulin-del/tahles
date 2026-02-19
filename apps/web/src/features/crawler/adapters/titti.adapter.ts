@@ -102,12 +102,10 @@ export class TittiAdapter implements SiteParser {
         }
 
         // --- FIELDS: Extract structured data ---
-        const getFieldValue = (fieldId: string) => {
-            return $(`#df_field_${fieldId} .value`).text().trim();
-        };
+        const getFieldValue = (fieldId: string) => $(`#df_field_${fieldId} .value`).text().trim();
+        const getListItems = (selector: string) => $(selector).map((_, el) => $(el).text().trim()).get().filter(Boolean);
 
         const phone = $('.show_phone').attr('data-name') || '';
-        const phoneDataId = $('.show_phone').attr('data-id') || '';
 
         // Extract provide type (incall/outcall)
         const provideField = getFieldValue('providefield');
@@ -115,9 +113,51 @@ export class TittiAdapter implements SiteParser {
             provideField.toLowerCase().includes('outcall') && provideField.toLowerCase().includes('incall') ? 'both' :
                 provideField.toLowerCase().includes('outcall') ? 'outcall' : 'incall';
 
-        // Description
-        const description = $('.description-content').text().trim() ||
-            $('meta[name="description"]').attr('content')?.trim() || null;
+        // --- ENRICH DESCRIPTION ---
+        // Combine multiple text blocks to create a "rich" profile
+        const aboutMe = $('.description-content').text().trim();
+        const shortDesc = $('meta[name="description"]').attr('content')?.trim() || '';
+
+        // Extract services list
+        const servicesList = getListItems('.services_list li');
+
+        // Extract "My Details" / Stats (Titti uses specific IDs or classes for these detailed fields sometimes, but often just a list)
+        // Let's try to grab as much as possible
+        const detailsMap: Record<string, string> = {};
+        $('.details_list li').each((_, el) => {
+            const label = $(el).find('.label').text().replace(':', '').trim();
+            const value = $(el).find('.value').text().trim();
+            if (label && value) detailsMap[label] = value;
+        });
+
+        // Construct the rich description
+        let richDescription = '';
+        if (shortDesc) richDescription += `${shortDesc}\n\n`;
+        if (aboutMe && aboutMe !== shortDesc) richDescription += `${aboutMe}\n\n`;
+
+        // Add Stats Section if any found
+        const keyStats = ['Age', 'Height', 'Weight', 'Breast Size', 'Hair Color', 'Eye color', 'Ethnicity', 'Nationality'].filter(k => k in detailsMap);
+        if (keyStats.length > 0) {
+            richDescription += `📍 Details:\n`;
+            keyStats.forEach(k => richDescription += `• ${k}: ${detailsMap[k]}\n`);
+            richDescription += '\n';
+        }
+
+        // Add Services Section
+        if (servicesList.length > 0) {
+            richDescription += `💎 Services:\n${servicesList.join(' • ')}\n`;
+        }
+
+        // Add Incall Prices if available (Titti structure varies, sometimes in a table)
+        const prices: string[] = [];
+        $('.price_list tr').each((_, el) => {
+            const time = $(el).find('td:first-child').text().trim();
+            const price = $(el).find('td:last-child').text().trim();
+            if (time && price) prices.push(`${time}: ${price}`);
+        });
+        if (prices.length > 0) {
+            richDescription += `\n💰 Rates:\n${prices.join('\n')}`;
+        }
 
         // Category from page
         const category = getFieldValue('Category_ID');
@@ -125,7 +165,7 @@ export class TittiAdapter implements SiteParser {
         return {
             ...listing,
             price_min: priceMin ?? listing.price_min,
-            description,
+            description: richDescription.trim() || null,
             photos: Array.from(new Set(photos)),
             categories: category ? [category.trim()] : [],
             languages: [],

@@ -27,7 +27,10 @@ export function ProfileModal({ ad, onClose }: ProfileModalProps) {
         const num = ad.whatsapp || ad.phone
         if (num) {
             const cleanNum = num.replace(/\D/g, '')
-            window.open(`https://wa.me/${cleanNum}?text=Hi ${ad.nickname}, I found you on Tahles`, '_blank')
+            // Default message "Hi [Name], I found you on Tahles"
+            // In a real app we might respect the current language or the profile's language
+            const text = `Hi ${ad.nickname}, I found you on Tahles`
+            window.open(`https://wa.me/${cleanNum}?text=${encodeURIComponent(text)}`, '_blank')
         }
     }
 
