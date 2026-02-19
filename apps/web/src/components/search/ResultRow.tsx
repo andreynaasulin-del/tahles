@@ -110,7 +110,7 @@ export function ResultRow({
                 <img
                   src={mainPhoto}
                   alt={nickname}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover object-[center_20%] scale-[1.08] transition-transform duration-500 group-hover:scale-[1.15]"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white/20">

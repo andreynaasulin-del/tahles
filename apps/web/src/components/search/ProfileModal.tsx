@@ -70,12 +70,12 @@ export function ProfileModal({ ad, onClose }: ProfileModalProps) {
                 <div className="w-full sm:w-[55%] bg-[#050505] overflow-y-auto sm:overflow-y-scroll no-scrollbar h-[50vh] sm:h-auto relative group">
 
                     {/* Main Photo / Video placeholder if implemented later */}
-                    <div className="relative aspect-[3/4] sm:aspect-auto sm:min-h-full">
+                    <div className="relative aspect-[3/4] sm:aspect-auto sm:min-h-full overflow-hidden">
                         {mainPhoto ? (
                             <img
                                 src={mainPhoto}
                                 alt={ad.nickname}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover scale-[1.08] object-[center_20%]"
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-white/20 bg-white/5 text-4xl font-bold">
@@ -95,8 +95,8 @@ export function ProfileModal({ ad, onClose }: ProfileModalProps) {
                     {otherPhotos.length > 0 && (
                         <div className="grid grid-cols-2 gap-1 p-1">
                             {otherPhotos.map((photo, i) => (
-                                <div key={i} className="aspect-[3/4] relative">
-                                    <img src={photo} className="w-full h-full object-cover" alt="" />
+                                <div key={i} className="aspect-[3/4] relative overflow-hidden">
+                                    <img src={photo} className="w-full h-full object-cover scale-[1.08] object-[center_20%]" alt="" />
                                 </div>
                             ))}
                         </div>
