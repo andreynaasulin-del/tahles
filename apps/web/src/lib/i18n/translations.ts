@@ -131,6 +131,7 @@ export type TranslationKey =
   | 'language'
   | 'starting_at'
   | 'contacts'
+  | 'view_profile'
   | 'unlock'
 
 type TranslationDict = Record<TranslationKey, string>
@@ -246,6 +247,7 @@ const en: TranslationDict = {
   language: 'Language',
   starting_at: 'Starting at',
   contacts: 'Contacts',
+  view_profile: 'View Profile',
   unlock: 'Unlock',
 }
 
@@ -360,6 +362,7 @@ const ru: TranslationDict = {
   language: 'Язык',
   starting_at: 'От',
   contacts: 'Контакты',
+  view_profile: 'Открыть Анкету',
   unlock: 'Открыть',
 }
 
@@ -474,6 +477,7 @@ const he: TranslationDict = {
   language: 'שפה',
   starting_at: 'החל מ',
   contacts: 'אנשי קשר',
+  view_profile: 'צפה בפרופיל',
   unlock: 'פתיחה',
 }
 

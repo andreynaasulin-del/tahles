@@ -316,7 +316,12 @@ export default function HomePage() {
           {ads.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {ads.map((ad, i) => (
-                <ResultRow key={ad.id} rank={(meta.page - 1) * DEFAULT_PAGE_SIZE + i + 1} {...ad} />
+                <ResultRow
+                  key={ad.id}
+                  rank={(meta.page - 1) * DEFAULT_PAGE_SIZE + i + 1}
+                  {...ad}
+                  onSelect={(id) => console.log('Selected profile:', id)}
+                />
               ))}
             </div>
           )}
