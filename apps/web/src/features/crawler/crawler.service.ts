@@ -4,7 +4,7 @@ import { normalizeTitiData } from './normalizer'
 import { diffProfile } from './diff'
 import { RawTitiListing } from './types'
 import { TittiAdapter } from './adapters/titti.adapter'
-import { SiteParser } from './parser.interface'
+import { SiteParser, CrawlSection } from './parser.interface'
 
 export class CrawlerService {
     private supabase = createServiceRoleClient()
@@ -13,10 +13,22 @@ export class CrawlerService {
         // Добавим остальные, когда пробьем Cloudflare
     ]
 
+    /** Cache: category slug → UUID */
+    private categoryMap: Record<string, string> = {}
 
+    private async loadCategories() {
+        if (Object.keys(this.categoryMap).length > 0) return
+        const { data } = await this.supabase.from('categories').select('id, slug')
+        for (const cat of data ?? []) {
+            this.categoryMap[cat.slug] = cat.id
+        }
+        console.log(`📚 [Crawler] Loaded ${Object.keys(this.categoryMap).length} categories:`, Object.keys(this.categoryMap))
+    }
 
     async runFullCrawl() {
-        console.log('🚀 [Crawler] Starting DEEP multi-site crawl...');
+        console.log('🚀 [Crawler] Starting DEEP multi-site, multi-section crawl...');
+
+        await this.loadCategories()
 
         const { data: users } = await this.supabase.from('users').select('id').limit(1);
         const systemUserId = users?.[0]?.id;
@@ -27,32 +39,46 @@ export class CrawlerService {
         }
 
         for (const adapter of this.adapters) {
-            console.log(`\n📂 [Crawler] Target: ${adapter.source}`);
+            console.log(`\n📂 [Crawler] Source: ${adapter.source} (${adapter.sections.length} sections)`);
 
-            // Проходим по первым 10 страницам для каждого источника (глубокий парсинг)
-            for (let page = 1; page <= 10; page++) {
-                try {
-                    const url = page === 1 ? adapter.baseUrl : `${adapter.baseUrl}/page/${page}/`;
-                    console.log(`📄 [Crawler] Fetching page ${page}: ${url}`);
+            for (const section of adapter.sections) {
+                console.log(`\n🏷️  [Crawler] Section: ${section.label} → category: ${section.categorySlug || 'none'}`);
 
-                    const html = await this.fetchPage(url);
-                    const listings = adapter.parseListing(html);
+                for (let page = 1; page <= 10; page++) {
+                    try {
+                        // Build pagination URL
+                        let url: string;
+                        if (page === 1) {
+                            url = section.url;
+                        } else if (section.url.endsWith('.html')) {
+                            // /girls.html → /girls/page/2/
+                            url = section.url.replace('.html', `/page/${page}/`);
+                        } else {
+                            // /premium-escorts/ → /premium-escorts/page/2/
+                            url = section.url.replace(/\/?$/, `/page/${page}/`);
+                        }
 
-                    if (listings.length === 0) {
-                        console.log(`🏁 [Crawler] No more listings on page ${page}. Moving to next source.`);
-                        break;
+                        console.log(`📄 [Crawler] Fetching page ${page}: ${url}`);
+
+                        const html = await this.fetchPage(url);
+                        const listings = adapter.parseListing(html);
+
+                        if (listings.length === 0) {
+                            console.log(`🏁 [Crawler] No more listings on page ${page}. Next section.`);
+                            break;
+                        }
+
+                        console.log(`✅ [Crawler] Found ${listings.length} listings on page ${page}`);
+
+                        for (const listing of listings) {
+                            await this.processProfile(adapter, listing, systemUserId, section);
+                            // Рандомная пауза чтобы не забанили
+                            await new Promise(r => setTimeout(r, 1000 + Math.random() * 2000));
+                        }
+                    } catch (error: any) {
+                        console.error(`❌ [Crawler] Error on page ${page}:`, error.message);
+                        if (error.message.includes('403') || error.message.includes('404')) break;
                     }
-
-                    console.log(`✅ [Crawler] Found ${listings.length} listings on page ${page}`);
-
-                    for (const listing of listings) {
-                        await this.processProfile(adapter, listing, systemUserId);
-                        // Рандомная пауза чтобы не забанили
-                        await new Promise(r => setTimeout(r, 1000 + Math.random() * 2000));
-                    }
-                } catch (error: any) {
-                    console.error(`❌ [Crawler] Error on page ${page}:`, error.message);
-                    if (error.message.includes('403')) break; // Cloudflare block
                 }
             }
         }
@@ -60,7 +86,7 @@ export class CrawlerService {
     }
 
 
-    private async processProfile(adapter: SiteParser, listing: RawTitiListing, userId: string) {
+    private async processProfile(adapter: SiteParser, listing: RawTitiListing, userId: string, section: CrawlSection) {
         try {
             const profileHtml = await this.fetchPage(listing.url)
             const rawProfile = adapter.parseProfile(profileHtml, listing)
@@ -81,26 +107,37 @@ export class CrawlerService {
                 .from('advertisements')
                 .upsert({
                     ...normalized.ad,
-                    nickname: listing.name, // Поле nickname обязательное в миграции
+                    nickname: listing.name,
                     source: adapter.source,
                     source_id: listing.source_id,
                     id: (existing as any)?.id,
                     user_id: userId
                 } as any)
-
                 .select()
                 .single()
 
             const adRecord = ad as any
             if (adError || !adRecord) throw adError || new Error('Ad save failed')
 
+            // Save contacts
             await this.supabase
                 .from('contacts')
                 .upsert({ ...normalized.contacts, ad_id: adRecord.id } as any)
 
-            console.log(`[Crawler] Saved ${adapter.source}:${listing.source_id} (${listing.name})`)
+            // Save category link (ad_categories)
+            if (section.categorySlug && this.categoryMap[section.categorySlug]) {
+                const categoryId = this.categoryMap[section.categorySlug]
+                await this.supabase
+                    .from('ad_categories')
+                    .upsert(
+                        { ad_id: adRecord.id, category_id: categoryId },
+                        { onConflict: 'ad_id,category_id' }
+                    )
+            }
+
+            console.log(`[Crawler] ✅ ${adapter.source}:${listing.source_id} (${listing.name}) → ${section.categorySlug || 'no-cat'}`)
         } catch (error) {
-            console.error(`[Crawler] Failed ${adapter.source}:${listing.source_id}:`, error)
+            console.error(`[Crawler] ❌ ${adapter.source}:${listing.source_id}:`, error)
         }
     }
 
@@ -115,4 +152,3 @@ export class CrawlerService {
         return res.text()
     }
 }
-

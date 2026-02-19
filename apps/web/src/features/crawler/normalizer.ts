@@ -2,15 +2,39 @@ import { Action } from '@radix-ui/react-toast'
 import { RawTitiProfile, NormalizedData } from './types'
 import { CATEGORIES } from '@/lib/constants'
 
-// City mapping dictionary
+// City mapping dictionary (Hebrew + English variants → normalized)
 const CITY_MAP: Record<string, string> = {
     'תל אביב': 'Tel Aviv',
+    'Tel Aviv - Jaffa': 'Tel Aviv',
+    'Tel Aviv -Jaffa': 'Tel Aviv',
+    'Tel-Aviv': 'Tel Aviv',
+    'TLV': 'Tel Aviv',
     'מרכז': 'Central District',
+    'Center': 'Central District',
     'חיפה': 'Haifa',
     'ירושלים': 'Jerusalem',
     'נתניה': 'Netanya',
     'אשדוד': 'Ashdod',
     'פתח תקווה': 'Petah Tikva',
+    'Petach Tikva': 'Petah Tikva',
+    'באר שבע': 'Beer Sheva',
+    'Beer-Sheva': 'Beer Sheva',
+    'Beersheba': 'Beer Sheva',
+    'הרצליה': 'Herzliya',
+    'רמת גן': 'Ramat Gan',
+    'Ramat-Gan': 'Ramat Gan',
+    'ראשון לציון': 'Rishon LeZion',
+    'Rishon Lezion': 'Rishon LeZion',
+    'Rishon LeZion': 'Rishon LeZion',
+    'Rishon': 'Rishon LeZion',
+    'בת ים': 'Bat Yam',
+    'Bat-Yam': 'Bat Yam',
+    'Bat Yam': 'Bat Yam',
+    'רחובות': 'Rehovot',
+    'כפר סבא': 'Kfar Saba',
+    'Kfar-Saba': 'Kfar Saba',
+    'אילת': 'Eilat',
+    'Eilat': 'Eilat',
 }
 
 export function normalizeTitiData(raw: RawTitiProfile): NormalizedData {

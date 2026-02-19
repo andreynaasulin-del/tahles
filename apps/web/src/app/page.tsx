@@ -34,6 +34,9 @@ interface Ad {
   is_new?: boolean
   phone?: string | null
   photos?: string[]
+  whatsapp?: string | null
+  created_at?: string | null
+  comments_count?: number
 }
 
 interface SearchMeta { total: number; page: number; query: string; sheet: string }
@@ -91,7 +94,7 @@ export default function HomePage() {
     setLoading(true)
     setStarted(true)
     const params = new URLSearchParams()
-    if (cat) params.set('sheet', cat)
+    if (cat) params.set('category', cat)
     if (sh && sh !== 'all') params.set('sheet', sh)
     if (userCity) params.set('city', userCity)
     params.set('page', String(page))

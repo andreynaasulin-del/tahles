@@ -5,6 +5,7 @@ import { z } from 'zod'
 const SearchSchema = z.object({
   q: z.string().max(100).optional().default(''),
   sheet: z.string().max(50).optional().default(''),
+  category: z.string().max(50).optional().default(''),
   city: z.string().max(100).optional().default(''),
   price_min: z.string().regex(/^\d+$/).optional().nullable(),
   price_max: z.string().regex(/^\d+$/).optional().nullable(),
@@ -64,9 +65,9 @@ function applyMockFilters(sheet: string, q: string, priceMin?: string | null, pr
 
 
 // ── Real Supabase search ─────────────────────────────────────────────────────
-async function realSearch(q: string, sheet: string, city: string, priceMin: string | null, priceMax: string | null, page: number, limit: number) {
-  const { createServerClient } = await import('@vm/db')
-  const supabase = createServerClient()
+async function realSearch(q: string, sheet: string, category: string, city: string, priceMin: string | null, priceMax: string | null, page: number, limit: number) {
+  const { createServiceRoleClient } = await import('@vm/db')
+  const supabase = createServiceRoleClient()
 
   // Phone search is protected - returning metadata only, no raw phone data
   if (q && /^\+?[\d\s\-().]{6,}$/.test(q)) {
@@ -76,7 +77,37 @@ async function realSearch(q: string, sheet: string, city: string, priceMin: stri
     return { type: 'phone', query: '[REDACTED]', insights: { timesSearched: ts, trend: ts > 50 ? 'rising' : 'stable', matchCount: phoneCount ?? 0, topCity: null }, data: [], total: phoneCount ?? 0, page }
   }
 
-  let query = supabase.from('advertisements').select('id,nickname,age,verified,vip_status,online_status,price_min,price_max,city,gender,service_type,created_at,photos', { count: 'exact' }).range((page - 1) * limit, page * limit - 1)
+  // If category filter is active — get ad IDs from ad_categories first
+  let categoryAdIds: string[] | null = null
+  if (category) {
+    const { data: catData } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', category)
+      .single() as { data: { id: string } | null }
+
+    if (catData) {
+      const { data: adCats } = await supabase
+        .from('ad_categories')
+        .select('ad_id')
+        .eq('category_id', catData.id) as { data: { ad_id: string }[] | null }
+
+      categoryAdIds = (adCats ?? []).map(r => r.ad_id)
+      // If no ads in this category, return empty
+      if (categoryAdIds.length === 0) {
+        return { type: 'text', query: q, insights: null, data: [], total: 0, page, pageSize: limit }
+      }
+    }
+  }
+
+  let query = supabase.from('advertisements')
+    .select('id,nickname,age,verified,vip_status,online_status,price_min,price_max,city,gender,service_type,created_at,photos, contacts(whatsapp,phone), ad_comments(count)', { count: 'exact' })
+    .range((page - 1) * limit, page * limit - 1)
+
+  // Category filter — restrict to ad IDs in that category
+  if (categoryAdIds) {
+    query = query.in('id', categoryAdIds)
+  }
 
   if (q) query = query.or(`nickname.ilike.%${q}%,city.ilike.%${q}%,description.ilike.%${q}%`)
   if (sheet === 'basic') query = query.eq('vip_status', false).eq('verified', false)
@@ -85,6 +116,7 @@ async function realSearch(q: string, sheet: string, city: string, priceMin: stri
   if (sheet === 'up1000') query = query.lte('price_min', 1000)
   if (sheet === 'under25') query = query.lte('age', 25)
   if (sheet === '40plus') query = query.gte('age', 40)
+  if (sheet === 'outcall') query = query.in('service_type', ['outcall', 'both'])
   if (city) query = query.ilike('city', `%${city}%`)
   if (priceMin) query = query.gte('price_min', parseInt(priceMin))
   if (priceMax) query = query.lte('price_max', parseInt(priceMax))
@@ -99,18 +131,29 @@ async function realSearch(q: string, sheet: string, city: string, priceMin: stri
   const { data, error, count } = await query
   if (error) throw error
 
+  // Map joined data to flat structure
+  const mappedData = (data || []).map((ad: any) => ({
+    ...ad,
+    whatsapp: ad.contacts?.[0]?.whatsapp || null,
+    phone: ad.contacts?.[0]?.phone || null,
+    comments_count: ad.ad_comments?.[0]?.count || 0,
+    // Clean up joined arrays
+    contacts: undefined,
+    ad_comments: undefined
+  }))
+
   type R = { city?: string | null }
   const total = count ?? 0
   const ts = q ? Math.floor(total * 3 + 17) : 0
   const cityMap: Record<string, number> = {}
-  for (const row of (data ?? []) as R[]) { if (row.city) cityMap[row.city] = (cityMap[row.city] ?? 0) + 1 }
+  for (const row of (mappedData ?? []) as R[]) { if (row.city) cityMap[row.city] = (cityMap[row.city] ?? 0) + 1 }
   const topCity = Object.entries(cityMap).sort((a, b) => b[1] - a[1])[0]
 
   return {
     type: 'text',
     query: q,
     insights: q ? { timesSearched: ts, trend: ts > 40 ? 'rising' : 'stable', matchCount: total, topCity: topCity?.[0] ?? null, localFrequency: topCity?.[1] ?? 0 } : null,
-    data: data ?? [],
+    data: mappedData ?? [],
     total,
     page,
     pageSize: limit
@@ -123,7 +166,7 @@ export async function GET(request: NextRequest) {
     const rawParams = Object.fromEntries(searchParams.entries())
     const validated = SearchSchema.parse(rawParams)
 
-    const { q, sheet, city, price_min: priceMin, price_max: priceMax, page } = validated
+    const { q, sheet, category, city, price_min: priceMin, price_max: priceMax, page } = validated
 
     // Используем константу из либы
     const { DEFAULT_PAGE_SIZE } = await import('@/lib/constants')
@@ -133,7 +176,7 @@ export async function GET(request: NextRequest) {
 
     if (hasSupabase) {
       try {
-        return NextResponse.json(await realSearch(q, sheet, city, priceMin ?? null, priceMax ?? null, page, limit))
+        return NextResponse.json(await realSearch(q, sheet, category, city, priceMin ?? null, priceMax ?? null, page, limit))
       } catch (e) {
         console.error('RealSearch Error:', e)
         // fall through to mock in dev/fallback

@@ -1,11 +1,15 @@
 
 import * as cheerio from 'cheerio';
-import { SiteParser } from '../parser.interface';
+import { SiteParser, CrawlSection } from '../parser.interface';
 import { RawTitiListing, RawTitiProfile } from '../types';
 
 export class SexfireAdapter implements SiteParser {
     source = 'sexfire';
     baseUrl = 'https://www.sexfire2.com';
+
+    sections: CrawlSection[] = [
+        { url: this.baseUrl, categorySlug: 'individual', label: 'Main' },
+    ];
 
     parseListing(html: string): RawTitiListing[] {
         const $ = cheerio.load(html);
