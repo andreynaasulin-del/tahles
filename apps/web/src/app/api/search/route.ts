@@ -101,7 +101,7 @@ async function realSearch(q: string, sheet: string, category: string, city: stri
   }
 
   let query = supabase.from('advertisements')
-    .select('id,nickname,age,verified,vip_status,online_status,price_min,price_max,city,gender,service_type,created_at,photos, contacts(whatsapp,phone), ad_comments(count)', { count: 'exact' })
+    .select('id,nickname,age,verified,vip_status,online_status,price_min,price_max,city,gender,service_type,description,created_at,photos, contacts(whatsapp,phone), ad_comments(count)', { count: 'exact' })
     .range((page - 1) * limit, page * limit - 1)
 
   // Category filter — restrict to ad IDs in that category

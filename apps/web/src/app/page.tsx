@@ -17,7 +17,8 @@ function TahlesLogo({ size = 36 }: { size?: number }) {
 }
 
 
-interface Ad {
+
+export interface Ad {
   id: string
   nickname: string
   age: number | null
@@ -37,6 +38,7 @@ interface Ad {
   whatsapp?: string | null
   created_at?: string | null
   comments_count?: number
+  description?: string | null
 }
 
 interface SearchMeta { total: number; page: number; query: string; sheet: string }
@@ -53,6 +55,7 @@ const SHEET_ICONS: Record<string, string> = {
 }
 
 import { DEFAULT_PAGE_SIZE } from '@/lib/constants'
+import { ProfileModal } from '@/components/search/ProfileModal'
 
 export default function HomePage() {
   const { t } = useTranslation()
@@ -63,6 +66,7 @@ export default function HomePage() {
   const [meta, setMeta] = useState<SearchMeta>({ total: 0, page: 1, query: '', sheet: 'all' })
   const [userCity, setUserCity] = useState<string | null>(null)
   const [started, setStarted] = useState(false)
+  const [selectedAd, setSelectedAd] = useState<Ad | null>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
   const scrollToResults = () => {
@@ -320,7 +324,7 @@ export default function HomePage() {
                   key={ad.id}
                   rank={(meta.page - 1) * DEFAULT_PAGE_SIZE + i + 1}
                   {...ad}
-                  onSelect={(id) => console.log('Selected profile:', id)}
+                  onSelect={() => setSelectedAd(ad)} // Updated handler
                 />
               ))}
             </div>
@@ -358,6 +362,11 @@ export default function HomePage() {
           )}
         </div>
       </main>
+
+      {/* ── Modal ────────────────────────────────────────────────────── */}
+      {selectedAd && (
+        <ProfileModal ad={selectedAd} onClose={() => setSelectedAd(null)} />
+      )}
     </div>
   )
 }
