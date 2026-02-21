@@ -62,7 +62,10 @@ export function AdCard({
               alt={nickname}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              quality={90}
+              unoptimized
+              referrerPolicy="no-referrer"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-4xl">
@@ -118,6 +121,8 @@ export function AdCard({
                 fill
                 className="object-cover blur-lg scale-110"
                 sizes="80px"
+                unoptimized
+                referrerPolicy="no-referrer"
               />
               {/* Dark overlay + lock */}
               <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-0.5">

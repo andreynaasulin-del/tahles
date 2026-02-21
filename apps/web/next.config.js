@@ -1,11 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.titti.co.il',
+      },
+      {
+        protocol: 'https',
+        hostname: 'titti.co.il',
       },
     ],
   },
@@ -32,7 +41,7 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'same-origin',
           },
           {
             key: 'Permissions-Policy',

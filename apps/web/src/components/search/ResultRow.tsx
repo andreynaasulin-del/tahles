@@ -1,5 +1,7 @@
 'use client'
 
+import { memo, useCallback, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 
 
@@ -25,7 +27,6 @@ interface ResultRowProps {
   whatsapp?: string | null
   created_at?: string | null
   comments_count?: number
-  onSelect: (id: string) => void
 }
 
 function formatLastSeen(min: number): string {
@@ -52,15 +53,18 @@ const SERVICE_STYLES: Record<string, { emoji: string; label: string }> = {
   kinky: { emoji: '🔥', label: 'Kinky' },
 }
 
-export function ResultRow({
-  id: _id, nickname, age, verified, vip_status, online_status,
+export const ResultRow = memo(function ResultRow({
+  id, nickname, age, verified, vip_status, online_status,
   price_min, price_max, city, gender: _gender, service_type,
   rank: _rank, views_today, last_seen_min, is_new, phone, photos = [],
-  whatsapp, created_at, comments_count = 0, onSelect
+  whatsapp, created_at, comments_count = 0
 }: ResultRowProps) {
   const { t } = useTranslation()
+  const router = useRouter()
   const isHot = (views_today ?? 0) >= 300
-  const mainPhoto = photos?.[0]
+  const [photoIdx, setPhotoIdx] = useState(0)
+  const [allPhotosFailed, setAllPhotosFailed] = useState(false)
+  const mainPhoto = photos?.[photoIdx]
 
   function formatPrice(min: number | null, max: number | null) {
     if (!min && !max) return t('price_on_request')
@@ -71,25 +75,31 @@ export function ResultRow({
 
   const service = service_type ? SERVICE_STYLES[service_type] : null
 
-  const handleWhatsappClick = (e: React.MouseEvent) => {
+  const handleWhatsappClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
     const num = whatsapp || phone
     if (num) {
-      // Direct open for MVP - later add limits
       const cleanNum = num.replace(/\D/g, '')
-      window.open(`https://wa.me/${cleanNum}?text=Hi ${nickname}, I found you on Tahles`, '_blank')
+      const text = encodeURIComponent(`Hi ${nickname}, I found you on Tahles and would like to meet you`)
+      window.open(`https://wa.me/${cleanNum}?text=${text}`, '_blank')
     }
-  }
+  }, [whatsapp, phone, nickname])
+
+  const handleCardClick = useCallback(() => {
+    router.push(`/ad/${id}`)
+  }, [router, id])
+
+  if (allPhotosFailed) return null
 
   return (
     <div
-      onClick={() => onSelect(_id)}
+      onClick={handleCardClick}
       className={`
-      relative rounded-3xl p-0.5 overflow-hidden transition-all duration-300 group cursor-pointer
+      relative rounded-3xl p-0.5 overflow-hidden transition-transform duration-150 group cursor-pointer touch-manipulation
       ${vip_status
-          ? 'bg-gradient-to-br from-velvet-400/40 via-purple-500/20 to-transparent'
-          : 'bg-white/5'}
-      hover:scale-[1.01] hover:shadow-2xl hover:shadow-velvet-500/10 active:scale-[0.99]
+        ? 'bg-gradient-to-br from-velvet-400/40 via-purple-500/20 to-transparent'
+        : 'bg-white/5'}
+      hover:scale-[1.01] hover:shadow-2xl hover:shadow-velvet-500/10 active:scale-[0.98]
     `}>
       <div className="relative h-full w-full rounded-[22px] bg-[#0d0d0d] p-4 sm:p-5 flex flex-col gap-4 overflow-hidden">
 
@@ -110,12 +120,19 @@ export function ResultRow({
                 <img
                   src={mainPhoto}
                   alt={nickname}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.15]"
-                  style={{ objectPosition: 'center 20%', transform: 'scale(1.08)' }}
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                  onError={() => {
+                    const next = photoIdx + 1
+                    if (next >= (photos?.length ?? 0)) setAllPhotosFailed(true)
+                    else setPhotoIdx(next)
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white/20">
-                  {nickname.charAt(0)}
+                  {nickname.charAt(0).toUpperCase()}
                 </div>
               )}
               {/* Online indicator */}
@@ -189,18 +206,21 @@ export function ResultRow({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-yellow-500/80">⭐️</span>
-              <span>{comments_count > 0 ? `${(4.5 + Math.random() * 0.5).toFixed(1)} (${comments_count} reviews)` : 'No reviews yet'}</span>
+              <span>{comments_count > 0 ? `${comments_count} reviews` : 'No reviews yet'}</span>
             </div>
           </div>
 
-          <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.05] hover:bg-white/[0.1] text-white text-xs font-bold uppercase tracking-wider transition-all active:scale-95 group/btn">
-            {t('view_profile') ?? 'View Profile'}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover/btn:translate-x-0.5 transition-transform"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+          <button
+            onClick={(e) => { e.stopPropagation(); router.push(`/ad/${id}`) }}
+            className="btn-shimmer flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-xs font-black uppercase tracking-wider active:scale-95 shadow-lg shadow-velvet-500/20 group/btn touch-manipulation border border-velvet-400/40 hover:border-velvet-400/60 hover:shadow-velvet-500/30 transition-all duration-200"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover/btn:scale-110 transition-transform"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Profile
           </button>
         </div>
 
       </div>
     </div>
   )
-}
+})
 
