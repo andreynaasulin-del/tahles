@@ -9,8 +9,6 @@ interface Stats {
   vip: number
   verified: number
   updatesPerHour: number
-  searchesToday: number
-  checksToday: number
   topCity: { name: string; count: number } | null
 }
 
@@ -82,8 +80,6 @@ export function DataBar() {
         <StatItem label={t('db_online')}  value={stats.online} live />
         {/* Скрыты на мобиле */}
         <StatItem label={t('db_updates_hr')}     value={stats.updatesPerHour} mobileHide />
-        <StatItem label={t('db_searches_today')} value={stats.searchesToday}  mobileHide />
-        <StatItem label={t('db_checks_today')}   value={stats.checksToday}    mobileHide />
         {stats.topCity && (
           <div className="flex items-center gap-1 px-3 shrink-0">
             <span className="text-black/35 text-[10px] font-medium uppercase tracking-wider whitespace-nowrap">

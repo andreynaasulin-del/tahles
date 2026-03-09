@@ -23,7 +23,8 @@ export function diffProfile(existing: AdRow | null, incoming: NormalizedData['ad
     const changedFields: string[] = []
     const fieldsToCompare: (keyof AdRow)[] = [
         'nickname', 'description', 'price_min', 'price_max', 'city',
-        'online_status', 'vip_status', 'verified', 'photos'
+        'online_status', 'vip_status', 'verified', 'photos', 'raw_data',
+        'rating_avg', 'rating_count'
     ]
 
     fieldsToCompare.forEach(field => {

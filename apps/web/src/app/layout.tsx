@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { I18nProvider } from '@/lib/i18n/context'
@@ -8,13 +8,47 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
+const SITE_URL = 'https://tahles-web.vercel.app'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0a0a0a',
+}
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Tahles — Truth Engine',
+    default: 'Tahles — Premium Escort Directory Israel | Verified Profiles',
     template: '%s | Tahles',
   },
-  description: 'Search interest. Real-time demand data.',
-  robots: { index: false, follow: false },
+  description: 'Israel\'s top escort directory. Browse 170+ verified profiles with real photos, reviews & ratings. Tel Aviv, Haifa, Jerusalem. Safe, discreet, updated daily.',
+  keywords: ['escort Israel', 'escort Tel Aviv', 'escort directory', 'verified escorts', 'premium escorts Israel', 'Tahles', 'escort Haifa', 'escort Jerusalem', 'massage Israel'],
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    alternateLocale: ['he_IL', 'ru_RU'],
+    url: SITE_URL,
+    siteName: 'Tahles',
+    title: 'Tahles — Premium Escort Directory Israel',
+    description: '170+ verified profiles with real photos, reviews & ratings. Tel Aviv, Haifa, Jerusalem.',
+    images: [{
+      url: `${SITE_URL}/og-image.png`,
+      width: 1200,
+      height: 630,
+      alt: 'Tahles — Premium Escort Directory',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tahles — Premium Escort Directory Israel',
+    description: '170+ verified profiles. Real photos, reviews & ratings.',
+    images: [`${SITE_URL}/og-image.png`],
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
 }
 
 export default function RootLayout({
@@ -22,8 +56,36 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Tahles',
+    url: SITE_URL,
+    description: 'Premium escort directory in Israel with verified profiles, reviews and ratings.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        {/* Microsoft Clarity */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "vrlax7xzts");`,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <I18nProvider>{children}</I18nProvider>
       </body>

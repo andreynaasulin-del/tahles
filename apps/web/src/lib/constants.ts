@@ -11,15 +11,22 @@ export const SHEETS = [
 export type SheetId = (typeof SHEETS)[number]['id']
 
 export const CATEGORIES = [
-  { slug: 'massage',    name: 'Massage',      icon: '💆' },
-  { slug: 'dating',     name: 'Dating Only',  icon: '💞' },
-  { slug: 'sugar-baby', name: 'Sugar Baby',   icon: '🌸' },
-  { slug: 'domina',     name: 'Domina',       icon: '👠' },
   { slug: 'individual', name: 'Individual',   icon: '🌺' },
-  { slug: 'trans',      name: 'Trans',        icon: '🏳️‍⚧️' },
+  { slug: 'agency',     name: 'Agency',       icon: '🏢' },
 ] as const
 
 export type CategorySlug = (typeof CATEGORIES)[number]['slug']
+
+export const ORIGINS = [
+  { id: 'european',         label: 'European',        icon: '🌍' },
+  { id: 'eastern_european', label: 'East European',   icon: '🇷🇺' },
+  { id: 'israeli',          label: 'Israeli',         icon: '🇮🇱' },
+  { id: 'latina',           label: 'Latina',          icon: '🔥' },
+  { id: 'asian',            label: 'Asian',           icon: '🌸' },
+  { id: 'ethiopian',        label: 'Ethiopian',       icon: '🇪🇹' },
+] as const
+
+export type OriginId = (typeof ORIGINS)[number]['id']
 
 export const PRESETS = [
   {

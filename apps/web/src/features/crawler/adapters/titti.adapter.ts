@@ -1,7 +1,7 @@
 
 import * as cheerio from 'cheerio';
 import { SiteParser, CrawlSection } from '../parser.interface';
-import { RawTitiListing, RawTitiProfile } from '../types';
+import { RawTitiListing, RawTitiProfile, RawTitiComment } from '../types';
 
 export class TittiAdapter implements SiteParser {
     source = 'titi';
@@ -24,6 +24,8 @@ export class TittiAdapter implements SiteParser {
         { url: `${this.baseUrl}/girls.html`, categorySlug: 'individual', label: 'Independent Girls' },
         { url: `${this.baseUrl}/escort-services.html`, categorySlug: 'individual', label: 'OutCall Escort' },
         { url: `${this.baseUrl}/erotic-massage.html`, categorySlug: 'massage', label: 'Erotic Massage' },
+        { url: `${this.baseUrl}/discreet-apartments.html`, categorySlug: 'individual', label: 'Discreet Apartments' },
+        { url: `${this.baseUrl}/apartments.html`, categorySlug: 'individual', label: 'Apartments' },
     ];
 
     parseListing(html: string): RawTitiListing[] {
@@ -64,120 +66,249 @@ export class TittiAdapter implements SiteParser {
     parseProfile(html: string, listing: RawTitiListing): RawTitiProfile {
         const $ = cheerio.load(html);
 
-        // --- PHOTOS: Extract from photos_source JS array (reliable, no junk) ---
+        // --- PHOTOS & VIDEOS: Parse photos_source JS array ---
+        // Photos have type: 'image', Videos have type: 'local' with .mp4 in href
         const photos: string[] = [];
-        const photoRegex = /large:\s*'([^']+)'/g;
-        let match;
-        while ((match = photoRegex.exec(html)) !== null) {
-            const src = match[1];
-            if (src && !src.includes('/images/') && !src.includes('logo') && !src.includes('verified')) {
-                photos.push(src.startsWith('http') ? src : `${this.baseUrl}${src}`);
+        const videos: string[] = [];
+
+        // Parse each photos_source.push({ ... }) entry
+        const pushRegex = /photos_source\.push\(\s*\{([^}]+)\}/g;
+        let pushMatch;
+        while ((pushMatch = pushRegex.exec(html)) !== null) {
+            const block = pushMatch[1];
+            const typeMatch = block.match(/type:\s*'([^']*)'/);
+            const hrefMatch = block.match(/href:\s*'([^']*)'/);
+            const largeMatch = block.match(/large:\s*'([^']*)'/);
+            const itemType = typeMatch?.[1] || '';
+            const href = hrefMatch?.[1] || '';
+            const large = largeMatch?.[1] || '';
+
+            if (itemType === 'local' && href.includes('.mp4')) {
+                // Video entry — URL is in href field
+                const videoUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
+                if (!videos.includes(videoUrl)) videos.push(videoUrl);
+            } else if (itemType === 'image' || (!itemType && large && !large.endsWith('/files/'))) {
+                // Photo entry — use _large version for full quality (676x900 vs thumbnail 189x245)
+                let rawUrl = large.startsWith('http') ? large : `${this.baseUrl}${large}`;
+                // Upgrade to _large version if not already
+                if (rawUrl.endsWith('.webp') && !rawUrl.includes('_large')) {
+                    rawUrl = rawUrl.replace(/\.webp$/, '_large.webp');
+                }
+                if (rawUrl && !rawUrl.endsWith('/files/') && !rawUrl.includes('/images/') && !rawUrl.includes('logo')) {
+                    if (!photos.includes(rawUrl)) photos.push(rawUrl);
+                }
             }
         }
 
-        // Fallback: gallery thumbnails only (if JS parsing found nothing)
+        // Fallback: gallery thumbnails (if JS parsing found nothing)
         if (photos.length === 0) {
             $('.gallery .thumbs li').each((_, el) => {
-                const href = $(el).attr('href');
-                if (href && !href.includes('/images/')) {
-                    photos.push(href.startsWith('http') ? href : `${this.baseUrl}${href}`);
+                const $li = $(el);
+                const href = $li.attr('href') || '';
+                const isVideo = $li.hasClass('fancybox.iframe') || href.includes('.mp4');
+                if (isVideo && href.includes('.mp4')) {
+                    const url = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
+                    if (!videos.includes(url)) videos.push(url);
+                } else if (href && !href.includes('/images/')) {
+                    let url = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
+                    // Upgrade to _large version for full quality
+                    if (url.endsWith('.webp') && !url.includes('_large')) {
+                        url = url.replace(/\.webp$/, '_large.webp');
+                    }
+                    if (!photos.includes(url)) photos.push(url);
                 }
             });
         }
 
-        // --- PRICE: Extract from happy_hour_text or description ---
+        // Also catch <video> tags as extra fallback
+        $('video[src], video source[src]').each((_, el) => {
+            const src = $(el).attr('src');
+            if (src && src.includes('.mp4')) {
+                const url = src.startsWith('http') ? src : `${this.baseUrl}${src}`;
+                if (!videos.includes(url)) videos.push(url);
+            }
+        });
+
+        // --- FIELDS: Generic field extractor for titti (Flynax CMS) ---
+        // Pattern: <div id="df_field_{key}"><div class="name">...</div><div class="value">...</div></div>
+        const getFieldValue = (fieldId: string) => {
+            return $(`#df_field_${fieldId} .value`).text().trim();
+        };
+
+        // --- PRICE: Extract from df_field_price_incall* / price_outcall* ---
         let priceMin: number | null = null;
-        const happyHourText = $('.happy_hour_text').text().trim();
-        const priceMatch = happyHourText.match(/(\d[\d,. ]*)\s*₪/);
-        if (priceMatch) {
-            priceMin = parseInt(priceMatch[1].replace(/[, .]/g, ''));
-        }
-        // Also try description for price patterns
+        const priceTable: { duration: string; type: string; amount: number }[] = [];
+
+        // Parse price fields: #df_field_price_incall30, #df_field_price_incall1, etc.
+        $('[id^="df_field_price_"]').each((_, el) => {
+            const $el = $(el);
+            const label = $el.find('.name').text().trim(); // "30m Incall", "1h Incall"
+            const valueText = $el.find('.value').text().trim(); // "₪ 600", "₪ 1,200"
+            const amountMatch = valueText.match(/₪?\s*([\d,. ]+)/);
+            if (amountMatch && label) {
+                const amount = parseInt(amountMatch[1].replace(/[, .]/g, ''));
+                if (amount > 0) {
+                    const type = label.toLowerCase().includes('outcall') ? 'outcall' : 'incall';
+                    priceTable.push({ duration: label.split(' ')[0], type, amount });
+                    if (priceMin === null || amount < priceMin) priceMin = amount;
+                }
+            }
+        });
+
+        // Fallback: happy_hour_text
         if (!priceMin) {
-            const descText = $('.details').text();
-            const descPriceMatch = descText.match(/(\d{3,5})\s*₪/) || descText.match(/(\d{3,5})\s*nis/i) || descText.match(/(\d{3,5})\s*shekel/i);
-            if (descPriceMatch) {
-                priceMin = parseInt(descPriceMatch[1]);
+            const happyHourText = $('.happy_hour_text').text().trim();
+            const priceMatch = happyHourText.match(/(\d[\d,. ]*)\s*₪/);
+            if (priceMatch) {
+                priceMin = parseInt(priceMatch[1].replace(/[, .]/g, ''));
             }
         }
 
-        // --- FIELDS: Extract structured data ---
-        const getFieldValue = (fieldId: string) => $(`#df_field_${fieldId} .value`).text().trim();
-        const getListItems = (selector: string) => $(selector).map((_, el) => $(el).text().trim()).get().filter(Boolean);
+        // --- PHONE: Extract from WhatsApp link (most reliable, has full number) ---
+        let phone = '';
+        const whatsappLink = $('a[href*="whatsapp.com/send"]').attr('href') || '';
+        const phoneFromWa = whatsappLink.match(/phone=(\d+)/);
+        if (phoneFromWa) {
+            phone = phoneFromWa[1];
+        }
+        // Fallback: show_phone data
+        if (!phone) {
+            phone = ($('.show_phone').attr('data-name') || '').replace(/[^\d+]/g, '');
+        }
 
-        const phone = $('.show_phone').attr('data-name') || '';
-
-        // Extract provide type (incall/outcall)
-        const provideField = getFieldValue('providefield');
+        // --- SERVICE TYPE: check if price fieldset mentions outcall ---
+        const hasOutcall = $('[id^="df_field_price_outcall"]').length > 0;
+        const hasIncall = $('[id^="df_field_price_incall"]').length > 0;
         const serviceType: 'incall' | 'outcall' | 'both' =
-            provideField.toLowerCase().includes('outcall') && provideField.toLowerCase().includes('incall') ? 'both' :
-                provideField.toLowerCase().includes('outcall') ? 'outcall' : 'incall';
+            hasIncall && hasOutcall ? 'both' :
+                hasOutcall ? 'outcall' : 'incall';
 
-        // --- ENRICH DESCRIPTION ---
-        // Combine multiple text blocks to create a "rich" profile
-        const aboutMe = $('.description-content').text().trim();
-        const shortDesc = $('meta[name="description"]').attr('content')?.trim() || '';
-
-        // Extract services list
-        const servicesList = getListItems('.services_list li');
-
-        // Extract "My Details" / Stats (Titti uses specific IDs or classes for these detailed fields sometimes, but often just a list)
-        // Let's try to grab as much as possible
-        const detailsMap: Record<string, string> = {};
-        $('.details_list li').each((_, el) => {
-            const label = $(el).find('.label').text().replace(':', '').trim();
-            const value = $(el).find('.value').text().trim();
-            if (label && value) detailsMap[label] = value;
-        });
-
-        // Construct the rich description
-        let richDescription = '';
-        if (shortDesc) richDescription += `${shortDesc}\n\n`;
-        if (aboutMe && aboutMe !== shortDesc) richDescription += `${aboutMe}\n\n`;
-
-        // Add Stats Section if any found
-        const keyStats = ['Age', 'Height', 'Weight', 'Breast Size', 'Hair Color', 'Eye color', 'Ethnicity', 'Nationality'].filter(k => k in detailsMap);
-        if (keyStats.length > 0) {
-            richDescription += `📍 Details:\n`;
-            keyStats.forEach(k => richDescription += `• ${k}: ${detailsMap[k]}\n`);
-            richDescription += '\n';
-        }
-
-        // Add Services Section
-        if (servicesList.length > 0) {
-            richDescription += `💎 Services:\n${servicesList.join(' • ')}\n`;
-        }
-
-        // Add Incall Prices if available (Titti structure varies, sometimes in a table)
-        const prices: string[] = [];
-        $('.price_list tr').each((_, el) => {
-            const time = $(el).find('td:first-child').text().trim();
-            const price = $(el).find('td:last-child').text().trim();
-            if (time && price) prices.push(`${time}: ${price}`);
-        });
-        if (prices.length > 0) {
-            richDescription += `\n💰 Rates:\n${prices.join('\n')}`;
-        }
+        // --- DESCRIPTION ---
+        const description = getFieldValue('about_me') ||
+            $('meta[name="description"]').attr('content')?.trim() || null;
 
         // Category from page
         const category = getFieldValue('Category_ID');
 
+        // --- PHYSICAL PARAMS: Correct titti field IDs ---
+        const physicalParams: Record<string, string> = {};
+        const fieldMap: Record<string, string> = {
+            'ethnicity': 'ethnicity',
+            'nationality': 'nationality',
+            'sexuality': 'sexuality',
+            'eyes': 'eye_color',
+            'Hair_Color': 'hair_color',
+            'height': 'height',
+            'weight': 'weight',
+            'titi_size': 'breast_size',
+        };
+        for (const [fieldId, key] of Object.entries(fieldMap)) {
+            const val = getFieldValue(fieldId);
+            if (val) physicalParams[key] = val;
+        }
+
+        // --- SERVICES LIST: ul.checkboxes li with title ---
+        // All services in #df_field_my_escort_services ul.checkboxes li
+        const services: string[] = [];
+        $('#df_field_my_escort_services ul.checkboxes li').each((_, el) => {
+            const title = $(el).attr('title');
+            if (title) services.push(title);
+        });
+
+        // --- COMMENTS: Parse from ul.comments ---
+        const comments: RawTitiComment[] = [];
+        $('ul.comments > li[id^="comment_"]').each((_, el) => {
+            const $c = $(el);
+            // Author: span.dark > b
+            const author = $c.find('span.dark b').first().text().trim() || null;
+            // Comment text: inside div.hlight after </h3> — get text content
+            const $hlight = $c.find('div.hlight');
+            // Remove child elements to get just the comment text
+            const hlightClone = $hlight.clone();
+            hlightClone.find('h3, .rating_container, .like_dislike').remove();
+            const text = hlightClone.text().trim() || null;
+            // Date: in span.unregistered or span.registered text after "/"
+            const metaText = $c.find('span.unregistered, span.registered').text();
+            const dateMatch = metaText.match(/(\d{1,2}\.\d{1,2}\.\d{4}\s*\d{1,2}:\d{2})/);
+            const dateRaw = dateMatch ? dateMatch[1] : null;
+            // Rating: count active stars in ul.comments-rating-bar
+            const activeStars = $c.find('ul.comments-rating-bar li.active').length;
+            const ratingNum = activeStars > 0 ? activeStars : null;
+            // Comment ID from element
+            const commentId = $c.attr('id')?.replace('comment_', '') || '';
+
+            if (text || author) {
+                const commentKey = `${listing.source_id}_comment_${commentId}`;
+                comments.push({
+                    comment_key: commentKey,
+                    author,
+                    text,
+                    rating: ratingNum,
+                    date_raw: dateRaw,
+                });
+            }
+        });
+
+        // --- RATING: from section.statistics ---
+        let ratingAvg: number | null = null;
+        let ratingCount: number | null = null;
+        // Text pattern: "Current rating:" followed by number
+        const statsText = $('section.statistics').text();
+        const ratingAvgMatch = statsText.match(/Current rating:\s*([\d.]+)/);
+        if (ratingAvgMatch) ratingAvg = parseFloat(ratingAvgMatch[1]);
+        const ratingCountMatch2 = statsText.match(/Total stars votes:\s*(\d+)/);
+        if (ratingCountMatch2) ratingCount = parseInt(ratingCountMatch2[1]);
+
+        // --- SHOWS & COMMENTS COUNT: ul.counters ---
+        let showsCount: number | null = null;
+        let commentsCountPage: number | null = null;
+        $('ul.counters li').each((_, el) => {
+            const text = $(el).text().trim();
+            const countEl = $(el).find('span.count').text().trim();
+            const count = countEl ? parseInt(countEl.replace(/,/g, '')) : null;
+            if (text.includes('Shows') && count) showsCount = count;
+            if (text.includes('Comments') && count) commentsCountPage = count;
+        });
+
+        // --- SHORT DESCRIPTION ---
+        const shortDescription = getFieldValue('short_description') || null;
+
+        // --- PAYMENTS, PARKING, LANGUAGE, REGION ---
+        const payments = getFieldValue('pay_options') || null;
+        const parking = getFieldValue('parking') || null;
+        const language = getFieldValue('language') || null;
+        const region = getFieldValue('country_level1') || getFieldValue('region') || null;
+
         return {
             ...listing,
             price_min: priceMin ?? listing.price_min,
-            description: richDescription.trim() || null,
+            description,
             photos: Array.from(new Set(photos)),
             categories: category ? [category.trim()] : [],
-            languages: [],
+            languages: language ? language.split(/[,\n]/).map(l => l.trim()).filter(Boolean) : [],
             service_type: serviceType,
             contacts: {
-                phone: phone ? phone.replace(/[^\d+]/g, '') : undefined,
-                whatsapp: phone ? phone.replace(/[^\d+]/g, '') : undefined,
+                phone: phone || undefined,
+                whatsapp: phone || undefined,
                 telegram: undefined
             },
-            comments: [],
-            rating_avg: null,
-            rating_count: null,
-        };
+            comments,
+            rating_avg: ratingAvg,
+            rating_count: ratingCount,
+            // Store ALL enriched data in the profile for the raw_data field
+            _enriched: {
+                videos,
+                priceTable,
+                physicalParams,
+                services,
+                shortDescription,
+                payments,
+                parking,
+                region,
+                registrationDate: null, // titti doesn't expose registration date
+                showsCount,
+                commentsCount: commentsCountPage,
+            }
+        } as any;
     }
 }

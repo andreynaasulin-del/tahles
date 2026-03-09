@@ -20,7 +20,7 @@ export const I18nContext = createContext<I18nContextValue>({
 const STORAGE_KEY = 'vm_locale'
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en')
+  const [locale, setLocaleState] = useState<Locale>('he')
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY) as Locale | null

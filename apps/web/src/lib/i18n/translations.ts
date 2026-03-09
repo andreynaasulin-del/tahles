@@ -111,12 +111,8 @@ export type TranslationKey =
   | 'sheet_40plus'
   | 'sheet_outcall'
   | 'sheet_nearme'
-  | 'cat_massage'
-  | 'cat_dating'
-  | 'cat_sugar_baby'
-  | 'cat_domina'
   | 'cat_individual'
-  | 'cat_trans'
+  | 'cat_agency'
   | 'preset_mfw'
   | 'preset_mfm'
   | 'preset_russian'
@@ -131,8 +127,85 @@ export type TranslationKey =
   | 'language'
   | 'starting_at'
   | 'contacts'
-  | 'view_profile'
   | 'unlock'
+  | 'origin'
+  | 'origin_european'
+  | 'origin_eastern_european'
+  | 'origin_israeli'
+  | 'origin_latina'
+  | 'origin_asian'
+  | 'origin_african'
+  | 'origin_ethiopian'
+  | 'view_profile'
+  | 'all_cities'
+  | 'all_origins'
+  | 'price_range'
+  | 'any_price'
+  | 'profiles'
+  // ── infographic slide ──
+  | 'info_prices'
+  | 'info_details'
+  | 'info_services'
+  | 'info_languages'
+  // ── physical params ──
+  | 'param_height'
+  | 'param_weight'
+  | 'param_breast'
+  | 'param_hair'
+  | 'param_eyes'
+  | 'param_ethnicity'
+  | 'param_nationality'
+  | 'param_sexuality'
+  // ── contact popup ──
+  | 'contact_btn'
+  | 'contact_how'
+  | 'contact_wa_sub'
+  | 'contact_call'
+  | 'contact_call_sub'
+  | 'wa_message'
+  // ── profile detail sections ──
+  | 'section_about'
+  | 'section_payments'
+  | 'section_parking'
+  // ── hero / info blocks ──
+  | 'hero_line1'
+  | 'hero_line2'
+  | 'hero_line3'
+  | 'signal_profiles'
+  | 'signal_added_24h'
+  | 'signal_wa_verified'
+  | 'signal_demand'
+  | 'signal_demand_low'
+  | 'signal_demand_medium'
+  | 'signal_demand_high'
+  | 'how_title'
+  | 'how_text'
+  | 'rating_title'
+  | 'rating_intro'
+  | 'rating_wa'
+  | 'rating_photos'
+  | 'rating_retouch'
+  | 'rating_reviews'
+  | 'rating_outro'
+  | 'warning_title'
+  | 'warning_text'
+  | 'warning_money'
+  | 'cookie_text'
+  | 'cookie_accept'
+  | 'cookie_decline'
+  // ── city names ──
+  | 'city_tel_aviv'
+  | 'city_jerusalem'
+  | 'city_haifa'
+  | 'city_bat_yam'
+  | 'city_rishon_lezion'
+  | 'city_netanya'
+  | 'city_beer_sheva'
+  | 'city_petah_tikva'
+  | 'city_ramat_gan'
+  | 'city_ashdod'
+  | 'city_holon'
+  | 'city_hadera'
 
 type TranslationDict = Record<TranslationKey, string>
 
@@ -217,7 +290,6 @@ const en: TranslationDict = {
   unlock_phone: 'Unlock contact',
   unlock_price: '$100',
   truth_engine: 'Premium Matching',
-  // legacy
   unlock_to_text: 'UNLOCK TO TEXT',
   photos: 'photos',
   sheet_all: 'All',
@@ -227,12 +299,8 @@ const en: TranslationDict = {
   sheet_40plus: '40+',
   sheet_outcall: 'Outcall',
   sheet_nearme: 'Near Me',
-  cat_massage: 'Massage',
-  cat_dating: 'Dating Only',
-  cat_sugar_baby: 'Sugar Baby',
-  cat_domina: 'Domina',
   cat_individual: 'Individual',
-  cat_trans: 'Trans',
+  cat_agency: 'Agency',
   preset_mfw: 'Men for Women & Couples',
   preset_mfm: 'Men for Men',
   preset_russian: 'Russian Girls',
@@ -247,8 +315,84 @@ const en: TranslationDict = {
   language: 'Language',
   starting_at: 'Starting at',
   contacts: 'Contacts',
-  view_profile: 'View Profile',
   unlock: 'Unlock',
+  origin: 'Origin',
+  origin_european: 'European',
+  origin_eastern_european: 'East European',
+  origin_israeli: 'Israeli',
+  origin_latina: 'Latina',
+  origin_asian: 'Asian',
+  origin_african: 'African',
+  origin_ethiopian: 'Ethiopian',
+  view_profile: 'View Profile',
+  all_cities: 'All',
+  all_origins: 'All',
+  price_range: 'Price Range',
+  any_price: 'Any price',
+  profiles: 'profiles',
+  // infographic
+  info_prices: 'Prices',
+  info_details: 'Details',
+  info_services: 'Services',
+  info_languages: 'Languages',
+  param_height: 'Height',
+  param_weight: 'Weight',
+  param_breast: 'Breast',
+  param_hair: 'Hair',
+  param_eyes: 'Eyes',
+  param_ethnicity: 'Ethnicity',
+  param_nationality: 'Nationality',
+  param_sexuality: 'Sexuality',
+  // contact
+  contact_btn: 'Contact',
+  contact_how: 'Choose how to connect',
+  contact_wa_sub: 'Message directly',
+  contact_call: 'Call',
+  contact_call_sub: 'Phone call',
+  wa_message: 'Hi, I found your profile on Tahles and would like to meet',
+  // profile sections
+  section_about: 'About',
+  section_payments: 'Payments',
+  section_parking: 'Parking',
+  // hero / info
+  hero_line1: 'The largest ad database in the country, updated daily.',
+  hero_line2: 'Escort \u2022 Strippers \u2022 Massage \u2022 Sugar dating & more.',
+  hero_line3: 'A simple, convenient interactive feed aggregating ads from Telegram and other sources.',
+  signal_profiles: 'profiles on site',
+  signal_added_24h: 'added in last 24h',
+  signal_wa_verified: 'with verified WhatsApp',
+  signal_demand: 'Current demand level',
+  signal_demand_low: 'low',
+  signal_demand_medium: 'medium',
+  signal_demand_high: 'high',
+  how_title: 'How Tahles works',
+  how_text: 'We collect ads from various sources, remove duplicates, and display them in an organized feed.',
+  rating_title: 'Tahles Rating System',
+  rating_intro: 'To maintain order and trust, profiles are reviewed and rated.',
+  rating_wa: 'WhatsApp verification',
+  rating_photos: 'Manual photo review',
+  rating_retouch: 'Removal of overly retouched photos',
+  rating_reviews: 'Reviews and likes from verified users',
+  rating_outro: 'Profiles with more trust and good reviews appear higher in the feed.',
+  warning_title: 'Important',
+  warning_text: 'Even with checks and a high rating, reliability cannot be guaranteed 100%.',
+  warning_money: 'Do not send money in advance to anyone.',
+  cookie_text: 'We use cookies to improve your experience.',
+  cookie_accept: 'Accept',
+  cookie_decline: 'Decline',
+  // cities
+  city_tel_aviv: 'Tel Aviv',
+  city_jerusalem: 'Jerusalem',
+  city_haifa: 'Haifa',
+  city_bat_yam: 'Bat Yam',
+  city_rishon_lezion: 'Rishon LeZion',
+  city_netanya: 'Netanya',
+  city_beer_sheva: 'Beer Sheva',
+  city_petah_tikva: 'Petah Tikva',
+  city_ramat_gan: 'Ramat Gan',
+  city_ashdod: 'Ashdod',
+  city_holon: 'Holon',
+  city_hadera: 'Hadera',
 }
 
 const ru: TranslationDict = {
@@ -332,7 +476,6 @@ const ru: TranslationDict = {
   unlock_phone: 'Открыть контакт',
   unlock_price: '$100',
   truth_engine: 'Премиум подбор',
-  // legacy
   unlock_to_text: 'РАЗБЛОКИРУЙ ДЛЯ СВЯЗИ',
   photos: 'фото',
   sheet_all: 'Все',
@@ -342,12 +485,8 @@ const ru: TranslationDict = {
   sheet_40plus: '40+',
   sheet_outcall: 'Выезд',
   sheet_nearme: 'Рядом',
-  cat_massage: 'Массаж',
-  cat_dating: 'Только свидания',
-  cat_sugar_baby: 'Сахарная',
-  cat_domina: 'Домина',
-  cat_individual: 'Индивидуально',
-  cat_trans: 'Транс',
+  cat_individual: 'Индивидуалка',
+  cat_agency: 'Агентство',
   preset_mfw: 'Мужчины для женщин и пар',
   preset_mfm: 'Мужчины для мужчин',
   preset_russian: 'Русские девушки',
@@ -362,8 +501,84 @@ const ru: TranslationDict = {
   language: 'Язык',
   starting_at: 'От',
   contacts: 'Контакты',
-  view_profile: 'Открыть Анкету',
   unlock: 'Открыть',
+  origin: 'Происхождение',
+  origin_european: 'Европейки',
+  origin_eastern_european: 'Восточная Европа',
+  origin_israeli: 'Израильтянки',
+  origin_latina: 'Латиноамериканки',
+  origin_asian: 'Азиатки',
+  origin_african: 'Африканки',
+  origin_ethiopian: 'Эфиопки',
+  view_profile: 'Смотреть профиль',
+  all_cities: 'Все',
+  all_origins: 'Все',
+  price_range: 'Диапазон цен',
+  any_price: 'Любая цена',
+  profiles: 'профилей',
+  // infographic
+  info_prices: 'Цены',
+  info_details: 'Детали',
+  info_services: 'Услуги',
+  info_languages: 'Языки',
+  param_height: 'Рост',
+  param_weight: 'Вес',
+  param_breast: 'Грудь',
+  param_hair: 'Волосы',
+  param_eyes: 'Глаза',
+  param_ethnicity: 'Этнос',
+  param_nationality: 'Гражданство',
+  param_sexuality: 'Ориентация',
+  // contact
+  contact_btn: 'Связаться',
+  contact_how: 'Выберите способ связи',
+  contact_wa_sub: 'Написать напрямую',
+  contact_call: 'Звонок',
+  contact_call_sub: 'Телефонный звонок',
+  wa_message: 'Привет, я нашёл ваш профиль на Tahles и хотел бы встретиться',
+  // profile sections
+  section_about: 'О себе',
+  section_payments: 'Оплата',
+  section_parking: 'Парковка',
+  // hero / info
+  hero_line1: 'Самая крупная база объявлений в стране, обновляется каждый день.',
+  hero_line2: 'Эскорт \u2022 Стриптиз \u2022 Массаж \u2022 Содержанки и другое.',
+  hero_line3: 'Простой и удобный интерактивный фид, объединяющий объявления из Telegram и других источников.',
+  signal_profiles: 'профилей на сайте',
+  signal_added_24h: 'добавлено за 24ч',
+  signal_wa_verified: 'с подтверждённым WhatsApp',
+  signal_demand: 'Уровень спроса сейчас',
+  signal_demand_low: 'низкий',
+  signal_demand_medium: 'средний',
+  signal_demand_high: 'высокий',
+  how_title: 'Как работает Tahles',
+  how_text: 'Мы собираем объявления из разных источников, удаляем дубликаты и показываем их в упорядоченном фиде.',
+  rating_title: 'Система рейтинга Tahles',
+  rating_intro: 'Для поддержания порядка и доверия, профили проходят проверку и получают рейтинг.',
+  rating_wa: 'Подтверждение через WhatsApp',
+  rating_photos: 'Ручная проверка фотографий',
+  rating_retouch: 'Удаление фото с чрезмерной ретушью',
+  rating_reviews: 'Отзывы и лайки от проверенных пользователей',
+  rating_outro: 'Профили с большим доверием и хорошими отзывами показываются выше в ленте.',
+  warning_title: 'Важно знать',
+  warning_text: 'Даже при проверках и высоком рейтинге невозможно гарантировать надёжность на 100%.',
+  warning_money: 'Не переводите деньги заранее никому.',
+  cookie_text: 'Мы используем cookies для улучшения вашего опыта.',
+  cookie_accept: 'Принять',
+  cookie_decline: 'Отклонить',
+  // cities
+  city_tel_aviv: 'Тель-Авив',
+  city_jerusalem: 'Иерусалим',
+  city_haifa: 'Хайфа',
+  city_bat_yam: 'Бат-Ям',
+  city_rishon_lezion: 'Ришон ле-Цион',
+  city_netanya: 'Нетания',
+  city_beer_sheva: 'Беэр-Шева',
+  city_petah_tikva: 'Петах-Тиква',
+  city_ramat_gan: 'Рамат-Ган',
+  city_ashdod: 'Ашдод',
+  city_holon: 'Холон',
+  city_hadera: 'Хадера',
 }
 
 const he: TranslationDict = {
@@ -447,7 +662,6 @@ const he: TranslationDict = {
   unlock_phone: 'פתח יצירת קשר',
   unlock_price: '$100',
   truth_engine: 'שידוך פרימיום',
-  // legacy
   unlock_to_text: 'פתח לשליחת הודעה',
   photos: 'תמונות',
   sheet_all: 'הכל',
@@ -457,12 +671,8 @@ const he: TranslationDict = {
   sheet_40plus: '40+',
   sheet_outcall: 'יוצאות',
   sheet_nearme: 'קרוב',
-  cat_massage: 'עיסוי',
-  cat_dating: 'דייטים בלבד',
-  cat_sugar_baby: 'שוגר בייבי',
-  cat_domina: 'דומינה',
-  cat_individual: 'אישי',
-  cat_trans: 'טרנס',
+  cat_individual: 'עצמאית',
+  cat_agency: 'סוכנות',
   preset_mfw: 'גברים לנשים וזוגות',
   preset_mfm: 'גברים לגברים',
   preset_russian: 'בנות רוסיות',
@@ -477,8 +687,145 @@ const he: TranslationDict = {
   language: 'שפה',
   starting_at: 'החל מ',
   contacts: 'אנשי קשר',
-  view_profile: 'צפה בפרופיל',
   unlock: 'פתיחה',
+  origin: 'מוצא',
+  origin_european: 'אירופאיות',
+  origin_eastern_european: 'מזרח אירופה',
+  origin_israeli: 'ישראליות',
+  origin_latina: 'לטיניות',
+  origin_asian: 'אסיאתיות',
+  origin_african: 'אפריקאיות',
+  origin_ethiopian: 'אתיופיות',
+  view_profile: 'צפה בפרופיל',
+  all_cities: 'הכל',
+  all_origins: 'הכל',
+  price_range: 'טווח מחירים',
+  any_price: 'כל מחיר',
+  profiles: 'פרופילים',
+  // infographic
+  info_prices: 'מחירים',
+  info_details: 'פרטים',
+  info_services: 'שירותים',
+  info_languages: 'שפות',
+  param_height: 'גובה',
+  param_weight: 'משקל',
+  param_breast: 'חזה',
+  param_hair: 'שיער',
+  param_eyes: 'עיניים',
+  param_ethnicity: 'מוצא',
+  param_nationality: 'לאום',
+  param_sexuality: 'נטייה',
+  // contact
+  contact_btn: 'צור קשר',
+  contact_how: 'בחר איך ליצור קשר',
+  contact_wa_sub: 'שלח הודעה',
+  contact_call: 'התקשר',
+  contact_call_sub: 'שיחת טלפון',
+  wa_message: 'היי, מצאתי את הפרופיל שלך ב-Tahles ואשמח להיפגש',
+  // profile sections
+  section_about: 'אודות',
+  section_payments: 'תשלומים',
+  section_parking: 'חניה',
+  // hero / info
+  hero_line1: 'מאגר המודעות הגדול בארץ שמתעדכן כל יום.',
+  hero_line2: 'נערות ליווי \u2022 חשפניות \u2022 עיסויים \u2022 נתמכות ועוד.',
+  hero_line3: 'פיד אינטראקטיבי פשוט ונוח שמרכז מודעות מטלגרם וממקורות נוספים.',
+  signal_profiles: 'פרופילים באתר',
+  signal_added_24h: 'נוספו ב-24 שעות אחרונות',
+  signal_wa_verified: 'עם WhatsApp מאומת',
+  signal_demand: 'קצב ביקוש כרגע',
+  signal_demand_low: 'נמוך',
+  signal_demand_medium: 'בינוני',
+  signal_demand_high: 'גבוה',
+  how_title: 'איך Tahles עובד',
+  how_text: 'אנחנו אוספים מודעות ממקורות שונים, מסירים כפילויות ומציגים אותן בפיד מסודר.',
+  rating_title: 'מערכת דירוג ב-Tahles',
+  rating_intro: 'כדי לשמור על סדר ואמינות, פרופילים עוברים בדיקה ומקבלים דירוג.',
+  rating_wa: 'אימות דרך WhatsApp',
+  rating_photos: 'בדיקה ידנית של תמונות',
+  rating_retouch: 'הסרת תמונות עם ריטוש מוגזם',
+  rating_reviews: 'ביקורות ולייקים ממשתמשים מאומתים',
+  rating_outro: 'פרופילים עם יותר אמון וביקורות טובות מופיעים גבוה יותר בפיד.',
+  warning_title: 'חשוב לדעת',
+  warning_text: 'גם עם בדיקות וציון גבוה לא ניתן להבטיח אמינות ב-100%.',
+  warning_money: 'אל תעבירו כסף מראש לאף אחד.',
+  cookie_text: 'אנחנו משתמשים בעוגיות כדי לשפר את חוויית השימוש.',
+  cookie_accept: 'אישור',
+  cookie_decline: 'דחייה',
+  // cities
+  city_tel_aviv: 'תל אביב',
+  city_jerusalem: 'ירושלים',
+  city_haifa: 'חיפה',
+  city_bat_yam: 'בת ים',
+  city_rishon_lezion: 'ראשון לציון',
+  city_netanya: 'נתניה',
+  city_beer_sheva: 'באר שבע',
+  city_petah_tikva: 'פתח תקווה',
+  city_ramat_gan: 'רמת גן',
+  city_ashdod: 'אשדוד',
+  city_holon: 'חולון',
+  city_hadera: 'חדרה',
 }
 
 export const translations: Record<Locale, TranslationDict> = { en, ru, he }
+
+/* ── City name translation map (for DB values → display) ── */
+export const CITY_MAP: Record<string, Record<Locale, string>> = {
+  'Tel Aviv':      { en: 'Tel Aviv',      ru: 'Тель-Авив',      he: 'תל אביב' },
+  'Jerusalem':     { en: 'Jerusalem',     ru: 'Иерусалим',      he: 'ירושלים' },
+  'Haifa':         { en: 'Haifa',         ru: 'Хайфа',          he: 'חיפה' },
+  'Bat Yam':       { en: 'Bat Yam',       ru: 'Бат-Ям',         he: 'בת ים' },
+  'Rishon LeZion': { en: 'Rishon LeZion', ru: 'Ришон ле-Цион',  he: 'ראשון לציון' },
+  'Netanya':       { en: 'Netanya',       ru: 'Нетания',        he: 'נתניה' },
+  'Beer Sheva':    { en: 'Beer Sheva',    ru: 'Беэр-Шева',      he: 'באר שבע' },
+  'Petah Tikva':   { en: 'Petah Tikva',   ru: 'Петах-Тиква',    he: 'פתח תקווה' },
+  'Ramat Gan':     { en: 'Ramat Gan',     ru: 'Рамат-Ган',      he: 'רמת גן' },
+  'Ashdod':        { en: 'Ashdod',        ru: 'Ашдод',          he: 'אשדוד' },
+  'Holon':         { en: 'Holon',         ru: 'Холон',          he: 'חולון' },
+  'Hadera':        { en: 'Hadera',        ru: 'Хадера',         he: 'חדרה' },
+}
+
+export function translateCity(city: string | null, locale: Locale): string {
+  if (!city) return ''
+  return CITY_MAP[city]?.[locale] || city
+}
+
+/* ── Service type translation map ── */
+export const SERVICE_TYPE_MAP: Record<string, Record<Locale, string>> = {
+  'INCALL':     { en: 'Incall',     ru: 'В апартаментах', he: 'בדירה' },
+  'OUTCALL':    { en: 'Outcall',    ru: 'Выезд',         he: 'יוצאת' },
+  'Incall':     { en: 'Incall',     ru: 'В апартаментах', he: 'בדירה' },
+  'Outcall':    { en: 'Outcall',    ru: 'Выезд',         he: 'יוצאת' },
+  'Escort':     { en: 'Escort',     ru: 'Эскорт',        he: 'ליווי' },
+  'escort':     { en: 'Escort',     ru: 'Эскорт',        he: 'ליווי' },
+  'Massage':    { en: 'Massage',    ru: 'Массаж',        he: 'עיסוי' },
+  'massage':    { en: 'Massage',    ru: 'Массаж',        he: 'עיסוי' },
+  'Striptease': { en: 'Striptease', ru: 'Стриптиз',      he: 'סטריפטיז' },
+  'BDSM':       { en: 'BDSM',      ru: 'БДСМ',          he: 'BDSM' },
+  'Domina':     { en: 'Domina',     ru: 'Доминация',     he: 'דומינה' },
+}
+
+export function translateServiceType(st: string | null, locale: Locale): string {
+  if (!st) return ''
+  return SERVICE_TYPE_MAP[st]?.[locale]
+    || SERVICE_TYPE_MAP[st.charAt(0).toUpperCase() + st.slice(1)]?.[locale]
+    || SERVICE_TYPE_MAP[st.toUpperCase()]?.[locale]
+    || st
+}
+
+/* ── Ethnicity value translation map ── */
+export const ETHNICITY_MAP: Record<string, Record<Locale, string>> = {
+  'Eastern European': { en: 'Eastern European', ru: 'Восточная Европа',    he: 'מזרח אירופה' },
+  'European':         { en: 'European',         ru: 'Европейка',           he: 'אירופאית' },
+  'Latino':           { en: 'Latina',           ru: 'Латиноамериканка',    he: 'לטינית' },
+  'Asian':            { en: 'Asian',            ru: 'Азиатка',             he: 'אסיאתית' },
+  'Ethiopian':        { en: 'Ethiopian',        ru: 'Эфиопка',             he: 'אתיופית' },
+  'African':          { en: 'African',          ru: 'Африканка',           he: 'אפריקאית' },
+  'Israeli':          { en: 'Israeli',          ru: 'Израильтянка',        he: 'ישראלית' },
+  'Russian':          { en: 'Russian',          ru: 'Русская',             he: 'רוסיה' },
+}
+
+export function translateEthnicity(eth: string | null, locale: Locale): string {
+  if (!eth) return ''
+  return ETHNICITY_MAP[eth]?.[locale] || eth
+}

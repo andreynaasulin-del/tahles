@@ -1,16 +1,24 @@
 
 import { createServiceRoleClient } from '@vm/db/src/service-client'
-import { normalizeTitiData } from './normalizer'
+import { normalizeTitiData, detectCategories } from './normalizer'
 import { diffProfile } from './diff'
 import { RawTitiListing } from './types'
 import { TittiAdapter } from './adapters/titti.adapter'
+import { SexfireAdapter } from './adapters/sexfire.adapter'
+import { XfinderAdapter } from './adapters/xfinder.adapter'
+import { IsearchingAdapter } from './adapters/issearching.adapter'
 import { SiteParser, CrawlSection } from './parser.interface'
 
 export class CrawlerService {
     private supabase = createServiceRoleClient()
     private adapters: SiteParser[] = [
         new TittiAdapter(),
-        // Добавим остальные, когда пробьем Cloudflare
+        // Cloudflare-protected sites — run locally via crawl-cf-sites.ts script
+        // Registered here so the service can process pre-fetched HTML
+        new SexfireAdapter(),
+        new XfinderAdapter(),
+        // No Cloudflare — direct HTTP fetch works
+        new IsearchingAdapter(),
     ]
 
     /** Cache: category slug → UUID */
@@ -27,6 +35,10 @@ export class CrawlerService {
 
     async runFullCrawl() {
         console.log('🚀 [Crawler] Starting DEEP multi-site, multi-section crawl...');
+
+        // Fresh client each cycle — prevents stale connections after 15-min sleep
+        this.supabase = createServiceRoleClient()
+        this.categoryMap = {}
 
         await this.loadCategories()
 
@@ -92,6 +104,16 @@ export class CrawlerService {
             const rawProfile = adapter.parseProfile(profileHtml, listing)
             const normalized = normalizeTitiData(rawProfile)
 
+            // ── Quality filter: skip junk profiles ──
+            const hasContact = !!(normalized.contacts?.phone || normalized.contacts?.whatsapp)
+            const hasPhotos = normalized.ad.photos && normalized.ad.photos.length > 0
+            const hasComments = normalized.comments && normalized.comments.length > 0
+
+            if (!hasContact || !hasPhotos) {
+                console.log(`[Crawler] ⏭️  SKIP ${adapter.source}:${listing.source_id} (${listing.name}) — no ${!hasContact ? 'contacts' : 'photos'}`)
+                return
+            }
+
             // Проверяем наличие
             const { data: existing } = await this.supabase
                 .from('advertisements')
@@ -124,18 +146,38 @@ export class CrawlerService {
                 .from('contacts')
                 .upsert({ ...normalized.contacts, ad_id: adRecord.id } as any)
 
-            // Save category link (ad_categories)
-            if (section.categorySlug && this.categoryMap[section.categorySlug]) {
-                const categoryId = this.categoryMap[section.categorySlug]
-                await this.supabase
-                    .from('ad_categories')
-                    .upsert(
-                        { ad_id: adRecord.id, category_id: categoryId },
-                        { onConflict: 'ad_id,category_id' }
-                    )
+            // Save comments
+            if (normalized.comments && normalized.comments.length > 0) {
+                for (const comment of normalized.comments) {
+                    await this.supabase
+                        .from('ad_comments')
+                        .upsert(
+                            { ...comment, ad_id: adRecord.id } as any,
+                            { onConflict: 'comment_key' }
+                        )
+                }
+                console.log(`💬 [Crawler] Saved ${normalized.comments.length} comments for ${listing.source_id}`)
             }
 
-            console.log(`[Crawler] ✅ ${adapter.source}:${listing.source_id} (${listing.name}) → ${section.categorySlug || 'no-cat'}`)
+            // Save categories: section category + auto-detected from content
+            const detectedSlugs = detectCategories(rawProfile)
+            if (section.categorySlug && !detectedSlugs.includes(section.categorySlug)) {
+                detectedSlugs.push(section.categorySlug)
+            }
+            const uniqueSlugs = [...new Set(detectedSlugs)]
+
+            for (const slug of uniqueSlugs) {
+                if (this.categoryMap[slug]) {
+                    await this.supabase
+                        .from('ad_categories')
+                        .upsert(
+                            { ad_id: adRecord.id, category_id: this.categoryMap[slug] },
+                            { onConflict: 'ad_id,category_id' }
+                        )
+                }
+            }
+
+            console.log(`[Crawler] ✅ ${adapter.source}:${listing.source_id} (${listing.name}) → [${uniqueSlugs.join(', ')}]`)
         } catch (error) {
             console.error(`[Crawler] ❌ ${adapter.source}:${listing.source_id}:`, error)
         }

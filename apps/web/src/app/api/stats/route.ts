@@ -1,72 +1,116 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// ── Mock data for dev/demo ──────────────────────────────────────────────────
-function getMockStats() {
-  const hour = new Date().getHours()
-  const minute = new Date().getMinutes()
-  // Numbers slowly drift to look alive
-  const drift = Math.floor(minute / 5)
-  return {
-    total: 1847 + drift,
-    online: 214 + Math.floor(drift * 0.3),
-    vip: 89 + Math.floor(drift * 0.1),
-    verified: 423 + drift,
-    updatesPerHour: 38 + Math.floor(Math.sin(hour) * 8 + 8),
-    searchesToday: 4210 + hour * 47 + drift * 3,
-    checksToday: 1380 + hour * 19 + drift,
-    topCity: { name: 'Tel Aviv', count: 612 + drift },
-    ts: Date.now(),
-  }
+export const dynamic = 'force-dynamic'
+
+const METRICS_ID = '00000000-0000-0000-0000-000000000001'
+
+async function recordVisitAndGetDemand(supabase: any): Promise<'low' | 'medium' | 'high'> {
+  const now = Date.now()
+  const oneHourAgo = now - 60 * 60 * 1000
+
+  // Get current visits array
+  const { data: sentinel } = await supabase
+    .from('advertisements')
+    .select('raw_data')
+    .eq('id', METRICS_ID)
+    .single()
+
+  const rd = sentinel?.raw_data ?? { _type: 'system_metrics', _visits: [] }
+  const visits: number[] = rd._visits ?? []
+
+  // Add this visit
+  visits.push(now)
+
+  // Prune visits older than 1 hour
+  const recentVisits = visits.filter((ts: number) => ts > oneHourAgo)
+
+  // Save back
+  rd._visits = recentVisits
+  await supabase
+    .from('advertisements')
+    .update({ raw_data: rd })
+    .eq('id', METRICS_ID)
+
+  // Determine demand based on visits in last hour
+  const count = recentVisits.length
+  if (count >= 15) return 'high'
+  if (count >= 5) return 'medium'
+  return 'low'
 }
 
-// ── Real Supabase stats ─────────────────────────────────────────────────────
-async function getRealStats() {
-  const { createServerClient } = await import('@vm/db')
-  const supabase = createServerClient()
+async function getSignalStats() {
+  const { createServiceRoleClient } = await import('@vm/db')
+  const supabase = createServiceRoleClient()
 
-  const [adsResult, recentResult, citiesResult] = await Promise.all([
-    supabase.from('advertisements').select('id, city, vip_status, verified, online_status', { count: 'exact' }),
-    supabase.from('advertisements').select('id', { count: 'exact' }).gte('updated_at', new Date(Date.now() - 3600000).toISOString()),
-    supabase.from('advertisements').select('city').not('city', 'is', null),
-  ])
+  const now = new Date()
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
-  type AdRow = { online_status: boolean; vip_status: boolean; verified: boolean }
-  type CityRow = { city: string | null }
+  // 1. Total visible profiles (same filters as search API)
+  const { count: total } = await supabase
+    .from('advertisements')
+    .select('id', { count: 'exact', head: true })
+    .not('photos', 'is', null)
+    .not('description', 'is', null)
+    .eq('raw_data->>_verified', 'true')
 
-  const total    = adsResult.count ?? 0
-  const adsData  = (adsResult.data ?? []) as AdRow[]
-  const cityData = (citiesResult.data ?? []) as CityRow[]
-  const cityMap: Record<string, number> = {}
-  for (const row of cityData) {
-    if (row.city) cityMap[row.city] = (cityMap[row.city] ?? 0) + 1
+  // 2. Recently added among visible
+  const { count: added24h } = await supabase
+    .from('advertisements')
+    .select('id', { count: 'exact', head: true })
+    .not('photos', 'is', null)
+    .not('description', 'is', null)
+    .eq('raw_data->>_verified', 'true')
+    .gte('created_at', twentyFourHoursAgo)
+
+  // 3. Get visible profile IDs for WhatsApp cross-check
+  const { data: visibleRows } = await supabase
+    .from('advertisements')
+    .select('id')
+    .not('photos', 'is', null)
+    .not('description', 'is', null)
+    .eq('raw_data->>_verified', 'true')
+
+  const visibleIds = (visibleRows ?? []).map((r: any) => r.id)
+
+  // 4. WhatsApp verified count among visible profiles only
+  let waVerified = 0
+  if (visibleIds.length > 0) {
+    const { count } = await supabase
+      .from('contacts')
+      .select('ad_id', { count: 'exact', head: true })
+      .not('whatsapp', 'is', null)
+      .in('ad_id', visibleIds)
+    waVerified = count ?? 0
   }
-  const topCity = Object.entries(cityMap).sort((a, b) => b[1] - a[1])[0]
-  const hour = new Date().getHours()
+
+  // 5. Demand level based on real site visits in last hour
+  const demand = await recordVisitAndGetDemand(supabase)
 
   return {
-    total,
-    online:   adsData.filter((a) => a.online_status).length,
-    vip:      adsData.filter((a) => a.vip_status).length,
-    verified: adsData.filter((a) => a.verified).length,
-    updatesPerHour: recentResult.count ?? 0,
-    searchesToday: Math.floor(total * 12 + hour * 47 + 338),
-    checksToday:   Math.floor(total * 4  + hour * 19 + 121),
-    topCity: topCity ? { name: topCity[0], count: topCity[1] } : null,
+    total: total ?? 0,
+    added24h: added24h ?? 0,
+    waVerified,
+    demand,
     ts: Date.now(),
   }
 }
 
 export async function GET(_request: NextRequest) {
-  const hasSupabase = !!(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('demo.supabase')
-  )
-
   try {
-    const stats = hasSupabase ? await getRealStats() : getMockStats()
-    return NextResponse.json(stats)
-  } catch {
-    return NextResponse.json(getMockStats())
+    const stats = await getSignalStats()
+    return NextResponse.json(stats, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+      },
+    })
+  } catch (error) {
+    console.error('Stats error:', error)
+    return NextResponse.json({
+      total: 0,
+      added24h: 0,
+      waVerified: 0,
+      demand: 'medium',
+      ts: Date.now(),
+    })
   }
 }

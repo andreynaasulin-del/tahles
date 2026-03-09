@@ -9,14 +9,9 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
-    const { searchParams } = new URL(request.url)
-    const key = searchParams.get('key')
 
-    // Security Check
-    if (
-        authHeader !== `Bearer ${process.env.CRON_SECRET}` &&
-        key !== process.env.CRON_SECRET
-    ) {
+    // Security Check — header only (never accept secrets in query params — they leak in logs)
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return new NextResponse('Unauthorized', { status: 401 })
     }
 
