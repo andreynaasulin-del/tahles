@@ -45,30 +45,24 @@ async function getSignalStats() {
   const now = new Date()
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
-  // 1. Total visible profiles (same filters as search API)
+  // 1. Total profiles in DB (all ads, no strict filters)
   const { count: total } = await supabase
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
-    .not('photos', 'is', null)
-    .not('description', 'is', null)
-    .eq('raw_data->>_verified', 'true')
+    .neq('id', METRICS_ID)
 
-  // 2. Recently added among visible
+  // 2. Recently added (last 24h, no strict filters)
   const { count: added24h } = await supabase
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
-    .not('photos', 'is', null)
-    .not('description', 'is', null)
-    .eq('raw_data->>_verified', 'true')
+    .neq('id', METRICS_ID)
     .gte('created_at', twentyFourHoursAgo)
 
-  // 3. Get visible profile IDs for WhatsApp cross-check
+  // 3. Get all profile IDs for WhatsApp cross-check
   const { data: visibleRows } = await supabase
     .from('advertisements')
     .select('id')
-    .not('photos', 'is', null)
-    .not('description', 'is', null)
-    .eq('raw_data->>_verified', 'true')
+    .neq('id', METRICS_ID)
 
   const visibleIds = (visibleRows ?? []).map((r: any) => r.id)
 
