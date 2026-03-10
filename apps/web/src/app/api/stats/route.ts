@@ -45,13 +45,12 @@ async function getSignalStats() {
   const now = new Date()
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
-  // 1. Total visible profiles (same filters as search API)
+  // 1. Total profiles with photos
   const { count: total } = await supabase
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
     .not('photos', 'is', null)
-    .not('description', 'is', null)
-    .eq('raw_data->>_verified', 'true')
+    .neq('id', METRICS_ID)
 
   // 2. Recently added among visible
   const { count: added24h } = await supabase
