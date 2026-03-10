@@ -134,18 +134,63 @@ async function realSearch(
     }
   })
 
-  // Sort: score first → then videos → then photos
-  mappedData.sort((a: any, b: any) => {
-    const aScore = (a.score || 0)
-    const bScore = (b.score || 0)
-    if (aScore !== bScore) return bScore - aScore  // higher score first
-    const aVids = (a.videos?.length || 0)
-    const bVids = (b.videos?.length || 0)
-    if (aVids !== bVids) return bVids - aVids      // more videos second
-    const aPhotos = (a.photos?.length || 0)
-    const bPhotos = (b.photos?.length || 0)
-    return bPhotos - aPhotos                        // then more photos
-  })
+  // Deep quality rank — comprehensive multi-factor sorting
+  function qualityRank(ad: any): number {
+    let rank = 0
+
+    // ① Base score (0-100) weighted ×10 → max 1000
+    rank += (ad.score || 0) * 10
+
+    // ② Score category bonus
+    if (ad.score_category === 'HOT') rank += 500
+
+    // ③ VIP & verification trust signals
+    if (ad.vip_status) rank += 200
+    if (ad.verified) rank += 100
+
+    // ④ Media richness — videos weigh more (harder to fake)
+    const vids = ad.videos?.length || 0
+    const photos = ad.photos?.length || 0
+    rank += vids * 80         // each video = +80
+    rank += photos * 10       // each photo = +10
+
+    // ⑤ Contact completeness — WhatsApp most valuable
+    if (ad.whatsapp) rank += 60
+    if (ad.phone) rank += 30
+    if (ad.telegram) rank += 20
+
+    // ⑥ Profile completeness — services, prices, params, languages
+    const services = ad.services?.length || 0
+    const priceTable = ad.price_table?.length || 0
+    const params = Object.keys(ad.physical_params || {}).filter(
+      (k: string) => ad.physical_params[k]
+    ).length
+    const langs = ad.languages?.length || 0
+    rank += Math.min(services, 8) * 8   // cap at 8 services (64 max)
+    rank += priceTable * 15
+    rank += params * 12
+    rank += langs * 5
+
+    // ⑦ Price & address filled
+    if (ad.price_min) rank += 25
+    if (ad.address) rank += 15
+
+    // ⑧ Online status boost
+    if (ad.online_status) rank += 40
+
+    // ⑨ Freshness bonus — newer profiles rank higher
+    if (ad.created_at) {
+      const ageMs = Date.now() - new Date(ad.created_at).getTime()
+      const ageDays = ageMs / (1000 * 60 * 60 * 24)
+      if (ageDays < 1) rank += 100
+      else if (ageDays < 3) rank += 60
+      else if (ageDays < 7) rank += 30
+    }
+
+    return rank
+  }
+
+  mappedData.sort((a: any, b: any) => qualityRank(b) - qualityRank(a))
 
   // Paginate AFTER sorting (so video profiles always appear first)
   const totalCount = mappedData.length
