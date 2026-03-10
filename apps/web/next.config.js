@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    unoptimized: true,
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [375, 640, 750, 1080],
+    imageSizes: [128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -10,11 +12,15 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'www.titti.co.il',
+        hostname: '**.titti.co.il',
       },
       {
         protocol: 'https',
-        hostname: 'titti.co.il',
+        hostname: '**.sexfire.co.il',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.xfinder.co.il',
       },
     ],
   },
@@ -45,7 +51,7 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+            value: 'camera=(), microphone=(), browsing-topics=()',
           },
         ],
       },
