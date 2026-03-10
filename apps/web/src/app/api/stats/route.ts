@@ -45,24 +45,27 @@ async function getSignalStats() {
   const now = new Date()
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
-  // 1. Total profiles in DB (all ads, no strict filters)
+  // 1. Total profiles with photos (real listings)
   const { count: total } = await supabase
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
     .neq('id', METRICS_ID)
+    .not('photos', 'is', null)
 
-  // 2. Recently added (last 24h, no strict filters)
+  // 2. Recently added with photos (last 24h)
   const { count: added24h } = await supabase
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
     .neq('id', METRICS_ID)
+    .not('photos', 'is', null)
     .gte('created_at', twentyFourHoursAgo)
 
-  // 3. Get all profile IDs for WhatsApp cross-check
+  // 3. Get profile IDs with photos for WhatsApp cross-check
   const { data: visibleRows } = await supabase
     .from('advertisements')
     .select('id')
     .neq('id', METRICS_ID)
+    .not('photos', 'is', null)
 
   const visibleIds = (visibleRows ?? []).map((r: any) => r.id)
 
