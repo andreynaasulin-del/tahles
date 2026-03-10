@@ -54,8 +54,6 @@ async function realSearch(
       { count: 'exact' }
     )
     .not('photos', 'is', null)
-    .not('description', 'is', null)
-    .eq('raw_data->>_verified', 'true')
 
   // Category filter via raw_data JSONB
   if (category) query = query.eq('raw_data->>_category', category)
@@ -96,13 +94,10 @@ async function realSearch(
     throw error
   }
 
-  // Filter out profiles without photos or contacts
+  // Filter out profiles without photos
   const withPhotos = (data || []).filter((ad: any) => {
     const photos = ad.photos
-    const hasPhotos = Array.isArray(photos) && photos.length > 0
-    const contact = Array.isArray(ad.contacts) ? ad.contacts[0] : ad.contacts
-    const hasContact = !!(contact?.whatsapp || contact?.phone)
-    return hasPhotos && hasContact
+    return Array.isArray(photos) && photos.length > 0
   })
 
   const mappedData = withPhotos.map((ad: any) => {
