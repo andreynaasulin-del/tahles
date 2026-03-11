@@ -338,7 +338,7 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-3">
             {started && meta.total > 0 && (
-              <span className="hidden sm:block text-xs font-black text-white/40 uppercase tracking-widest tabular-nums">
+              <span className="text-xs font-black text-white/40 uppercase tracking-widest tabular-nums">
                 {fmtNum(meta.total)} {t('profiles')}
               </span>
             )}
