@@ -425,6 +425,13 @@ export default function HomePage() {
           <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">{t('origin')}</div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <button
+              onClick={() => handleOrigin('european')}
+              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
+                ${activeOrigin === 'european' ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
+            >
+              🇪🇺 {t('origin_european')}
+            </button>
+            <button
               onClick={() => handleOrigin('latina')}
               className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
                 ${activeOrigin === 'latina' ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
