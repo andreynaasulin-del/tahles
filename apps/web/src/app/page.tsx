@@ -52,6 +52,13 @@ interface Ad {
 
 interface SearchMeta { total: number; page: number }
 
+interface SignalStats {
+  total: number
+  added24h: number
+  waVerified: number
+  demand: 'low' | 'medium' | 'high'
+}
+
 const CITIES: { key: TranslationKey; value: string }[] = [
   { key: 'city_tel_aviv',      value: 'Tel Aviv' },
   { key: 'city_jerusalem',     value: 'Jerusalem' },
@@ -70,6 +77,52 @@ const PRICE_STEP = 50
 
 function fmtNum(n: number) {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+/* ── Activity Signal Bar ──────────────────────────────────────────────────── */
+function ActivitySignal({ stats }: { stats: SignalStats | null }) {
+  const { t } = useTranslation()
+  if (!stats || stats.total === 0) return null
+
+  const demandKey = `signal_demand_${stats.demand}` as TranslationKey
+  const demandColor = stats.demand === 'high'
+    ? 'text-green-400'
+    : stats.demand === 'medium'
+      ? 'text-yellow-400'
+      : 'text-white/40'
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 mb-1">
+      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+        <span className="text-sm">👤</span>
+        <div>
+          <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.total)}</div>
+          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_profiles')}</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+        <span className="text-sm">🔍</span>
+        <div>
+          <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.added24h)}</div>
+          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_added_24h')}</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+        <span className="text-sm">✔</span>
+        <div>
+          <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.waVerified)}</div>
+          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_wa_verified')}</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+        <span className="text-sm">📊</span>
+        <div>
+          <div className={`text-sm font-black tabular-nums ${demandColor}`}>{t(demandKey)}</div>
+          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_demand')}</div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /* ── Cookie Banner ────────────────────────────────────────────────────────── */
@@ -197,6 +250,7 @@ export default function HomePage() {
   const [userCity, setUserCity] = useState<string | null>(null)
   const userCityRef = useRef<string | null>(null)
   const [started, setStarted] = useState(false)
+  const [signalStats, setSignalStats] = useState<SignalStats | null>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
   const priceDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
   const abortRef = useRef<AbortController | null>(null)
@@ -204,6 +258,13 @@ export default function HomePage() {
   const cityLabel = (val: string): string => {
     return translateCity(val, locale)
   }
+
+  useEffect(() => {
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(data => setSignalStats(data))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     // Check localStorage cache first
@@ -376,6 +437,8 @@ export default function HomePage() {
             <span className="text-sm text-white/50">{t('how_text')}</span>
           </div>
         </section>
+
+        <ActivitySignal stats={signalStats} />
 
         {/* ── Categories ────────────────────────────────────────────────── */}
         <section className="mt-2 mb-2">
