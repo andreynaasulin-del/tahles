@@ -553,10 +553,10 @@ export const ResultRow = memo(function ResultRow({
           </div>
         )}
 
-        {/* Slide counter — pinned top-right (LTR) or top-left (RTL) */}
+        {/* Slide counter — bottom-left above gradient */}
         {validIndices.length > 1 && !isInfoSlide && (
-          <div className="absolute top-3 z-20 ltr:right-3 rtl:left-3" style={{ right: 'auto', left: 'auto', insetInlineEnd: '12px' }}>
-            <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm text-xs text-white/70 font-bold tabular-nums">
+          <div className="absolute bottom-16 z-20" style={{ insetInlineEnd: '12px' }}>
+            <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-[11px] text-white/50 font-bold tabular-nums">
               {currentValidPos + 1}/{validIndices.length}
             </span>
           </div>

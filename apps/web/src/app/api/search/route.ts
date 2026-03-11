@@ -137,14 +137,14 @@ async function realSearch(
         ethnicity: enriched.physicalParams?.ethnicity || rawData?._ethnicity || null,
       },
       languages:     rawData?.languages ?? [],
-      videos:        enriched.videos ?? [],
+      videos:        (enriched.videos ?? []).slice(0, 5),
       category:      rawData?._category || rawData?.category || null,
       score:         rawData?._score ?? 0,
       score_category: rawData?._score_category ?? null,
       contacts:      undefined,
       rating_count:  undefined,
       raw_data:      undefined,
-      photos: ad.photos,
+      photos: (ad.photos || []).slice(0, 15),
     }
   })
 
