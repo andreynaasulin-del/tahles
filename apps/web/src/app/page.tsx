@@ -355,10 +355,10 @@ export default function HomePage() {
       <main className="max-w-[1100px] mx-auto px-4 sm:px-6 pb-20">
 
         {/* ── Hero Marquee ─────────────────────────────────────────────── */}
-        <section className="mt-4 mb-3 overflow-hidden rounded-xl bg-white/[0.03] border border-white/[0.06] py-4">
+        <section className="mt-4 mb-2 overflow-hidden rounded-2xl bg-white/[0.04] border border-white/[0.08] py-6">
           <div className="marquee-track flex whitespace-nowrap">
             {[0, 1].map((dup) => (
-              <span key={dup} className="inline-flex items-center gap-8 px-8 text-base font-bold shrink-0">
+              <span key={dup} className="inline-flex items-center gap-10 px-10 text-lg font-bold shrink-0">
                 <span className="text-velvet-300">{t('hero_line1')}</span>
                 <span className="text-white/20">✦</span>
                 <span className="text-white/60">{t('hero_line2')}</span>
@@ -371,10 +371,10 @@ export default function HomePage() {
         </section>
 
         {/* ── How Tahles Works ────────────────────────────────────────── */}
-        <div className="mb-2 px-1">
-          <p className="text-xs text-white/40 leading-relaxed">
-            <span className="font-bold text-white/30">{t('how_title')}</span>
-            {' · '}
+        <div className="mb-3 px-1">
+          <p className="text-sm text-white/60 leading-relaxed">
+            <span className="font-black text-white/50">{t('how_title')}</span>
+            {'  '}
             {t('how_text')}
           </p>
         </div>
