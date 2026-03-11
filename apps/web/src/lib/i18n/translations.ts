@@ -111,6 +111,7 @@ export type TranslationKey =
   | 'sheet_40plus'
   | 'sheet_outcall'
   | 'sheet_nearme'
+  | 'sheet_video'
   | 'cat_individual'
   | 'cat_agency'
   | 'preset_mfw'
@@ -299,6 +300,7 @@ const en: TranslationDict = {
   sheet_40plus: '40+',
   sheet_outcall: 'Outcall',
   sheet_nearme: 'Near Me',
+  sheet_video: 'With Video',
   cat_individual: 'Individual',
   cat_agency: 'Agency',
   preset_mfw: 'Men for Women & Couples',
@@ -485,6 +487,7 @@ const ru: TranslationDict = {
   sheet_40plus: '40+',
   sheet_outcall: 'Выезд',
   sheet_nearme: 'Рядом',
+  sheet_video: 'С видео',
   cat_individual: 'Индивидуалка',
   cat_agency: 'Агентство',
   preset_mfw: 'Мужчины для женщин и пар',
@@ -671,6 +674,7 @@ const he: TranslationDict = {
   sheet_40plus: '40+',
   sheet_outcall: 'יוצאות',
   sheet_nearme: 'קרוב',
+  sheet_video: 'עם וידאו',
   cat_individual: 'עצמאית',
   cat_agency: 'סוכנות',
   preset_mfw: 'גברים לנשים וזוגות',

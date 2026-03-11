@@ -148,6 +148,11 @@ async function realSearch(
     }
   })
 
+  // Sheet: video — keep only profiles that have at least one video
+  const filteredData = sheet === 'video'
+    ? mappedData.filter((ad: any) => ad.videos && ad.videos.length > 0)
+    : mappedData
+
   // Deep quality rank — comprehensive multi-factor sorting
   function qualityRank(ad: any): number {
     let rank = 0
@@ -204,11 +209,11 @@ async function realSearch(
     return rank
   }
 
-  mappedData.sort((a: any, b: any) => qualityRank(b) - qualityRank(a))
+  filteredData.sort((a: any, b: any) => qualityRank(b) - qualityRank(a))
 
   // Paginate AFTER sorting (so video profiles always appear first)
-  const totalCount = mappedData.length
-  const paginatedData = mappedData.slice((page - 1) * limit, page * limit)
+  const totalCount = filteredData.length
+  const paginatedData = filteredData.slice((page - 1) * limit, page * limit)
 
   return {
     type: 'text',

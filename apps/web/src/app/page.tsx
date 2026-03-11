@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ResultRow } from '@/components/search/ResultRow'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import { CATEGORIES, ORIGINS, DEFAULT_PAGE_SIZE } from '@/lib/constants'
+import { SHEETS, CATEGORIES, ORIGINS, DEFAULT_PAGE_SIZE } from '@/lib/constants'
 import { translateCity } from '@/lib/i18n/translations'
 import type { TranslationKey } from '@/lib/i18n/translations'
 
@@ -138,28 +138,28 @@ function ActivitySignal({ stats }: { stats: SignalStats | null }) {
         <span className="text-sm">👤</span>
         <div>
           <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.total)}</div>
-          <div className="text-xs text-white/30 font-bold uppercase tracking-wider">{t('signal_profiles')}</div>
+          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_profiles')}</div>
         </div>
       </div>
       <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
         <span className="text-sm">🔍</span>
         <div>
           <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.added24h)}</div>
-          <div className="text-xs text-white/30 font-bold uppercase tracking-wider">{t('signal_added_24h')}</div>
+          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_added_24h')}</div>
         </div>
       </div>
       <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
         <span className="text-sm">✔</span>
         <div>
           <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.waVerified)}</div>
-          <div className="text-xs text-white/30 font-bold uppercase tracking-wider">{t('signal_wa_verified')}</div>
+          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_wa_verified')}</div>
         </div>
       </div>
       <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
         <span className="text-sm">📊</span>
         <div>
           <div className={`text-sm font-black tabular-nums ${demandColor}`}>{t(demandKey)}</div>
-          <div className="text-xs text-white/30 font-bold uppercase tracking-wider">{t('signal_demand')}</div>
+          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_demand')}</div>
         </div>
       </div>
     </div>
@@ -205,7 +205,7 @@ function WarningBlock() {
       <p className="text-sm text-white/50 leading-relaxed mb-2">{t('warning_text')}</p>
       <p className="text-sm text-amber-400/80 font-bold">{t('warning_money')}</p>
       <div className="mt-3 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
-      <p className="mt-3 text-xs text-white/20 uppercase tracking-widest font-bold text-center">
+      <p className="mt-3 text-xs text-white/40 uppercase tracking-widest font-bold text-center">
         ↓ {t('signal_profiles')} ↓
       </p>
     </div>
@@ -389,7 +389,7 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-3">
             {started && meta.total > 0 && (
-              <span className="hidden sm:block text-xs font-black text-white/20 uppercase tracking-widest tabular-nums">
+              <span className="hidden sm:block text-xs font-black text-white/40 uppercase tracking-widest tabular-nums">
                 {fmtNum(meta.total)} {t('profiles')}
               </span>
             )}
@@ -421,9 +421,25 @@ export default function HomePage() {
         {/* ── Activity Signal ──────────────────────────────────────────── */}
         <ActivitySignal stats={signalStats} />
 
+        {/* ── Sheets (quick filters) ───────────────────────────────────── */}
+        <section className="mb-2">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {SHEETS.map((sh) => (
+              <button
+                key={sh.id}
+                onClick={() => handleSheet(sh.id)}
+                className={`shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
+                  ${activeSheet === sh.id ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
+              >
+                {sh.icon} {t(`sheet_${sh.id}` as any) || sh.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* ── Categories ────────────────────────────────────────────────── */}
         <section className="mt-2 mb-2">
-          <div className="text-xs text-white/25 uppercase tracking-[0.2em] font-black mb-1.5">{t('category')}</div>
+          <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">{t('category')}</div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {CATEGORIES.map((cat) => {
               const isActive = activeCategory === cat.slug
@@ -449,7 +465,7 @@ export default function HomePage() {
 
         {/* ── Cities ───────────────────────────────────────────────────── */}
         <section className="mb-2">
-          <div className="text-xs text-white/25 uppercase tracking-[0.2em] font-black mb-1.5">{t('city')}</div>
+          <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">{t('city')}</div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <button
               onClick={() => handleCity('')}
@@ -473,7 +489,7 @@ export default function HomePage() {
 
         {/* ── Ethnicity / Origin ──────────────────────────────────────── */}
         <section className="mb-2">
-          <div className="text-xs text-white/25 uppercase tracking-[0.2em] font-black mb-1.5">{t('origin')}</div>
+          <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">{t('origin')}</div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <button
               onClick={() => handleOrigin('')}
@@ -498,7 +514,7 @@ export default function HomePage() {
         {/* ── Price Range Slider ───────────────────────────────────────── */}
         <section className="mb-2 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-xs text-white/25 uppercase tracking-[0.2em] font-black">{t('price_range')}</div>
+            <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black">{t('price_range')}</div>
             <div className="text-sm font-bold text-velvet-300 tabular-nums">
               {priceRange[0] === PRICE_MIN && priceRange[1] === PRICE_MAX
                 ? t('any_price')
@@ -535,7 +551,7 @@ export default function HomePage() {
               className="price-slider absolute inset-x-0"
             />
           </div>
-          <div className="flex justify-between mt-1 text-xs text-white/20 font-bold tabular-nums">
+          <div className="flex justify-between mt-1 text-xs text-white/40 font-bold tabular-nums">
             <span>{PRICE_MIN} ₪</span>
             <span>{fmtNum(PRICE_MAX)}+ ₪</span>
           </div>
@@ -543,7 +559,7 @@ export default function HomePage() {
 
         {/* ── How Tahles Works (small text after filters) ──────────────── */}
         <div className="mb-3 px-1">
-          <p className="text-xs text-white/20 leading-relaxed">
+          <p className="text-xs text-white/40 leading-relaxed">
             <span className="font-bold text-white/30">{t('how_title')}</span>
             {' · '}
             {t('how_text')}
@@ -554,7 +570,7 @@ export default function HomePage() {
         <div ref={resultsRef} className="scroll-mt-20">
           {started && (
             <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <span className="text-xs font-black text-white/25 uppercase tracking-[0.2em]">
+              <span className="text-xs font-black text-white/50 uppercase tracking-[0.2em]">
                 {loading ? '…' : fmtNum(meta.total)} {t('results') || 'results'}
               </span>
               <div className="flex gap-1.5 flex-wrap">

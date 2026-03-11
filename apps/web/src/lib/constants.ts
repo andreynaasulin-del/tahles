@@ -1,11 +1,8 @@
 export const SHEETS = [
-  { id: 'all',      label: 'All',      icon: '🔥' },
-  { id: 'verified', label: 'Verified', icon: '✅' },
-  { id: 'vip',      label: 'VIP',      icon: '👑' },
-  { id: 'under25',  label: 'Under 25', icon: '🌟' },
-  { id: '40plus',   label: '40+',      icon: '💎' },
-  { id: 'outcall',  label: 'Outcall',  icon: '🚗' },
-  { id: 'nearme',   label: 'Near Me',  icon: '📍' },
+  { id: 'all',      label: 'All',       icon: '🔥' },
+  { id: 'vip',      label: 'VIP',       icon: '👑' },
+  { id: 'under25',  label: 'Under 25',  icon: '🌟' },
+  { id: 'video',    label: 'With Video', icon: '🎬' },
 ] as const
 
 export type SheetId = (typeof SHEETS)[number]['id']
