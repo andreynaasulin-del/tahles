@@ -370,6 +370,15 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── How Tahles Works ────────────────────────────────────────── */}
+        <div className="mb-2 px-1">
+          <p className="text-xs text-white/40 leading-relaxed">
+            <span className="font-bold text-white/30">{t('how_title')}</span>
+            {' · '}
+            {t('how_text')}
+          </p>
+        </div>
+
         {/* ── Categories ────────────────────────────────────────────────── */}
         <section className="mt-2 mb-2">
           <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">{t('category')}</div>
@@ -493,15 +502,6 @@ export default function HomePage() {
             <span>{fmtNum(PRICE_MAX)}+ ₪</span>
           </div>
         </section>
-
-        {/* ── How Tahles Works (small text after filters) ──────────────── */}
-        <div className="mb-3 px-1">
-          <p className="text-xs text-white/40 leading-relaxed">
-            <span className="font-bold text-white/30">{t('how_title')}</span>
-            {' · '}
-            {t('how_text')}
-          </p>
-        </div>
 
         {/* ── Active filters + count ────────────────────────────────── */}
         <div ref={resultsRef} className="scroll-mt-20">
