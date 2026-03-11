@@ -190,7 +190,7 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('')
   const activeSheet = 'all'
   const [activeCity, setActiveCity] = useState('')
-  const activeOrigin = ''
+  const [activeOrigin, setActiveOrigin] = useState('')
   const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
   const [appliedPrice, setAppliedPrice] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
   const [meta, setMeta] = useState<SearchMeta>({ total: 0, page: 1 })
@@ -290,6 +290,12 @@ export default function HomePage() {
     fetchResults(activeCategory, activeSheet, next, appliedPrice[0], appliedPrice[1], 1, activeOrigin)
   }
 
+  const handleOrigin = (origin: string) => {
+    const next = activeOrigin === origin ? '' : origin
+    setActiveOrigin(next)
+    fetchResults(activeCategory, activeSheet, activeCity, appliedPrice[0], appliedPrice[1], 1, next)
+  }
+
   const handlePriceChange = (idx: 0 | 1, val: number) => {
     const next: [number, number] = [...priceRange] as [number, number]
     next[idx] = val
@@ -308,13 +314,14 @@ export default function HomePage() {
   const handleReset = () => {
     setActiveCategory('')
     setActiveCity('')
+    setActiveOrigin('')
     setPriceRange([PRICE_MIN, PRICE_MAX])
     setAppliedPrice([PRICE_MIN, PRICE_MAX])
     fetchResults('', 'all', '', PRICE_MIN, PRICE_MAX, 1, '')
   }
 
   const hasPriceFilter = appliedPrice[0] > PRICE_MIN || appliedPrice[1] < PRICE_MAX
-  const hasActiveFilters = activeCategory || activeCity || hasPriceFilter
+  const hasActiveFilters = activeCategory || activeCity || activeOrigin || hasPriceFilter
   const leftPercent = ((priceRange[0] - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100
   const rightPercent = ((priceRange[1] - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100
 
@@ -413,6 +420,19 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Origin / Ethnicity ──────────────────────────────────────── */}
+        <section className="mb-2">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <button
+              onClick={() => handleOrigin('latina')}
+              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
+                ${activeOrigin === 'latina' ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
+            >
+              🔥 {t('origin_latina')}
+            </button>
+          </div>
+        </section>
+
         {/* ── Price Range Slider ───────────────────────────────────────── */}
         <section className="mb-2 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
           <div className="flex items-center justify-between mb-3">
@@ -484,6 +504,11 @@ export default function HomePage() {
                 {activeCity && (
                   <button onClick={() => handleCity(activeCity)} className="text-xs px-2.5 py-1 rounded-full bg-velvet-500/15 text-velvet-300 font-bold border border-velvet-500/25 flex items-center gap-1">
                     📍 {cityLabel(activeCity)} ✕
+                  </button>
+                )}
+                {activeOrigin && (
+                  <button onClick={() => handleOrigin(activeOrigin)} className="text-xs px-2.5 py-1 rounded-full bg-velvet-500/15 text-velvet-300 font-bold border border-velvet-500/25 flex items-center gap-1">
+                    🔥 {t(`origin_${activeOrigin}` as any)} ✕
                   </button>
                 )}
                 {hasPriceFilter && (
