@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     default: 'Tahles — Premium Escort Directory Israel | Verified Profiles',
     template: '%s | Tahles',
   },
-  description: 'Israel\'s top escort directory. Browse 150+ verified profiles with real photos, reviews & ratings. Tel Aviv, Haifa, Jerusalem. Safe, discreet, updated daily.',
+  description: 'Israel\'s top escort directory. Browse 70+ verified profiles with real photos, reviews & ratings. Tel Aviv, Haifa, Jerusalem. Safe, discreet, updated daily.',
   keywords: ['escort Israel', 'escort Tel Aviv', 'escort directory', 'verified escorts', 'premium escorts Israel', 'Tahles', 'escort Haifa', 'escort Jerusalem', 'massage Israel'],
   robots: { index: true, follow: true },
   openGraph: {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: 'Tahles',
     title: 'Tahles — Premium Escort Directory Israel',
-    description: '150+ verified profiles with real photos, reviews & ratings. Tel Aviv, Haifa, Jerusalem.',
+    description: '70+ verified profiles with real photos, reviews & ratings. Tel Aviv, Haifa, Jerusalem.',
     images: [{
       url: `${SITE_URL}/og-image.png`,
       width: 1200,
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Tahles — Premium Escort Directory Israel',
-    description: '150+ verified profiles. Real photos, reviews & ratings.',
+    description: '70+ verified profiles. Real photos, reviews & ratings.',
     images: [`${SITE_URL}/og-image.png`],
   },
   alternates: {
