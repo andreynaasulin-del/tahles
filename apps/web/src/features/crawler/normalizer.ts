@@ -1,4 +1,3 @@
-import { Action } from '@radix-ui/react-toast'
 import { RawTitiProfile, NormalizedData } from './types'
 import { CATEGORIES } from '@/lib/constants'
 
@@ -60,10 +59,80 @@ const CITY_MAP: Record<string, string> = {
     'Kfar-Saba': 'Kfar Saba',
     'אילת': 'Eilat',
     'Eilat': 'Eilat',
+    'חדרה': 'Hadera',
+    'Hadera': 'Hadera',
+    'אשקלון': 'Ashkelon',
+    'Ashkelon': 'Ashkelon',
+    'קריות': 'Haifa',
+    'Krayot': 'Haifa',
+    'והצפון': 'Haifa',
+    'עכו': 'Haifa',
+    'Acre': 'Haifa',
+    'בית שמש': 'Jerusalem',
+    'Beit Shemesh': 'Jerusalem',
+    'רמלה': 'Central District',
+    'Ramla': 'Central District',
+    'לוד': 'Central District',
+    'Lod': 'Central District',
 }
 
-export function normalizeTitiData(raw: RawTitiProfile): NormalizedData {
-    const normalizedCity = CITY_MAP[raw.city || ''] || raw.city || 'Israel'
+// Ethnicity value normalization: titti uses Hebrew/English → map to our slugs
+const ETHNICITY_MAP: Record<string, string> = {
+    'european': 'european',
+    'eastern european': 'european',
+    'east european': 'european',
+    'western european': 'european',
+    'אירופאית': 'european',
+    'מזרח אירופה': 'european',
+    'מערב אירופה': 'european',
+    'רוסייה': 'european',
+    'אוקראינית': 'european',
+
+    'latina': 'latina',
+    'latino': 'latina',
+    'south american': 'latina',
+    'brazilian': 'latina',
+    'ברזילאית': 'latina',
+    'לטינית': 'latina',
+    'דרום אמריקה': 'latina',
+
+    'asian': 'asian',
+    'east asian': 'asian',
+    'southeast asian': 'asian',
+    'thai': 'asian',
+    'chinese': 'asian',
+    'japanese': 'asian',
+    'filipina': 'asian',
+    'אסיאתית': 'asian',
+    'תאילנדית': 'asian',
+
+    'african': 'african',
+    'אפריקאית': 'african',
+    'אתיופית': 'african',
+    'ethiopian': 'african',
+
+    'israeli': 'israeli',
+    'ישראלית': 'israeli',
+    'מרוקאית': 'israeli',
+    'תימנייה': 'israeli',
+}
+
+function normalizeEthnicity(raw: RawTitiProfile): string | null {
+    const enriched = (raw as any)._enriched || {}
+    const physEthnicity = enriched.physicalParams?.ethnicity || ''
+    const physNationality = enriched.physicalParams?.nationality || ''
+    const combined = `${physEthnicity} ${physNationality}`.toLowerCase().trim()
+
+    for (const [key, value] of Object.entries(ETHNICITY_MAP)) {
+        if (combined.includes(key.toLowerCase())) return value
+    }
+    return null
+}
+
+export function normalizeTitiData(raw: RawTitiProfile, sourceOverride?: string): NormalizedData {
+    // Map city — if unknown, keep original (NOT 'Israel' fallback)
+    const rawCity = raw.city?.trim() || null
+    const normalizedCity = rawCity ? (CITY_MAP[rawCity] || rawCity) : null
 
     // Map categories to Tahles slugs
     const categoryIds: string[] = []
@@ -75,9 +144,35 @@ export function normalizeTitiData(raw: RawTitiProfile): NormalizedData {
         if (match) categoryIds.push(match.slug)
     })
 
+    // Detect category for raw_data (search API filters on this)
+    const detectedCats = detectCategories(raw)
+    const primaryCategory = detectedCats[0] || 'individual'
+
+    // Normalize ethnicity from physical params
+    const ethnicity = normalizeEthnicity(raw)
+
+    // Compute score from rating data
+    const score = raw.rating_avg ? Math.round(raw.rating_avg * (raw.rating_count || 1)) : 0
+    const scoreCategory = (raw as any).is_vip ? 'HOT' : (score > 20 ? 'TOP' : null)
+
+    // Address from enriched data
+    const enriched = (raw as any)._enriched || {}
+    const address = enriched.region || normalizedCity || null
+
+    // Build raw_data with required _ prefixed fields for search API
+    const rawData = {
+        ...raw,
+        _verified: raw.is_verified ? 'true' : 'false',
+        _category: primaryCategory,
+        _ethnicity: ethnicity,
+        _score: score,
+        _score_category: scoreCategory,
+        _address: address,
+    }
+
     // Basic Advertisement data
     const ad: any = {
-        source: 'titi',
+        source: sourceOverride || 'titi',
         source_id: raw.source_id,
         nickname: raw.name,
         description: raw.description,
@@ -92,7 +187,7 @@ export function normalizeTitiData(raw: RawTitiProfile): NormalizedData {
         rating_avg: raw.rating_avg,
         rating_count: raw.rating_count,
         online_status: raw.online_status,
-        raw_data: raw,
+        raw_data: rawData,
         updated_at: new Date().toISOString()
     }
 

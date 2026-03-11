@@ -103,7 +103,7 @@ export class CrawlerService {
         try {
             const profileHtml = await this.fetchPage(listing.url)
             const rawProfile = adapter.parseProfile(profileHtml, listing)
-            const normalized = normalizeTitiData(rawProfile)
+            const normalized = normalizeTitiData(rawProfile, adapter.source)
 
             // ── Quality filter: skip junk profiles ──
             const hasContact = !!(normalized.contacts?.phone || normalized.contacts?.whatsapp)
