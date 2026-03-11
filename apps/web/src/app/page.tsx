@@ -1,10 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ResultRow } from '@/components/search/ResultRow'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import { SHEETS, CATEGORIES, ORIGINS, DEFAULT_PAGE_SIZE } from '@/lib/constants'
+import { CATEGORIES, ORIGINS, DEFAULT_PAGE_SIZE } from '@/lib/constants'
 import { translateCity } from '@/lib/i18n/translations'
 import type { TranslationKey } from '@/lib/i18n/translations'
 
@@ -51,13 +51,6 @@ interface Ad {
 }
 
 interface SearchMeta { total: number; page: number }
-
-interface SignalStats {
-  total: number
-  added24h: number
-  waVerified: number
-  demand: 'low' | 'medium' | 'high'
-}
 
 const CITIES: { key: TranslationKey; value: string }[] = [
   { key: 'city_tel_aviv',      value: 'Tel Aviv' },
@@ -115,52 +108,6 @@ function CookieBanner() {
         >
           {t('cookie_decline')}
         </button>
-      </div>
-    </div>
-  )
-}
-
-/* ── Activity Signal Bar ──────────────────────────────────────────────────── */
-function ActivitySignal({ stats }: { stats: SignalStats | null }) {
-  const { t } = useTranslation()
-  if (!stats || stats.total === 0) return null
-
-  const demandKey = `signal_demand_${stats.demand}` as TranslationKey
-  const demandColor = stats.demand === 'high'
-    ? 'text-green-400'
-    : stats.demand === 'medium'
-      ? 'text-yellow-400'
-      : 'text-white/40'
-
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 mb-1">
-      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-        <span className="text-sm">👤</span>
-        <div>
-          <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.total)}</div>
-          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_profiles')}</div>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-        <span className="text-sm">🔍</span>
-        <div>
-          <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.added24h)}</div>
-          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_added_24h')}</div>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-        <span className="text-sm">✔</span>
-        <div>
-          <div className="text-sm font-black text-white/90 tabular-nums">{fmtNum(stats.waVerified)}</div>
-          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_wa_verified')}</div>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-        <span className="text-sm">📊</span>
-        <div>
-          <div className={`text-sm font-black tabular-nums ${demandColor}`}>{t(demandKey)}</div>
-          <div className="text-xs text-white/50 font-bold uppercase tracking-wider">{t('signal_demand')}</div>
-        </div>
       </div>
     </div>
   )
@@ -244,7 +191,7 @@ export default function HomePage() {
   const [ads, setAds] = useState<Ad[]>([])
   const [loading, setLoading] = useState(false)
   const [activeCategory, setActiveCategory] = useState('')
-  const [activeSheet, setActiveSheet] = useState('all')
+  const activeSheet = 'all'
   const [activeCity, setActiveCity] = useState('')
   const [activeOrigin, setActiveOrigin] = useState('')
   const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
@@ -255,20 +202,10 @@ export default function HomePage() {
   const [started, setStarted] = useState(false)
   const resultsRef = useRef<HTMLDivElement>(null)
   const priceDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [signalStats, setSignalStats] = useState<SignalStats | null>(null)
-
   /* Helper: translate a DB city value to display name */
   const cityLabel = (val: string): string => {
     return translateCity(val, locale)
   }
-
-  /* Fetch activity signal stats */
-  useEffect(() => {
-    fetch('/api/stats')
-      .then(r => r.json())
-      .then(data => setSignalStats(data))
-      .catch(() => {})
-  }, [])
 
   useEffect(() => {
     if (!navigator.geolocation) return
@@ -323,15 +260,7 @@ export default function HomePage() {
   const handleCategory = (slug: string) => {
     const next = activeCategory === slug ? '' : slug
     setActiveCategory(next)
-    setActiveSheet(next ? '' : 'all')
-    fetchResults(next, next ? '' : 'all', activeCity, appliedPrice[0], appliedPrice[1], 1, activeOrigin)
-  }
-
-  const handleSheet = (id: string) => {
-    const next = activeSheet === id && id !== 'all' ? 'all' : id
-    setActiveSheet(next)
-    setActiveCategory('')
-    fetchResults('', next, activeCity, appliedPrice[0], appliedPrice[1], 1, activeOrigin)
+    fetchResults(next, 'all', activeCity, appliedPrice[0], appliedPrice[1], 1, activeOrigin)
   }
 
   const handleOrigin = (id: string) => {
@@ -363,7 +292,6 @@ export default function HomePage() {
 
   const handleReset = () => {
     setActiveCategory('')
-    setActiveSheet('all')
     setActiveCity('')
     setActiveOrigin('')
     setPriceRange([PRICE_MIN, PRICE_MAX])
@@ -416,25 +344,6 @@ export default function HomePage() {
           <p className="text-xs sm:text-xs text-white/25 mt-1 leading-relaxed">
             {t('hero_line3')}
           </p>
-        </section>
-
-        {/* ── Activity Signal ──────────────────────────────────────────── */}
-        <ActivitySignal stats={signalStats} />
-
-        {/* ── Sheets (quick filters) ───────────────────────────────────── */}
-        <section className="mb-2">
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {SHEETS.map((sh) => (
-              <button
-                key={sh.id}
-                onClick={() => handleSheet(sh.id)}
-                className={`shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
-                  ${activeSheet === sh.id ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
-              >
-                {sh.icon} {t(`sheet_${sh.id}` as any) || sh.label}
-              </button>
-            ))}
-          </div>
         </section>
 
         {/* ── Categories ────────────────────────────────────────────────── */}

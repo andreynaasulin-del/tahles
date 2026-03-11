@@ -1,8 +1,5 @@
 export const SHEETS = [
   { id: 'all',      label: 'All',       icon: '🔥' },
-  { id: 'vip',      label: 'VIP',       icon: '👑' },
-  { id: 'under25',  label: 'Under 25',  icon: '🌟' },
-  { id: 'video',    label: 'With Video', icon: '🎬' },
 ] as const
 
 export type SheetId = (typeof SHEETS)[number]['id']
