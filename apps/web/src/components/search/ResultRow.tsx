@@ -45,14 +45,12 @@ const PARAM_KEYS: Record<string, TranslationKey> = {
   breast_size: 'param_breast',
   hair_color: 'param_hair',
   eye_color: 'param_eyes',
-  ethnicity: 'param_ethnicity',
-  nationality: 'param_nationality',
   sexuality: 'param_sexuality',
 }
 
 const PARAM_ICONS: Record<string, string> = {
   height: '📏', weight: '⚖️', breast_size: '👙', hair_color: '💇',
-  eye_color: '👁️', ethnicity: '🌍', nationality: '🏳️', sexuality: '💜'
+  eye_color: '👁️', sexuality: '💜'
 }
 
 /* ── Infographic Slide ────────────────────────────────── */

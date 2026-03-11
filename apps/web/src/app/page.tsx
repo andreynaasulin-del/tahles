@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ResultRow } from '@/components/search/ResultRow'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import { CATEGORIES, ORIGINS, DEFAULT_PAGE_SIZE } from '@/lib/constants'
+import { CATEGORIES, DEFAULT_PAGE_SIZE } from '@/lib/constants'
 import { translateCity } from '@/lib/i18n/translations'
 import type { TranslationKey } from '@/lib/i18n/translations'
 
@@ -193,7 +193,7 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('')
   const activeSheet = 'all'
   const [activeCity, setActiveCity] = useState('')
-  const [activeOrigin, setActiveOrigin] = useState('')
+  const activeOrigin = ''
   const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
   const [appliedPrice, setAppliedPrice] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
   const [meta, setMeta] = useState<SearchMeta>({ total: 0, page: 1 })
@@ -263,12 +263,6 @@ export default function HomePage() {
     fetchResults(next, 'all', activeCity, appliedPrice[0], appliedPrice[1], 1, activeOrigin)
   }
 
-  const handleOrigin = (id: string) => {
-    const next = activeOrigin === id ? '' : id
-    setActiveOrigin(next)
-    fetchResults(activeCategory, activeSheet, activeCity, appliedPrice[0], appliedPrice[1], 1, next)
-  }
-
   const handleCity = (city: string) => {
     const next = activeCity === city ? '' : city
     setActiveCity(next)
@@ -293,14 +287,13 @@ export default function HomePage() {
   const handleReset = () => {
     setActiveCategory('')
     setActiveCity('')
-    setActiveOrigin('')
     setPriceRange([PRICE_MIN, PRICE_MAX])
     setAppliedPrice([PRICE_MIN, PRICE_MAX])
     fetchResults('', 'all', '', PRICE_MIN, PRICE_MAX, 1, '')
   }
 
   const hasPriceFilter = appliedPrice[0] > PRICE_MIN || appliedPrice[1] < PRICE_MAX
-  const hasActiveFilters = activeCategory || activeCity || activeOrigin || hasPriceFilter
+  const hasActiveFilters = activeCategory || activeCity || hasPriceFilter
   const leftPercent = ((priceRange[0] - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100
   const rightPercent = ((priceRange[1] - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100
 
@@ -396,30 +389,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Ethnicity / Origin ──────────────────────────────────────── */}
-        <section className="mb-2">
-          <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">{t('origin')}</div>
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            <button
-              onClick={() => handleOrigin('')}
-              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
-                ${!activeOrigin ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
-            >
-              🌐 {t('all_origins')}
-            </button>
-            {ORIGINS.map((o) => (
-              <button
-                key={o.id}
-                onClick={() => handleOrigin(o.id)}
-                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
-                  ${activeOrigin === o.id ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
-              >
-                {o.icon} {t(`origin_${o.id}` as any)}
-              </button>
-            ))}
-          </div>
-        </section>
-
         {/* ── Price Range Slider ───────────────────────────────────────── */}
         <section className="mb-2 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
           <div className="flex items-center justify-between mb-3">
@@ -486,11 +455,6 @@ export default function HomePage() {
                 {activeCategory && (
                   <button onClick={() => handleCategory(activeCategory)} className="text-xs px-2.5 py-1 rounded-full bg-velvet-500/15 text-velvet-300 font-bold border border-velvet-500/25 flex items-center gap-1">
                     {CATEGORIES.find(c => c.slug === activeCategory)?.icon} {t(`cat_${activeCategory}` as any)} ✕
-                  </button>
-                )}
-                {activeOrigin && (
-                  <button onClick={() => handleOrigin(activeOrigin)} className="text-xs px-2.5 py-1 rounded-full bg-velvet-500/15 text-velvet-300 font-bold border border-velvet-500/25 flex items-center gap-1">
-                    {ORIGINS.find(o => o.id === activeOrigin)?.icon} {t(`origin_${activeOrigin}` as any)} ✕
                   </button>
                 )}
                 {activeCity && (
