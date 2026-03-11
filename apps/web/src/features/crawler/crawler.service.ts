@@ -2,6 +2,7 @@
 import { createServiceRoleClient } from '@vm/db/src/service-client'
 import { normalizeTitiData, detectCategories } from './normalizer'
 import { diffProfile } from './diff'
+import { computeQualityScore } from '@/lib/quality-score'
 import { RawTitiListing } from './types'
 import { TittiAdapter } from './adapters/titti.adapter'
 import { SexfireAdapter } from './adapters/sexfire.adapter'
@@ -177,7 +178,35 @@ export class CrawlerService {
                 }
             }
 
-            console.log(`[Crawler] ✅ ${adapter.source}:${listing.source_id} (${listing.name}) → [${uniqueSlugs.join(', ')}]`)
+            // Compute and save quality_score
+            const rawData = adRecord.raw_data || {}
+            const enriched = rawData._enriched || {}
+            const rdContacts = rawData.contacts || {}
+            const qScore = computeQualityScore({
+                score: rawData._score || 0,
+                score_category: rawData._score_category || null,
+                vip_status: adRecord.vip_status,
+                verified: adRecord.verified,
+                videos: enriched.videos || [],
+                photos: adRecord.photos || [],
+                whatsapp: rdContacts.whatsapp || rawData.wa || null,
+                phone: rdContacts.phone || rawData.phone || null,
+                telegram: null,
+                services: enriched.services || [],
+                price_table: enriched.priceTable || [],
+                physical_params: enriched.physicalParams || {},
+                languages: rawData.languages || [],
+                price_min: adRecord.price_min,
+                address: rawData._address || null,
+                online_status: adRecord.online_status,
+                created_at: adRecord.created_at,
+            })
+            await this.supabase
+                .from('advertisements')
+                .update({ quality_score: qScore })
+                .eq('id', adRecord.id)
+
+            console.log(`[Crawler] ✅ ${adapter.source}:${listing.source_id} (${listing.name}) → [${uniqueSlugs.join(', ')}] score=${qScore}`)
         } catch (error) {
             console.error(`[Crawler] ❌ ${adapter.source}:${listing.source_id}:`, error)
         }

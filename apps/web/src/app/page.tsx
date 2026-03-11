@@ -202,12 +202,26 @@ export default function HomePage() {
   const [started, setStarted] = useState(false)
   const resultsRef = useRef<HTMLDivElement>(null)
   const priceDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
   /* Helper: translate a DB city value to display name */
   const cityLabel = (val: string): string => {
     return translateCity(val, locale)
   }
 
   useEffect(() => {
+    // Check localStorage cache first
+    try {
+      const cached = localStorage.getItem('tahles_geo')
+      if (cached) {
+        const { city, ts } = JSON.parse(cached)
+        if (Date.now() - ts < 3600000 && city) {
+          userCityRef.current = city
+          setUserCity(city)
+          return
+        }
+      }
+    } catch { /* ignore */ }
+
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -217,7 +231,11 @@ export default function HomePage() {
           )
           const data = await res.json()
           const city = data.address?.city || data.address?.town || data.address?.village || null
-          if (city) { userCityRef.current = city; setUserCity(city) }
+          if (city) {
+            userCityRef.current = city
+            setUserCity(city)
+            localStorage.setItem('tahles_geo', JSON.stringify({ city, ts: Date.now() }))
+          }
         } catch { }
       },
       () => { },
@@ -228,6 +246,11 @@ export default function HomePage() {
   const fetchResults = useCallback(async (
     cat: string, sh: string, city: string, pMin: number, pMax: number, page = 1, origin = ''
   ) => {
+    // Cancel any in-flight request
+    if (abortRef.current) abortRef.current.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setLoading(true)
     setStarted(true)
     const params = new URLSearchParams()
@@ -240,16 +263,17 @@ export default function HomePage() {
     if (pMax < PRICE_MAX) params.set('price_max', String(pMax))
     params.set('page', String(page))
     try {
-      const res = await fetch(`/api/search?${params}`)
-      if (!res.ok) { setAds([]); return }
+      const res = await fetch(`/api/search?${params}`, { signal: controller.signal })
+      if (!res.ok) return
       const json = await res.json()
       if (page === 1) setAds(json.data ?? [])
       else setAds((prev) => [...prev, ...(json.data ?? [])])
       setMeta({ total: json.total ?? 0, page })
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       setAds([])
     } finally {
-      setLoading(false)
+      if (abortRef.current === controller) setLoading(false)
     }
   }, [])
 
@@ -452,7 +476,7 @@ export default function HomePage() {
           {started && (
             <div className="flex items-center gap-3 mb-5 flex-wrap">
               <span className="text-xs font-black text-white/50 uppercase tracking-[0.2em]">
-                {loading ? '…' : fmtNum(meta.total)} {t('results') || 'results'}
+                {fmtNum(meta.total)} {t('results') || 'results'}
               </span>
               <div className="flex gap-1.5 flex-wrap">
                 {activeCategory && (
