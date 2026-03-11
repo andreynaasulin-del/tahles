@@ -422,6 +422,7 @@ export default function HomePage() {
 
         {/* ── Origin / Ethnicity ──────────────────────────────────────── */}
         <section className="mb-2">
+          <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">{t('origin')}</div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <button
               onClick={() => handleOrigin('latina')}
