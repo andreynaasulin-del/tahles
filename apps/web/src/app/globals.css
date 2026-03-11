@@ -213,3 +213,12 @@ img {
 .animate-slide-up {
   animation: slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
+/* ── Hero marquee ────────────────────────────────────────────────────────── */
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee-scroll 30s linear infinite;
+}

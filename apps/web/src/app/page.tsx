@@ -326,17 +326,20 @@ export default function HomePage() {
 
       <main className="max-w-[1100px] mx-auto px-4 sm:px-6 pb-20">
 
-        {/* ── Hero Section ─────────────────────────────────────────────── */}
-        <section className="mt-5 mb-2">
-          <p className="text-sm sm:text-base font-bold text-white/70 leading-relaxed">
-            {t('hero_line1')}
-          </p>
-          <p className="text-xs sm:text-sm text-white/40 mt-1 leading-relaxed">
-            {t('hero_line2')}
-          </p>
-          <p className="text-xs sm:text-xs text-white/25 mt-1 leading-relaxed">
-            {t('hero_line3')}
-          </p>
+        {/* ── Hero Marquee ─────────────────────────────────────────────── */}
+        <section className="mt-4 mb-3 overflow-hidden rounded-xl bg-white/[0.03] border border-white/[0.06] py-2.5">
+          <div className="marquee-track flex whitespace-nowrap">
+            {[0, 1].map((dup) => (
+              <span key={dup} className="inline-flex items-center gap-6 px-6 text-sm font-bold shrink-0">
+                <span className="text-velvet-300">{t('hero_line1')}</span>
+                <span className="text-white/20">✦</span>
+                <span className="text-white/60">{t('hero_line2')}</span>
+                <span className="text-white/20">✦</span>
+                <span className="text-white/40">{t('hero_line3')}</span>
+                <span className="text-white/20">✦</span>
+              </span>
+            ))}
+          </div>
         </section>
 
         {/* ── Categories ────────────────────────────────────────────────── */}
