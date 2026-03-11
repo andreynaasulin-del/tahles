@@ -17,7 +17,7 @@ const CITY_VARIANTS: Record<string, string[]> = {
   'Tel Aviv':      ['Tel Aviv', 'תל אביב', 'Ramat Aviv'],
   'Jerusalem':     ['Jerusalem', 'ירושלים'],
   'Bat Yam':       ['Bat Yam', 'בת ים'],
-  'Haifa':         ['Haifa', 'חיפה', 'Krayot', 'קריות', 'חיפה, קריות והצפון'],
+  'Haifa':         ['Haifa', 'חיפה', 'Krayot', 'קריות', 'והצפון'],
   'Netanya':       ['Netanya', 'נתניה'],
   'Hadera':        ['Hadera', 'חדרה'],
   'Rishon LeZion': ['Rishon LeZion', 'ראשון לציון', 'Rishon Lezion'],

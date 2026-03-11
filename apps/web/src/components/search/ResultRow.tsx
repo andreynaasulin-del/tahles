@@ -79,14 +79,14 @@ function InfoSlide({
           {age ? <span className="text-white/30 font-medium text-sm ml-1">{age}</span> : null}
         </h4>
         {displayLocation && (
-          <p className="text-[11px] text-white/40 mt-0.5">📍 {displayLocation}</p>
+          <p className="text-xs text-white/40 mt-0.5">📍 {displayLocation}</p>
         )}
       </div>
 
       {/* Price Table */}
       {hasPrices && (
         <div className="mb-4">
-          <div className="text-[11px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_prices')}</div>
+          <div className="text-xs text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_prices')}</div>
           <div className="flex flex-col gap-1.5">
             {(price_table ?? []).map((p, i) => (
               <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06]">
@@ -104,7 +104,7 @@ function InfoSlide({
       {/* Physical Params */}
       {hasParams && (
         <div className="mb-4">
-          <div className="text-[11px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_details')}</div>
+          <div className="text-xs text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_details')}</div>
           <div className="grid grid-cols-2 gap-1.5">
             {Object.entries(params)
               .filter(([k]) => PARAM_KEYS[k])
@@ -124,7 +124,7 @@ function InfoSlide({
       {/* Services */}
       {hasServices && (
         <div className="mb-4">
-          <div className="text-[11px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_services')}</div>
+          <div className="text-xs text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_services')}</div>
           <div className="flex flex-wrap gap-1.5">
             {(services ?? []).slice(0, 8).map((s, i) => (
               <span key={i} className="px-2.5 py-1 rounded-full bg-velvet-500/10 border border-velvet-500/15 text-xs text-velvet-300/80 font-bold">
@@ -143,7 +143,7 @@ function InfoSlide({
       {/* Languages */}
       {hasLangs && (
         <div className="mb-2">
-          <div className="text-[11px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_languages')}</div>
+          <div className="text-xs text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_languages')}</div>
           <div className="flex gap-1.5">
             {(languages ?? []).map((l, i) => (
               <span key={i} className="px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-white/50 font-bold">
@@ -414,7 +414,8 @@ export const ResultRow = memo(function ResultRow({
   }
 
   const displayCity = city ? translateCity(city, locale) : null
-  const displayLocation = address || displayCity
+  // Prefer translated city in current locale; fall back to raw address
+  const displayLocation = displayCity || address
 
   return (
     <div className="relative rounded-3xl overflow-hidden bg-[#0d0d0d] border border-white/[0.06]">
@@ -544,7 +545,7 @@ export const ResultRow = memo(function ResultRow({
                 </div>
               </div>
               <div className="shrink-0" style={{ textAlign: 'end' }}>
-                <div className="text-[11px] text-white/30 uppercase font-bold tracking-wider drop-shadow">{t('starting_at')}</div>
+                <div className="text-xs text-white/30 uppercase font-bold tracking-wider drop-shadow">{t('starting_at')}</div>
                 <div className="text-xl font-black text-velvet-300 tabular-nums leading-tight drop-shadow-lg">
                   {price_min ? `${price_min} ₪` : t('price_on_request')}
                 </div>
