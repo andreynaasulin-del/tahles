@@ -220,5 +220,5 @@ img {
   100% { transform: translateX(-50%); }
 }
 .marquee-track {
-  animation: marquee-scroll 30s linear infinite;
+  animation: marquee-scroll 14s linear infinite;
 }
