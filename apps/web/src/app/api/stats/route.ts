@@ -45,7 +45,7 @@ async function getSignalStats() {
   const now = new Date()
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
-  // 1. Total profiles: photos + _verified (gives real 81)
+  // 1. Total profiles: same filter as search route (photos + verified)
   const { count: total } = await supabase
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
@@ -57,7 +57,6 @@ async function getSignalStats() {
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
     .not('photos', 'is', null)
-    .not('description', 'is', null)
     .eq('raw_data->>_verified', 'true')
     .gte('created_at', twentyFourHoursAgo)
 
@@ -66,7 +65,6 @@ async function getSignalStats() {
     .from('advertisements')
     .select('id')
     .not('photos', 'is', null)
-    .not('description', 'is', null)
     .eq('raw_data->>_verified', 'true')
 
   const visibleIds = (visibleRows ?? []).map((r: any) => r.id)

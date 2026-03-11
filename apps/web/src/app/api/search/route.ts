@@ -46,7 +46,7 @@ async function realSearch(
 
   // Category filter — use raw_data._category JSONB field
 
-  // Build base query — only profiles WITH photos
+  // Build base query — verified profiles WITH photos (description no longer required)
   let query = supabase
     .from('advertisements')
     .select(
@@ -54,7 +54,6 @@ async function realSearch(
       { count: 'exact' }
     )
     .not('photos', 'is', null)
-    .not('description', 'is', null)
     .eq('raw_data->>_verified', 'true')
 
   // Category filter via raw_data JSONB
@@ -96,24 +95,39 @@ async function realSearch(
     throw error
   }
 
+  // Extract contacts from raw_data (primary source) or contacts table (fallback)
+  function extractContact(ad: any) {
+    const rawData = ad.raw_data as any
+    const rdContacts = rawData?.contacts || {}
+    const phone = rdContacts?.phone || rawData?.phone || null
+    const wa = rdContacts?.whatsapp || rawData?.wa || phone
+    // Fallback: contacts table join
+    const tblContact = Array.isArray(ad.contacts) ? ad.contacts[0] : ad.contacts
+    return {
+      whatsapp: wa || tblContact?.whatsapp || null,
+      phone: phone || tblContact?.phone || null,
+      telegram: tblContact?.telegram_username || null,
+    }
+  }
+
   // Filter out profiles without photos or contacts
   const withPhotos = (data || []).filter((ad: any) => {
     const photos = ad.photos
     const hasPhotos = Array.isArray(photos) && photos.length > 0
-    const contact = Array.isArray(ad.contacts) ? ad.contacts[0] : ad.contacts
-    const hasContact = !!(contact?.whatsapp || contact?.phone)
+    const contact = extractContact(ad)
+    const hasContact = !!(contact.whatsapp || contact.phone)
     return hasPhotos && hasContact
   })
 
   const mappedData = withPhotos.map((ad: any) => {
-    const contact = Array.isArray(ad.contacts) ? ad.contacts[0] : ad.contacts
+    const contact = extractContact(ad)
     const rawData = ad.raw_data as any
     const enriched = rawData?._enriched ?? {}
     return {
       ...ad,
-      whatsapp:      contact?.whatsapp || null,
-      phone:         contact?.phone || null,
-      telegram:      contact?.telegram_username || null,
+      whatsapp:      contact.whatsapp,
+      phone:         contact.phone,
+      telegram:      contact.telegram,
       comments_count: ad.rating_count || 0,
       address:       rawData?._address || null,
       services:      enriched.services ?? [],

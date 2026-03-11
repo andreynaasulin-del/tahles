@@ -86,12 +86,12 @@ function InfoSlide({
       {/* Price Table */}
       {hasPrices && (
         <div className="mb-4">
-          <div className="text-[9px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_prices')}</div>
+          <div className="text-[11px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_prices')}</div>
           <div className="flex flex-col gap-1.5">
             {(price_table ?? []).map((p, i) => (
               <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06]">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-white/30 uppercase font-bold">{p.type}</span>
+                  <span className="text-xs text-white/30 uppercase font-bold">{p.type}</span>
                   <span className="text-xs text-white/60 font-bold">{p.duration}</span>
                 </div>
                 <span className="text-sm font-black text-velvet-300 tabular-nums">{p.amount} ₪</span>
@@ -104,7 +104,7 @@ function InfoSlide({
       {/* Physical Params */}
       {hasParams && (
         <div className="mb-4">
-          <div className="text-[9px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_details')}</div>
+          <div className="text-[11px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_details')}</div>
           <div className="grid grid-cols-2 gap-1.5">
             {Object.entries(params)
               .filter(([k]) => PARAM_KEYS[k])
@@ -112,8 +112,8 @@ function InfoSlide({
                 const displayVal = (k === 'ethnicity' || k === 'nationality') ? translateEthnicity(v, locale) : v
                 return (
                   <div key={k} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05]">
-                    <span className="text-[10px]">{PARAM_ICONS[k] || '•'}</span>
-                    <span className="text-[10px] text-white/50 font-bold truncate">{displayVal}</span>
+                    <span className="text-xs">{PARAM_ICONS[k] || '•'}</span>
+                    <span className="text-xs text-white/50 font-bold truncate">{displayVal}</span>
                   </div>
                 )
               })}
@@ -124,15 +124,15 @@ function InfoSlide({
       {/* Services */}
       {hasServices && (
         <div className="mb-4">
-          <div className="text-[9px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_services')}</div>
+          <div className="text-[11px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_services')}</div>
           <div className="flex flex-wrap gap-1.5">
             {(services ?? []).slice(0, 8).map((s, i) => (
-              <span key={i} className="px-2.5 py-1 rounded-full bg-velvet-500/10 border border-velvet-500/15 text-[10px] text-velvet-300/80 font-bold">
+              <span key={i} className="px-2.5 py-1 rounded-full bg-velvet-500/10 border border-velvet-500/15 text-xs text-velvet-300/80 font-bold">
                 {s}
               </span>
             ))}
             {(services ?? []).length > 8 && (
-              <span className="px-2.5 py-1 rounded-full bg-white/[0.04] text-[10px] text-white/30 font-bold">
+              <span className="px-2.5 py-1 rounded-full bg-white/[0.04] text-xs text-white/30 font-bold">
                 +{(services ?? []).length - 8}
               </span>
             )}
@@ -143,10 +143,10 @@ function InfoSlide({
       {/* Languages */}
       {hasLangs && (
         <div className="mb-2">
-          <div className="text-[9px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_languages')}</div>
+          <div className="text-[11px] text-velvet-400/60 uppercase tracking-[0.2em] font-black mb-2">{t('info_languages')}</div>
           <div className="flex gap-1.5">
             {(languages ?? []).map((l, i) => (
-              <span key={i} className="px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] text-white/50 font-bold">
+              <span key={i} className="px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-white/50 font-bold">
                 🗣️ {l}
               </span>
             ))}
@@ -162,21 +162,21 @@ function InfoSlide({
           </div>
           {price_min ? (
             <div className="text-center">
-              <div className="text-[10px] text-white/25 uppercase tracking-[0.2em] font-black mb-1">{t('starting_at')}</div>
+              <div className="text-xs text-white/25 uppercase tracking-[0.2em] font-black mb-1">{t('starting_at')}</div>
               <div className="text-3xl font-black text-velvet-300 tabular-nums">{price_min} ₪</div>
             </div>
           ) : (
             <div className="text-center">
-              <div className="text-[10px] text-white/25 uppercase tracking-[0.2em] font-black mb-1">{t('price')}</div>
+              <div className="text-xs text-white/25 uppercase tracking-[0.2em] font-black mb-1">{t('price')}</div>
               <div className="text-lg font-black text-white/40">{t('price_on_request')}</div>
             </div>
           )}
           <div className="flex flex-wrap items-center justify-center gap-2">
             {service_type && (
-              <span className="px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.06] text-[10px] text-white/40 font-bold uppercase">{translateServiceType(service_type, locale)}</span>
+              <span className="px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.06] text-xs text-white/40 font-bold uppercase">{translateServiceType(service_type, locale)}</span>
             )}
             {displayCity && (
-              <span className="px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.06] text-[10px] text-white/40 font-bold">📍 {displayCity}</span>
+              <span className="px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.06] text-xs text-white/40 font-bold">📍 {displayCity}</span>
             )}
           </div>
         </div>
@@ -298,6 +298,7 @@ export const ResultRow = memo(function ResultRow({
   const [allMediaFailed, setAllMediaFailed] = useState(false)
   const [failedSlides, setFailedSlides] = useState<Set<number>>(new Set())
   const [showContact, setShowContact] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
   const touchDelta = useRef(0)
   const mediaRef = useRef<HTMLImageElement | null>(null)
@@ -342,6 +343,28 @@ export const ResultRow = memo(function ResultRow({
       }
     }
   }, [slideIdx, isVideoSlide])
+
+  // Preload next 2 photos for instant swipe
+  useEffect(() => {
+    const preloadCount = 2
+    for (let i = 1; i <= preloadCount; i++) {
+      const nextPos = currentValidPos + i
+      if (nextPos >= validIndices.length) break
+      const nextIdx = validIndices[nextPos]
+      if (nextIdx >= videoCount && nextIdx < videoCount + photoCount) {
+        const url = photos[nextIdx - videoCount]
+        if (url) {
+          const img = new Image()
+          img.src = url
+        }
+      }
+    }
+  }, [slideIdx, validIndices, currentValidPos, videoCount, photoCount, photos])
+
+  // Reset loaded state on slide change
+  useEffect(() => {
+    setImageLoaded(false)
+  }, [slideIdx])
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
@@ -424,17 +447,25 @@ export const ResultRow = memo(function ResultRow({
           />
         ) : currentUrl ? (
           /* Photo slide */
-          <img
-            ref={mediaRef}
-            src={currentUrl}
-            alt={nickname}
-            loading="lazy"
-            decoding="async"
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover will-change-transform"
-            draggable={false}
-            onError={() => handleMediaError(slideIdx)}
-          />
+          <>
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-white/[0.03] animate-pulse z-[1]">
+                <div className="w-full h-full bg-gradient-to-b from-white/[0.04] to-transparent" />
+              </div>
+            )}
+            <img
+              ref={mediaRef}
+              src={currentUrl}
+              alt={nickname}
+              loading="lazy"
+              decoding="async"
+              referrerPolicy="no-referrer"
+              className={`w-full h-full object-cover will-change-transform transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              draggable={false}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => handleMediaError(slideIdx)}
+            />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-white/10">
             {nickname.charAt(0).toUpperCase()}
@@ -475,7 +506,7 @@ export const ResultRow = memo(function ResultRow({
         {isVideoSlide && (
           <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm">
             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-white/70 uppercase">Video</span>
+            <span className="text-xs font-bold text-white/70 uppercase">Video</span>
           </div>
         )}
 
@@ -496,25 +527,25 @@ export const ResultRow = memo(function ResultRow({
               <div className="min-w-0 flex-1">
                 <h3 className="text-xl font-black text-white leading-tight truncate drop-shadow-lg">
                   {nickname}
-                  {age ? <span className="text-white/40 font-medium text-sm ml-1">{age}</span> : null}
+                  {age ? <span className="text-white/40 font-medium text-sm ms-1">{age}</span> : null}
                 </h3>
                 {displayLocation && (
-                  <p className="text-xs text-white/50 mt-0.5 truncate drop-shadow">📍 {displayLocation}</p>
+                  <p className="text-sm text-white/50 mt-0.5 truncate drop-shadow">📍 {displayLocation}</p>
                 )}
-                <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {service_type && (
-                    <span className="inline-block px-2 py-0.5 rounded bg-white/10 text-[10px] text-white/50 font-bold uppercase">{translateServiceType(service_type, locale)}</span>
+                    <span className="inline-block px-2.5 py-0.5 rounded bg-white/10 text-xs text-white/60 font-bold uppercase">{translateServiceType(service_type, locale)}</span>
                   )}
                   {category && (
-                    <span className="inline-block px-2 py-0.5 rounded bg-velvet-500/20 text-[10px] text-velvet-300/70 font-bold uppercase">
+                    <span className="inline-block px-2.5 py-0.5 rounded bg-velvet-500/20 text-xs text-velvet-300/80 font-bold uppercase">
                       {category === 'individual' ? t('cat_individual') : category === 'agency' ? t('cat_agency') : category}
                     </span>
                   )}
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <div className="text-[9px] text-white/30 uppercase font-bold tracking-wider drop-shadow">{t('starting_at')}</div>
-                <div className="text-lg font-black text-velvet-300 tabular-nums leading-tight drop-shadow-lg">
+              <div className="shrink-0" style={{ textAlign: 'end' }}>
+                <div className="text-[11px] text-white/30 uppercase font-bold tracking-wider drop-shadow">{t('starting_at')}</div>
+                <div className="text-xl font-black text-velvet-300 tabular-nums leading-tight drop-shadow-lg">
                   {price_min ? `${price_min} ₪` : t('price_on_request')}
                 </div>
               </div>
@@ -522,10 +553,10 @@ export const ResultRow = memo(function ResultRow({
           </div>
         )}
 
-        {/* Slide counter */}
+        {/* Slide counter — pinned top-right (LTR) or top-left (RTL) */}
         {validIndices.length > 1 && !isInfoSlide && (
-          <div className="absolute bottom-14 right-4 z-20">
-            <span className="px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-sm text-[10px] text-white/50 font-bold tabular-nums">
+          <div className="absolute top-3 z-20 ltr:right-3 rtl:left-3" style={{ right: 'auto', left: 'auto', insetInlineEnd: '12px' }}>
+            <span className="px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm text-xs text-white/70 font-bold tabular-nums">
               {currentValidPos + 1}/{validIndices.length}
             </span>
           </div>
