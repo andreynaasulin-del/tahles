@@ -415,30 +415,38 @@ export default function HomePage() {
 
       <main className="max-w-[1100px] mx-auto px-4 sm:px-6 pb-20">
 
-        {/* ── Hero Marquee + How it works ─────────────────────────────── */}
+        {/* ── Hero + Stats Marquee ─────────────────────────────────────── */}
         <section className="mt-4 mb-4 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
-          <div className="overflow-hidden py-6">
-            <div className="marquee-track flex whitespace-nowrap">
-              {[0, 1].map((dup) => (
-                <span key={dup} className="inline-flex items-center gap-10 px-10 text-lg font-bold shrink-0">
-                  <span className="text-velvet-300">{t('hero_line1')}</span>
-                  <span className="text-white/20">✦</span>
-                  <span className="text-white/60">{t('hero_line2')}</span>
-                  <span className="text-white/20">✦</span>
-                  <span className="text-white/40">{t('hero_line3')}</span>
-                  <span className="text-white/20">✦</span>
-                </span>
-              ))}
-            </div>
+          <div className="px-5 py-4">
+            <h1 className="text-lg font-black text-velvet-300">{t('hero_line1')}</h1>
+            <p className="text-sm text-white/50 mt-1">{t('hero_line2')}</p>
           </div>
-          <div className="border-t border-white/[0.06] px-5 py-3.5">
+          {signalStats && signalStats.total > 0 && (
+            <div className="overflow-hidden border-t border-white/[0.06] py-3">
+              <div className="marquee-track flex whitespace-nowrap">
+                {[0, 1].map((dup) => (
+                  <span key={dup} className="inline-flex items-center gap-8 px-8 text-sm font-bold shrink-0">
+                    <span className="text-white/70">👤 {fmtNum(signalStats.total)} {t('signal_profiles')}</span>
+                    <span className="text-white/20">✦</span>
+                    <span className="text-white/70">🔍 {fmtNum(signalStats.added24h)} {t('signal_added_24h')}</span>
+                    <span className="text-white/20">✦</span>
+                    <span className="text-white/70">✔ {fmtNum(signalStats.waVerified)} {t('signal_wa_verified')}</span>
+                    <span className="text-white/20">✦</span>
+                    <span className={signalStats.demand === 'high' ? 'text-green-400' : signalStats.demand === 'medium' ? 'text-yellow-400' : 'text-white/50'}>
+                      📊 {t(`signal_demand_${signalStats.demand}` as TranslationKey)} {t('signal_demand')}
+                    </span>
+                    <span className="text-white/20">✦</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="border-t border-white/[0.06] px-5 py-3">
             <span className="font-black text-white/80">{t('how_title')}</span>
             <span className="text-white/40">{' — '}</span>
             <span className="text-sm text-white/50">{t('how_text')}</span>
           </div>
         </section>
-
-        <ActivitySignal stats={signalStats} />
 
         {/* ── Categories ────────────────────────────────────────────────── */}
         <section className="mt-2 mb-2">
