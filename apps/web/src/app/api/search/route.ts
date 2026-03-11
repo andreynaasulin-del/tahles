@@ -22,10 +22,7 @@ const CITY_VARIANTS: Record<string, string[]> = {
   'Hadera':        ['Hadera', 'חדרה'],
   'Rishon LeZion': ['Rishon LeZion', 'ראשון לציון', 'Rishon Lezion'],
   'Beer Sheva':    ['Beer Sheva', 'באר שבע', 'Beersheba'],
-  'Petah Tikva':   ['Petah Tikva', 'פתח תקווה'],
-  'Ramat Gan':     ['Ramat Gan', 'רמת גן'],
   'Ashdod':        ['Ashdod', 'אשדוד', 'Ashkelon', 'אשקלון'],
-  'Holon':         ['Holon', 'חולון'],
 }
 
 async function realSearch(

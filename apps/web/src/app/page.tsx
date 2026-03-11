@@ -60,10 +60,7 @@ const CITIES: { key: TranslationKey; value: string }[] = [
   { key: 'city_rishon_lezion', value: 'Rishon LeZion' },
   { key: 'city_netanya',       value: 'Netanya' },
   { key: 'city_beer_sheva',    value: 'Beer Sheva' },
-  { key: 'city_petah_tikva',   value: 'Petah Tikva' },
-  { key: 'city_ramat_gan',     value: 'Ramat Gan' },
   { key: 'city_ashdod',        value: 'Ashdod' },
-  { key: 'city_holon',         value: 'Holon' },
   { key: 'city_hadera',        value: 'Hadera' },
 ]
 
