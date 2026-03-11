@@ -18,12 +18,12 @@ export const CATEGORIES = [
 export type CategorySlug = (typeof CATEGORIES)[number]['slug']
 
 export const ORIGINS = [
-  { id: 'european',         label: 'European',        icon: '🌍' },
   { id: 'eastern_european', label: 'East European',   icon: '🇷🇺' },
-  { id: 'israeli',          label: 'Israeli',         icon: '🇮🇱' },
-  { id: 'latina',           label: 'Latina',          icon: '🔥' },
   { id: 'asian',            label: 'Asian',           icon: '🌸' },
-  { id: 'ethiopian',        label: 'Ethiopian',       icon: '🇪🇹' },
+  { id: 'african',          label: 'African',         icon: '🌍' },
+  { id: 'latina',           label: 'Latina',          icon: '🔥' },
+  { id: 'israeli',          label: 'Israeli',         icon: '🇮🇱' },
+  { id: 'european',         label: 'European',        icon: '🇪🇺' },
 ] as const
 
 export type OriginId = (typeof ORIGINS)[number]['id']

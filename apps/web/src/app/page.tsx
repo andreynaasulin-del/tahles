@@ -471,6 +471,30 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Ethnicity / Origin ──────────────────────────────────────── */}
+        <section className="mb-2">
+          <div className="text-xs text-white/25 uppercase tracking-[0.2em] font-black mb-1.5">{t('origin')}</div>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <button
+              onClick={() => handleOrigin('')}
+              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
+                ${!activeOrigin ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
+            >
+              🌐 {t('all_origins')}
+            </button>
+            {ORIGINS.map((o) => (
+              <button
+                key={o.id}
+                onClick={() => handleOrigin(o.id)}
+                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 touch-manipulation whitespace-nowrap
+                  ${activeOrigin === o.id ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300' : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'}`}
+              >
+                {o.icon} {t(`origin_${o.id}` as any)}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* ── Price Range Slider ───────────────────────────────────────── */}
         <section className="mb-2 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
           <div className="flex items-center justify-between mb-3">
