@@ -16,7 +16,6 @@ export const ORIGINS = [
   { id: 'asian',            label: 'Asian',           icon: '🌸' },
   { id: 'african',          label: 'African',         icon: '🌍' },
   { id: 'latina',           label: 'Latina',          icon: '🔥' },
-  { id: 'israeli',          label: 'Israeli',         icon: '🇮🇱' },
   { id: 'european',         label: 'European',        icon: '🇪🇺' },
 ] as const
 
