@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 
 const METRICS_ID = '00000000-0000-0000-0000-000000000001'
+
+function createNoCacheClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }),
+    },
+  })
+}
 
 async function recordVisitAndGetDemand(supabase: any): Promise<'low' | 'medium' | 'high'> {
   const now = Date.now()
@@ -39,20 +52,17 @@ async function recordVisitAndGetDemand(supabase: any): Promise<'low' | 'medium' 
 }
 
 async function getSignalStats() {
-  const { createServiceRoleClient } = await import('@vm/db')
-  const supabase = createServiceRoleClient()
+  const supabase = createNoCacheClient()
 
   const now = new Date()
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
   // 1. Total profiles: same filter as search route (photos + verified)
-  const { count: total, error: totalErr } = await supabase
+  const { count: total } = await supabase
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
     .not('photos', 'is', null)
     .eq('raw_data->>_verified', 'true')
-
-  console.log('STATS_DEBUG:', { supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL, total, totalErr })
 
   // 2. Recently added among visible
   const { count: added24h } = await supabase
