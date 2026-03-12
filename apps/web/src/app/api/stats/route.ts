@@ -46,11 +46,13 @@ async function getSignalStats() {
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
   // 1. Total profiles: same filter as search route (photos + verified)
-  const { count: total } = await supabase
+  const { count: total, error: totalErr } = await supabase
     .from('advertisements')
     .select('id', { count: 'exact', head: true })
     .not('photos', 'is', null)
     .eq('raw_data->>_verified', 'true')
+
+  console.log('STATS_DEBUG:', { supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL, total, totalErr })
 
   // 2. Recently added among visible
   const { count: added24h } = await supabase
