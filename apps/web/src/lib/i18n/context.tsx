@@ -11,10 +11,10 @@ interface I18nContextValue {
 }
 
 export const I18nContext = createContext<I18nContextValue>({
-  locale: 'en',
+  locale: 'he',
   setLocale: () => {},
   t: (key) => key,
-  dir: 'ltr',
+  dir: 'rtl',
 })
 
 const STORAGE_KEY = 'vm_locale'

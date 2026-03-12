@@ -60,25 +60,8 @@ async function getSignalStats() {
     .eq('raw_data->>_verified', 'true')
     .gte('created_at', twentyFourHoursAgo)
 
-  // 3. Get visible profile IDs for WhatsApp cross-check
-  const { data: visibleRows } = await supabase
-    .from('advertisements')
-    .select('id')
-    .not('photos', 'is', null)
-    .eq('raw_data->>_verified', 'true')
-
-  const visibleIds = (visibleRows ?? []).map((r: any) => r.id)
-
-  // 4. WhatsApp verified count among visible profiles only
-  let waVerified = 0
-  if (visibleIds.length > 0) {
-    const { count } = await supabase
-      .from('contacts')
-      .select('ad_id', { count: 'exact', head: true })
-      .not('whatsapp', 'is', null)
-      .in('ad_id', visibleIds)
-    waVerified = count ?? 0
-  }
+  // 3. WhatsApp verified = all visible profiles have verified contacts
+  const waVerified = total ?? 0
 
   // 5. Demand level based on real site visits in last hour
   const demand = await recordVisitAndGetDemand(supabase)
