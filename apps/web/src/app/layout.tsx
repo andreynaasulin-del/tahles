@@ -61,7 +61,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const jsonLd = {
+  const websiteLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Tahles',
@@ -74,6 +74,20 @@ export default function RootLayout({
     },
   }
 
+  const organizationLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Tahles',
+    url: SITE_URL,
+    logo: `${SITE_URL}/og-image.png`,
+    description: 'Israel\'s largest verified escort directory. Tel Aviv, Haifa, Jerusalem, Eilat and more.',
+    areaServed: {
+      '@type': 'Country',
+      name: 'Israel',
+    },
+    sameAs: [],
+  }
+
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
       <head>
@@ -82,7 +96,11 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
         />
         {/* Microsoft Clarity */}
         <script

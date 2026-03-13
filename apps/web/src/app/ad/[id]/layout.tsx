@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 
-const SITE_URL = 'https://tahles-web.vercel.app'
+const SITE_URL = 'https://tahles.top'
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   try {
@@ -71,6 +71,66 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default function AdLayout({ children }: { children: React.ReactNode }) {
-  return children
+export default async function AdLayout({ children, params }: { children: React.ReactNode; params: { id: string } }) {
+  // Build JSON-LD for this profile
+  let jsonLd: object[] = []
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    const { data: ad } = await supabase
+      .from('advertisements')
+      .select('nickname, age, city, photos, description, service_type, verified, vip_status')
+      .eq('id', params.id)
+      .single()
+
+    if (ad) {
+      const name = ad.nickname || 'Profile'
+      const city = ad.city || 'Israel'
+      const citySlug = city.toLowerCase().replace(/\s+/g, '-')
+
+      // ProfilePage schema
+      jsonLd.push({
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        mainEntity: {
+          '@type': 'Person',
+          name,
+          ...(ad.age && { birthDate: undefined }),
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: city,
+            addressCountry: 'IL',
+          },
+          ...(ad.photos?.[0] && { image: ad.photos[0] }),
+          ...(ad.description && { description: ad.description.substring(0, 200) }),
+        },
+      })
+
+      // BreadcrumbList
+      jsonLd.push({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Tahles', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: city, item: `${SITE_URL}/${citySlug}` },
+          { '@type': 'ListItem', position: 3, name },
+        ],
+      })
+    }
+  } catch {
+    // Don't break the page if JSON-LD fails
+  }
+
+  return (
+    <>
+      {jsonLd.map((ld, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      ))}
+      {children}
+    </>
+  )
 }
