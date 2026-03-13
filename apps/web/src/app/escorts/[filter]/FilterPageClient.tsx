@@ -10,6 +10,10 @@ interface FilterPageClientProps {
   initialTotal: number
 }
 
+function fmtNum(n: number) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 export default function FilterPageClient({ filterSlug, searchParams, initialProfiles, initialTotal }: FilterPageClientProps) {
   const [profiles, setProfiles] = useState(initialProfiles)
   const [page, setPage] = useState(1)
@@ -34,17 +38,28 @@ export default function FilterPageClient({ filterSlug, searchParams, initialProf
 
   if (profiles.length === 0) {
     return (
-      <section className="max-w-5xl mx-auto px-4 py-12 text-center">
-        <p className="text-white/40 text-lg">No profiles found in this category yet.</p>
-        <a href="/" className="inline-block mt-4 px-6 py-3 bg-[#c8a97e]/20 text-[#c8a97e] rounded-lg hover:bg-[#c8a97e]/30 transition">
+      <div className="text-center py-24 bg-white/[0.02] rounded-3xl border border-white/[0.04]">
+        <div className="text-5xl mb-4 opacity-30">🔍</div>
+        <p className="text-white/30 text-sm font-bold mb-5">No profiles found in this category yet</p>
+        <a
+          href="/"
+          className="inline-block px-6 py-2.5 rounded-full bg-velvet-500/10 text-velvet-400 font-bold text-xs uppercase tracking-widest hover:bg-velvet-500/20 transition-all border border-velvet-500/20"
+        >
           Browse all profiles
         </a>
-      </section>
+      </div>
     )
   }
 
   return (
-    <section className="max-w-5xl mx-auto px-4">
+    <>
+      {/* Results count */}
+      <div className="flex items-center gap-3 mb-5">
+        <span className="text-xs font-black text-white/50 uppercase tracking-[0.2em]">
+          {fmtNum(total)} results
+        </span>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {profiles.map((p: any, i: number) => (
           <ResultRow key={p.id} rank={i + 1} {...p} />
@@ -52,16 +67,34 @@ export default function FilterPageClient({ filterSlug, searchParams, initialProf
       </div>
 
       {profiles.length < total && (
-        <div className="flex justify-center py-8">
+        <div className="flex justify-center mt-10">
           <button
             onClick={loadMore}
             disabled={loading}
-            className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white/70 rounded-xl transition disabled:opacity-50"
+            className="group relative px-10 py-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-xs font-black uppercase tracking-[0.2em] text-white/40 hover:text-white hover:bg-white/[0.06] hover:border-white/[0.2] transition-all overflow-hidden disabled:opacity-50"
           >
-            {loading ? 'Loading...' : `Load more (${profiles.length} of ${total})`}
+            {loading ? (
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 border-2 border-velvet-400/30 border-t-velvet-400 rounded-full animate-spin" />
+                Loading...
+              </div>
+            ) : (
+              <>
+                <div className="relative z-10 flex items-center gap-3">
+                  Load more <span className="text-velvet-400">{fmtNum(total - profiles.length)}</span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-velvet-500/0 via-velvet-500/5 to-velvet-500/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              </>
+            )}
           </button>
         </div>
       )}
-    </section>
+
+      {loading && profiles.length > 0 && (
+        <div className="flex justify-center mt-8">
+          <div className="w-6 h-6 border-2 border-velvet-400/30 border-t-velvet-400 rounded-full animate-spin" />
+        </div>
+      )}
+    </>
   )
 }

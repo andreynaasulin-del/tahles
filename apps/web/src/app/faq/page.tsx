@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { CITIES, SITE_URL } from '@/lib/cities'
+import { CITIES, FILTERS, SITE_URL } from '@/lib/cities'
+import { SubpageHeader } from '@/components/layout/SubpageHeader'
 
 export const metadata: Metadata = {
   title: 'FAQ — Frequently Asked Questions | Tahles',
@@ -94,64 +95,88 @@ export default function FaqPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       <div className="min-h-screen bg-[#0a0a0a] text-white">
-        {/* Header */}
-        <header className="sticky top-0 z-50 glass border-b border-white/5 px-4 py-3">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <a href="/" className="text-xl font-bold tracking-tight">
-              <span className="text-[#c8a97e]">Tahles</span>
-            </a>
-            <nav className="flex gap-3 text-sm text-white/50">
-              <a href="/" className="hover:text-white transition">Home</a>
-            </nav>
-          </div>
-        </header>
+        <SubpageHeader
+          breadcrumbs={[
+            { label: 'Home', href: '/' },
+            { label: 'FAQ' },
+          ]}
+        />
 
-        {/* Breadcrumbs */}
-        <nav className="max-w-3xl mx-auto px-4 py-3 text-sm text-white/40">
-          <a href="/" className="hover:text-white/70 transition">Home</a>
-          <span className="mx-2">/</span>
-          <span className="text-white/70">FAQ</span>
-        </nav>
+        <main className="max-w-[1100px] mx-auto px-4 sm:px-6 pb-20">
+          {/* Hero */}
+          <section className="mt-4 mb-6 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
+            <div className="px-5 py-4">
+              <h1 className="text-lg font-black text-velvet-300">Frequently Asked Questions</h1>
+              <p className="text-sm text-white/50 mt-1">Everything you need to know about Tahles</p>
+            </div>
+          </section>
 
-        {/* Title */}
-        <section className="max-w-3xl mx-auto px-4 pt-4 pb-8">
-          <h1 className="text-3xl font-bold mb-2">Frequently Asked Questions</h1>
-          <p className="text-white/50">Everything you need to know about Tahles</p>
-        </section>
-
-        {/* FAQ Items */}
-        <section className="max-w-3xl mx-auto px-4 pb-12 space-y-6">
-          {FAQ_ITEMS.map((item, i) => (
-            <details key={i} className="group bg-white/[0.03] rounded-xl border border-white/5 overflow-hidden" open={i === 0}>
-              <summary className="px-6 py-4 cursor-pointer text-lg font-medium hover:bg-white/[0.02] transition list-none flex justify-between items-center">
-                <span>{item.q.en}</span>
-                <span className="text-white/30 group-open:rotate-180 transition-transform">&#9660;</span>
-              </summary>
-              <div className="px-6 pb-5 space-y-4">
-                <p className="text-white/60 leading-relaxed">{item.a.en}</p>
-                <p className="text-white/40 leading-relaxed" dir="rtl">{item.a.he}</p>
-                <p className="text-white/40 leading-relaxed">{item.a.ru}</p>
-              </div>
-            </details>
-          ))}
-        </section>
-
-        {/* City Links */}
-        <section className="max-w-3xl mx-auto px-4 pb-12 border-t border-white/5 pt-8">
-          <h2 className="text-xl font-semibold mb-4 text-white/70">Browse by city</h2>
-          <div className="flex flex-wrap gap-2">
-            {CITIES.map(c => (
-              <a key={c.slug} href={`/${c.slug}`}
-                className="px-4 py-2 rounded-full bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition text-sm">
-                {c.nameEn}
-              </a>
+          {/* FAQ Items */}
+          <section className="space-y-3">
+            {FAQ_ITEMS.map((item, i) => (
+              <details
+                key={i}
+                className="group rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden"
+                open={i === 0}
+              >
+                <summary className="px-5 py-4 cursor-pointer text-sm font-bold hover:bg-white/[0.02] transition list-none flex justify-between items-center">
+                  <span className="text-white/80">{item.q.en}</span>
+                  <span className="text-white/30 group-open:rotate-180 transition-transform text-xs ml-4">&#9660;</span>
+                </summary>
+                <div className="px-5 pb-5 space-y-3 border-t border-white/[0.04] pt-3">
+                  <p className="text-xs text-white/50 leading-relaxed">{item.a.en}</p>
+                  <p className="text-xs text-white/35 leading-relaxed" dir="rtl">{item.a.he}</p>
+                  <p className="text-xs text-white/35 leading-relaxed">{item.a.ru}</p>
+                </div>
+              </details>
             ))}
-          </div>
-        </section>
+          </section>
+
+          {/* Category nav */}
+          <section className="mt-10">
+            <h2 className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-3">Browse by category</h2>
+            <div className="flex flex-wrap gap-2">
+              {FILTERS.map(f => (
+                <a
+                  key={f.slug}
+                  href={`/escorts/${f.slug}`}
+                  className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs"
+                >
+                  {f.nameEn}
+                </a>
+              ))}
+            </div>
+          </section>
+
+          {/* City Links */}
+          <section className="mt-6">
+            <h2 className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-3">Browse by city</h2>
+            <div className="flex flex-wrap gap-2">
+              {CITIES.map(c => (
+                <a
+                  key={c.slug}
+                  href={`/${c.slug}`}
+                  className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs"
+                >
+                  {c.nameEn}
+                </a>
+              ))}
+            </div>
+          </section>
+        </main>
 
         {/* Footer */}
-        <footer className="border-t border-white/5 py-8 text-center text-white/30 text-sm">
-          <p>&copy; {new Date().getFullYear()} Tahles — Premium Escort Directory Israel</p>
+        <footer className="border-t border-white/[0.04] mt-12 pt-10 pb-8 px-4">
+          <div className="max-w-[1100px] mx-auto space-y-6">
+            <div className="flex flex-wrap gap-2 justify-center">
+              <a href="/escorts/vip" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">VIP</a>
+              <a href="/escorts/verified" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">Verified</a>
+              <a href="/escorts/new" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">New</a>
+            </div>
+            <div className="text-center text-[10px] text-white/15">
+              &copy; {new Date().getFullYear()} Tahles — Premium Escort Directory Israel
+            </div>
+          </div>
         </footer>
       </div>
     </>

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
-import { getCityBySlug, CITIES, SITE_URL } from '@/lib/cities'
+import { getCityBySlug, CITIES, FILTERS, SITE_URL } from '@/lib/cities'
+import { SubpageHeader } from '@/components/layout/SubpageHeader'
 import CityPageClient from './CityPageClient'
 
 export default async function CityPage({ params }: { params: { city: string } }) {
@@ -57,90 +58,122 @@ export default async function CityPage({ params }: { params: { city: string } })
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
 
       <div className="min-h-screen bg-[#0a0a0a] text-white">
-        {/* Header */}
-        <header className="sticky top-0 z-50 glass border-b border-white/5 px-4 py-3">
-          <div className="max-w-5xl mx-auto flex items-center justify-between">
-            <a href="/" className="text-xl font-bold tracking-tight">
-              <span className="text-[#c8a97e]">Tahles</span>
-            </a>
-            <nav className="flex gap-3 text-sm text-white/50">
-              <a href="/" className="hover:text-white transition">Home</a>
-            </nav>
-          </div>
-        </header>
-
-        {/* Breadcrumbs */}
-        <nav className="max-w-5xl mx-auto px-4 py-3 text-sm text-white/40">
-          <a href="/" className="hover:text-white/70 transition">Home</a>
-          <span className="mx-2">/</span>
-          <span className="text-white/70">{city.nameEn}</span>
-        </nav>
-
-        {/* Hero */}
-        <section className="max-w-5xl mx-auto px-4 pt-4 pb-8">
-          <h1 className="text-3xl font-bold mb-2">
-            Escort in {city.nameEn} <span className="text-white/40 text-xl">({city.nameHe})</span>
-          </h1>
-          <p className="text-white/50 text-lg">
-            {total} verified profiles in {city.nameEn}. Real photos, reviews & ratings. Updated daily.
-          </p>
-        </section>
-
-        {/* Profiles Grid */}
-        <CityPageClient
-          citySlug={city.slug}
-          cityNameEn={city.nameEn}
-          initialProfiles={profiles}
-          initialTotal={total}
+        <SubpageHeader
+          count={total}
+          breadcrumbs={[
+            { label: 'Home', href: '/' },
+            { label: city.nameEn },
+          ]}
         />
 
-        {/* SEO Text Block */}
-        <section className="max-w-5xl mx-auto px-4 py-12 border-t border-white/5">
-          <div className="prose prose-invert prose-sm max-w-none">
-            <h2 className="text-xl font-semibold mb-4">
-              {city.seo.titleHe}
-            </h2>
-            <p className="text-white/50 leading-relaxed mb-4" dir="rtl">
+        <main className="max-w-[1100px] mx-auto px-4 sm:px-6 pb-20">
+          {/* Hero */}
+          <section className="mt-4 mb-4 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
+            <div className="px-5 py-4">
+              <h1 className="text-lg font-black text-velvet-300">
+                Escort in {city.nameEn} <span className="text-white/30 text-base">({city.nameHe})</span>
+              </h1>
+              <p className="text-sm text-white/50 mt-1">
+                {total} verified profiles in {city.nameEn}. Real photos, reviews &amp; ratings. Updated daily.
+              </p>
+            </div>
+          </section>
+
+          {/* Category Filter Nav */}
+          <section className="mb-2">
+            <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">Category</div>
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              {FILTERS.map((f) => (
+                <a
+                  key={f.slug}
+                  href={`/escorts/${f.slug}`}
+                  className="shrink-0 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]"
+                >
+                  {f.nameEn}
+                </a>
+              ))}
+            </div>
+          </section>
+
+          {/* City Filter Nav */}
+          <section className="mb-4">
+            <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">City</div>
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              <a
+                href="/"
+                className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]"
+              >
+                All Cities
+              </a>
+              {CITIES.map((c) => (
+                <a
+                  key={c.slug}
+                  href={`/${c.slug}`}
+                  className={`shrink-0 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap ${
+                    c.slug === city.slug
+                      ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300'
+                      : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'
+                  }`}
+                >
+                  {c.nameEn}
+                </a>
+              ))}
+            </div>
+          </section>
+
+          {/* Profiles Grid */}
+          <CityPageClient
+            citySlug={city.slug}
+            cityNameEn={city.nameEn}
+            initialProfiles={profiles}
+            initialTotal={total}
+          />
+
+          {/* SEO Text Block */}
+          <section className="mt-10 p-6 rounded-2xl bg-gradient-to-br from-velvet-500/[0.06] to-transparent border border-velvet-500/[0.12]">
+            <h2 className="text-sm font-black text-velvet-300 mb-3">{city.seo.titleHe}</h2>
+            <p className="text-xs text-white/40 leading-relaxed mb-4" dir="rtl">
               {city.seo.descHe}
               {' '}Tahles הוא מאגר המודעות הגדול ביותר בישראל עם פרופילים מאומתים, תמונות אמיתיות, ביקורות ודירוגים.
               כל הפרופילים מאומתים ומתעדכנים יומיומית. שירותי ליווי ב{city.nameHe} כוללים ליווי לבית, ליווי למלון ועוד.
             </p>
-
-            <h2 className="text-xl font-semibold mb-4 mt-8">
-              {city.seo.titleEn}
-            </h2>
-            <p className="text-white/50 leading-relaxed mb-4">
+            <h3 className="text-sm font-black text-velvet-300 mb-3">{city.seo.titleEn}</h3>
+            <p className="text-xs text-white/40 leading-relaxed">
               {city.seo.descEn}
               {' '}Tahles is Israel&apos;s largest escort directory with verified profiles, real photos, reviews and ratings.
               All profiles are verified and updated daily. Escort services in {city.nameEn} include incall, outcall and hotel visits.
             </p>
-          </div>
-        </section>
+          </section>
 
-        {/* Internal Links to Other Cities */}
-        <section className="max-w-5xl mx-auto px-4 pb-12">
-          <h3 className="text-lg font-semibold mb-4 text-white/70">Browse other cities</h3>
-          <div className="flex flex-wrap gap-2">
-            {otherCities.map(c => (
-              <a
-                key={c.slug}
-                href={`/${c.slug}`}
-                className="px-4 py-2 rounded-full bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition text-sm"
-              >
-                {c.nameEn}
-              </a>
-            ))}
-          </div>
-        </section>
+          {/* Browse Other Cities */}
+          <section className="mt-8">
+            <h3 className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-3">Browse other cities</h3>
+            <div className="flex flex-wrap gap-2">
+              {otherCities.map(c => (
+                <a
+                  key={c.slug}
+                  href={`/${c.slug}`}
+                  className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs"
+                >
+                  {c.nameEn}
+                </a>
+              ))}
+            </div>
+          </section>
+        </main>
 
         {/* Footer */}
-        <footer className="border-t border-white/5 py-8 text-center text-white/30 text-sm">
-          <p>&copy; {new Date().getFullYear()} Tahles — Premium Escort Directory Israel</p>
-          <div className="flex justify-center gap-4 mt-3">
-            <a href="/faq" className="hover:text-white/60 transition">FAQ</a>
-            <a href="/escorts/vip" className="hover:text-white/60 transition">VIP</a>
-            <a href="/escorts/verified" className="hover:text-white/60 transition">Verified</a>
-            <a href="/escorts/new" className="hover:text-white/60 transition">New</a>
+        <footer className="border-t border-white/[0.04] mt-12 pt-10 pb-8 px-4">
+          <div className="max-w-[1100px] mx-auto space-y-6">
+            <div className="flex flex-wrap gap-2 justify-center">
+              <a href="/faq" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">FAQ</a>
+              <a href="/escorts/vip" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">VIP</a>
+              <a href="/escorts/verified" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">Verified</a>
+              <a href="/escorts/new" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">New</a>
+            </div>
+            <div className="text-center text-[10px] text-white/15">
+              &copy; {new Date().getFullYear()} Tahles — Premium Escort Directory Israel
+            </div>
           </div>
         </footer>
       </div>
