@@ -111,7 +111,6 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${heebo.variable} font-sans antialiased`}>
         <I18nProvider>{children}</I18nProvider>
-        <p style={{ fontSize: '10px', color: '#333', textAlign: 'center', padding: '4px' }}>verif12</p>
       </body>
     </html>
   )
