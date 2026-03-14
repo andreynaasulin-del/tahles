@@ -36,6 +36,7 @@ interface ResultRowProps {
   physical_params?: Record<string, string>
   languages?: string[]
   category?: string | null
+  priority?: boolean
 }
 
 /* ── Param key → translation key mapping ─────────────── */
@@ -281,9 +282,9 @@ function ContactPopup({
 
 /* ── Main Card ────────────────────────────────────────── */
 export const ResultRow = memo(function ResultRow({
-  nickname, age, price_min, city, photos = [], videos = [], address,
+  id, nickname, age, price_min, city, photos = [], videos = [], address,
   online_status, whatsapp, phone, telegram, service_type,
-  services, price_table, physical_params, languages, category
+  services, price_table, physical_params, languages, category, priority
 }: ResultRowProps) {
   const { t, locale } = useTranslation()
 
@@ -456,8 +457,9 @@ export const ResultRow = memo(function ResultRow({
               ref={mediaRef}
               src={currentUrl}
               alt={nickname}
-              loading="lazy"
-              decoding="async"
+              loading={priority ? 'eager' : 'lazy'}
+              decoding={priority ? 'sync' : 'async'}
+              fetchPriority={priority ? 'high' : undefined}
               referrerPolicy="no-referrer"
               className={`w-full h-full object-cover will-change-transform transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               draggable={false}
@@ -471,12 +473,17 @@ export const ResultRow = memo(function ResultRow({
           </div>
         )}
 
-        {/* Desktop click zones */}
+        {/* Desktop click zones + center opens profile */}
         {validIndices.length > 1 && (
           <>
-            <button onClick={(e) => { e.stopPropagation(); goPrev() }} className="absolute left-0 top-0 w-1/3 h-full opacity-0 cursor-pointer z-10" aria-label="Previous" />
-            <button onClick={(e) => { e.stopPropagation(); goNext() }} className="absolute right-0 top-0 w-1/3 h-full opacity-0 cursor-pointer z-10" aria-label="Next" />
+            <button onClick={(e) => { e.stopPropagation(); goPrev() }} className="absolute left-0 top-0 w-1/4 h-full opacity-0 cursor-pointer z-10" aria-label="Previous" />
+            <a href={`/ad/${id}`} className="absolute left-1/4 top-0 w-1/2 h-full opacity-0 cursor-pointer z-10" aria-label="View profile" />
+            <button onClick={(e) => { e.stopPropagation(); goNext() }} className="absolute right-0 top-0 w-1/4 h-full opacity-0 cursor-pointer z-10" aria-label="Next" />
           </>
+        )}
+        {/* Single media — center opens profile */}
+        {validIndices.length <= 1 && !isInfoSlide && (
+          <a href={`/ad/${id}`} className="absolute inset-0 opacity-0 cursor-pointer z-10" aria-label="View profile" />
         )}
 
         {/* Progress bar segments — cleaner than dots */}

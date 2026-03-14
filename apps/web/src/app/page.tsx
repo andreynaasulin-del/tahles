@@ -645,7 +645,7 @@ export default function HomePage() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {(hasNonHot ? ads.slice(0, hotEndIdx) : ads).map((ad, i) => (
-                    <ResultRow key={ad.id} rank={(meta.page - 1) * DEFAULT_PAGE_SIZE + i + 1} {...ad} />
+                    <ResultRow key={ad.id} rank={(meta.page - 1) * DEFAULT_PAGE_SIZE + i + 1} priority={meta.page === 1 && i < 4} {...ad} />
                   ))}
                 </div>
 

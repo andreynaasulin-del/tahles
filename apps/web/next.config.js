@@ -24,6 +24,20 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // Deleted filter pages → homepage
+      { source: '/escorts/vip', destination: '/', permanent: true },
+      { source: '/escorts/verified', destination: '/', permanent: true },
+      { source: '/escorts/new', destination: '/', permanent: true },
+      { source: '/escorts/russian', destination: '/', permanent: true },
+      { source: '/escorts/massage', destination: '/', permanent: true },
+      // Deleted guide pages → homepage
+      { source: '/guide/:slug', destination: '/', permanent: true },
+      // Deleted city×filter cross-pages → city page
+      { source: '/:city(tel-aviv|haifa|jerusalem|eilat|netanya|bat-yam|beer-sheva|ashdod|rishon-lezion|herzliya|hadera)/:filter', destination: '/:city', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {

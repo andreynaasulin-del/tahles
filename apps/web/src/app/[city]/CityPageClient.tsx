@@ -61,7 +61,7 @@ export default function CityPageClient({ citySlug, cityNameEn, initialProfiles, 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {profiles.map((p: any, i: number) => (
-          <ResultRow key={p.id} rank={i + 1} {...p} />
+          <ResultRow key={p.id} rank={i + 1} priority={i < 4} {...p} />
         ))}
       </div>
 
