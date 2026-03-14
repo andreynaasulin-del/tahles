@@ -86,7 +86,7 @@ export default async function CityPage({ params }: { params: { city: string } })
               {FILTERS.map((f) => (
                 <a
                   key={f.slug}
-                  href={`/${city.slug}/${f.slug}`}
+                  href={`/escorts/${f.slug}`}
                   className="shrink-0 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]"
                 >
                   {f.nameEn}

@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { MetadataRoute } from 'next'
 import { CITIES, FILTERS } from '@/lib/cities'
-import { SEO_PAGES } from '@/lib/seo-pages'
 
 const SITE_URL = 'https://tahles.top'
 
@@ -35,35 +34,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   }
 
-  // Category/filter pages (18 pages)
+  // Category/filter pages (6 pages)
   for (const filter of FILTERS) {
     entries.push({
       url: `${SITE_URL}/escorts/${filter.slug}`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.7,
-    })
-  }
-
-  // City × Filter cross-pages (198 pages)
-  for (const city of CITIES) {
-    for (const filter of FILTERS) {
-      entries.push({
-        url: `${SITE_URL}/${city.slug}/${filter.slug}`,
-        lastModified: now,
-        changeFrequency: 'weekly',
-        priority: 0.6,
-      })
-    }
-  }
-
-  // SEO/Marketing guide pages (40+ pages)
-  for (const page of SEO_PAGES) {
-    entries.push({
-      url: `${SITE_URL}/guide/${page.slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
     })
   }
 

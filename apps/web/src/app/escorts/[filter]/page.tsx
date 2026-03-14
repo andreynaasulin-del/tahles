@@ -90,14 +90,14 @@ export default async function FilterPage({ params }: { params: { filter: string 
             </div>
           </section>
 
-          {/* City Filter Nav — links to city×filter cross-pages */}
+          {/* City Filter Nav */}
           <section className="mb-4">
             <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">City</div>
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {CITIES.map((c) => (
                 <a
                   key={c.slug}
-                  href={`/${c.slug}/${filter.slug}`}
+                  href={`/${c.slug}`}
                   className="shrink-0 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]"
                 >
                   {c.nameEn}
