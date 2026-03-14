@@ -10,28 +10,18 @@ export function createBot(token: string) {
   bot.command('start', async (ctx) => {
     const count = await getProfileCount()
     const kb = new InlineKeyboard()
-      // Row 1: Top categories
-      .url('👑 VIP בנות', `${SITE}/escorts/vip`)
-      .url('✅ מאומתות', `${SITE}/escorts/verified`)
-      .url('💋 חדשות', `${SITE}/escorts/new`)
+      // Row 1: Big button — all ads
+      .url(`🔥 כל המודעות (${count})`, SITE)
       .row()
-      // Row 2: Origin
+      // Row 2: Origin + Individual (small buttons)
       .url('🇪🇺 אירופאיות', `${SITE}/escorts/european`)
-      .url('🇷🇺 רוסיות', `${SITE}/escorts/russian`)
-      .url('💆‍♀️ מעסות', `${SITE}/escorts/massage`)
+      .url('💃 לטיניות', `${SITE}/escorts/latina`)
       .row()
-      // Row 3: Top cities
-      .url('🌃 תל אביב', `${SITE}/tel-aviv`)
-      .url('🏖 אילת', `${SITE}/eilat`)
-      .url('🕌 ירושלים', `${SITE}/jerusalem`)
+      .url('🌸 אסיאתיות', `${SITE}/escorts/asian`)
+      .url('👩 העצמאיות', `${SITE}/escorts/independent`)
       .row()
-      // Row 4: More cities
-      .url('⚓ חיפה', `${SITE}/haifa`)
-      .url('🏙 נתניה', `${SITE}/netanya`)
-      .url('🌊 בת ים', `${SITE}/bat-yam`)
-      .row()
-      // Row 5: All profiles
-      .url(`🔥 כל ${count} הפרופילים באתר`, SITE)
+      // Row 4: Big button — support
+      .url('📞 פנייה לשירות לקוחות', 'https://t.me/TahlesSupport')
 
     await ctx.reply(
       `היי! זה הבוט של פרויקט *Tahles* 💥\n\n` +
