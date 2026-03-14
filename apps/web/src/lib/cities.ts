@@ -237,32 +237,6 @@ export const FILTERS: FilterConfig[] = [
       descHe: 'גלה נערות ליווי אירופאיות בישראל. פרופילים מאומתים עם תמונות אמיתיות.',
     },
   },
-  {
-    slug: 'russian',
-    nameEn: 'Russian Escorts',
-    nameHe: 'נערות ליווי רוסיות',
-    nameRu: 'Русские девушки',
-    searchParams: { ethnicity: 'eastern_european' },
-    seo: {
-      titleEn: 'Russian Escort in Israel — Verified Profiles',
-      titleHe: 'נערות ליווי רוסיות בישראל — פרופילים מאומתים',
-      descEn: 'Browse Russian and Eastern European escort profiles in Israel. Verified with real photos. Updated daily on Tahles.',
-      descHe: 'גלה נערות ליווי רוסיות ומזרח אירופאיות בישראל. פרופילים מאומתים.',
-    },
-  },
-  {
-    slug: 'massage',
-    nameEn: 'Massage Services',
-    nameHe: 'שירותי עיסוי',
-    nameRu: 'Массаж',
-    searchParams: { q: 'massage' },
-    seo: {
-      titleEn: 'Massage Services Israel — Professional & Relaxing',
-      titleHe: 'שירותי עיסוי בישראל — מקצועי ומרגיע',
-      descEn: 'Find professional massage services in Israel. Verified providers, real photos. Browse on Tahles — updated daily.',
-      descHe: 'מצא שירותי עיסוי מקצועיים בישראל. ספקים מאומתים עם תמונות אמיתיות.',
-    },
-  },
 ]
 
 export const FILTER_SLUGS = FILTERS.map(f => f.slug)
