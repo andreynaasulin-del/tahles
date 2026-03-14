@@ -10,26 +10,48 @@ export function createBot(token: string) {
   bot.command('start', async (ctx) => {
     const count = await getProfileCount()
     const kb = new InlineKeyboard()
-      .text('🔍 חיפוש', 'search_prompt')
-      .text('🏙 ערים', 'cities')
+      .url('🔥 בנות חמות עכשיו', `${SITE}/escorts/vip`)
+      .url('💋 חדשות באתר', `${SITE}/escorts/new`)
       .row()
-      .webApp('🌐 פתח את Tahles', SITE)
+      .url('🌃 תל אביב', `${SITE}/tel-aviv`)
+      .url('🏖 אילת', `${SITE}/eilat`)
+      .row()
+      .url('💆‍♀️ מעסות מפנקות', `${SITE}/escorts/massage`)
+      .url('👩‍❤️‍👩 ליווי פרטי', `${SITE}/escorts/independent`)
+      .row()
+      .url('🏠 Outcall — אליך', `${SITE}/escorts/outcall`)
+      .url('🏨 Incall — אליה', `${SITE}/escorts/incall`)
+      .row()
+      .url(`👑 כל ${count}+ הפרופילים`, SITE)
 
     await ctx.reply(
-      `👋 ברוך הבא ל-*Tahles Bot*!\n\n` +
-      `🔥 *${count}+* פרופילים מאומתים של נערות ליווי, חשפניות, מעסות ועוד\n` +
-      `✅ מספרי וואטסאפ מאומתים 100%\n\n` +
-      `השתמש בכפתורים למטה או שלח שם / עיר לחיפוש:`,
+      `היי! זה הבוט של פרויקט *Tahles* 💥\n\n` +
+      `הדרך הכי מהירה, דיסקרטית ואמינה לפינוק אמיתי וכיף מטורף עם בנות מהממות בלי בלגן ובלי רעש מיותר! 🔥\n\n` +
+      `✅ *${count}+* פרופילים מאומתים\n` +
+      `✅ תמונות אמיתיות 100%\n` +
+      `✅ WhatsApp ישיר — בלי מתווכים\n\n` +
+      `👇 *בחר מה בא לך עכשיו:*`,
       { parse_mode: 'Markdown', reply_markup: kb }
     )
   })
 
   // ── /cities ──
   bot.command('cities', handleCities)
-  bot.callbackQuery('cities', async (ctx) => {
-    await ctx.answerCallbackQuery()
-    await handleCities(ctx)
-  })
+
+  // City slug mapping for URL buttons
+  const CITY_SLUGS: Record<string, string> = {
+    'תל אביב': 'tel-aviv', 'Tel Aviv': 'tel-aviv',
+    'חיפה': 'haifa', 'Haifa': 'haifa',
+    'ירושלים': 'jerusalem', 'Jerusalem': 'jerusalem',
+    'אילת': 'eilat', 'Eilat': 'eilat',
+    'נתניה': 'netanya', 'Netanya': 'netanya',
+    'בת ים': 'bat-yam', 'Bat Yam': 'bat-yam',
+    'באר שבע': 'beer-sheva', 'Beer Sheva': 'beer-sheva',
+    'אשדוד': 'ashdod', 'Ashdod': 'ashdod',
+    'ראשון לציון': 'rishon-lezion', 'Rishon LeZion': 'rishon-lezion',
+    'הרצליה': 'herzliya', 'Herzliya': 'herzliya',
+    'חדרה': 'hadera', 'Hadera': 'hadera',
+  }
 
   async function handleCities(ctx: any) {
     const cities = await getCitiesWithCounts()
@@ -37,14 +59,27 @@ export function createBot(token: string) {
 
     const kb = new InlineKeyboard()
     for (let i = 0; i < cities.length; i++) {
-      kb.text(`${cities[i].city} (${cities[i].count})`, `city:${cities[i].city}`)
+      const slug = CITY_SLUGS[cities[i].city] || cities[i].city.toLowerCase().replace(/\s+/g, '-')
+      kb.url(`${cities[i].city} (${cities[i].count})`, `${SITE}/${slug}`)
       if (i % 2 === 1) kb.row()
     }
 
-    await ctx.reply('🏙 *בחר עיר:*', { parse_mode: 'Markdown', reply_markup: kb })
+    await ctx.reply('🏙 *בחר עיר — פתח ישר באתר:*', { parse_mode: 'Markdown', reply_markup: kb })
   }
 
-  // ── City callback ──
+  // ── Search prompt callback (legacy, still handle) ──
+  bot.callbackQuery('search_prompt', async (ctx) => {
+    await ctx.answerCallbackQuery()
+    await ctx.reply('🔍 שלח שם, עיר או קטגוריה לחיפוש:')
+  })
+
+  // ── Cities callback (legacy, still handle) ──
+  bot.callbackQuery('cities', async (ctx) => {
+    await ctx.answerCallbackQuery()
+    await handleCities(ctx)
+  })
+
+  // ── City callback (legacy, still handle) ──
   bot.callbackQuery(/^city:(.+)$/, async (ctx) => {
     await ctx.answerCallbackQuery()
     const city = ctx.match[1]
@@ -55,12 +90,6 @@ export function createBot(token: string) {
     for (const p of profiles) {
       await sendProfileCard(ctx, p)
     }
-  })
-
-  // ── Search prompt callback ──
-  bot.callbackQuery('search_prompt', async (ctx) => {
-    await ctx.answerCallbackQuery()
-    await ctx.reply('🔍 שלח שם, עיר או קטגוריה לחיפוש:')
   })
 
   // ── /search command ──
