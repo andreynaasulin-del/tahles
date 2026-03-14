@@ -4,6 +4,9 @@
   "scripts": {
     "dev:web": "pnpm --filter @vm/web dev",
     "dev:bot": "pnpm --filter @vm/bot dev",
+    "start:bot": "pnpm --filter @vm/bot start",
+    "parse": "pnpm --filter @vm/bot parse",
+    "outreach": "pnpm --filter @vm/bot outreach",
     "build": "pnpm --filter @vm/web build",
     "db:types": "supabase gen types typescript --local > packages/db/src/types.ts",
     "db:push": "supabase db push",

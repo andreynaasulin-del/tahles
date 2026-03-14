@@ -1,0 +1,7 @@
+.env
+data/session.txt
+data/parsed_users.json
+data/sent_users.json
+data/posted_ids.json
+dist/
+node_modules/
