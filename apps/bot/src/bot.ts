@@ -21,7 +21,7 @@ export function createBot(token: string) {
       .url('👩 העצמאיות', `${SITE}/escorts/independent`)
       .row()
       // Row 4: Big button — support
-      .url('📞 פנייה לשירות לקוחות', 'https://t.me/TahlesSupport')
+      .url('📞 פנייה לשירות לקוחות', 'https://t.me/tahles_support')
 
     await ctx.reply(
       `היי! זה הבוט של פרויקט *Tahles* 💥\n\n` +
