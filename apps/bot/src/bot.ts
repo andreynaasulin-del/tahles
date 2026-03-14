@@ -10,24 +10,33 @@ export function createBot(token: string) {
   bot.command('start', async (ctx) => {
     const count = await getProfileCount()
     const kb = new InlineKeyboard()
-      .url('🔥 בנות חמות עכשיו', `${SITE}/escorts/vip`)
-      .url('💋 חדשות באתר', `${SITE}/escorts/new`)
+      // Row 1: Top categories
+      .url('👑 VIP בנות', `${SITE}/escorts/vip`)
+      .url('✅ מאומתות', `${SITE}/escorts/verified`)
+      .url('💋 חדשות', `${SITE}/escorts/new`)
       .row()
+      // Row 2: Origin
+      .url('🇪🇺 אירופאיות', `${SITE}/escorts/european`)
+      .url('🇷🇺 רוסיות', `${SITE}/escorts/russian`)
+      .url('💆‍♀️ מעסות', `${SITE}/escorts/massage`)
+      .row()
+      // Row 3: Top cities
       .url('🌃 תל אביב', `${SITE}/tel-aviv`)
       .url('🏖 אילת', `${SITE}/eilat`)
+      .url('🕌 ירושלים', `${SITE}/jerusalem`)
       .row()
-      .url('💆‍♀️ מעסות מפנקות', `${SITE}/escorts/massage`)
-      .url('👩‍❤️‍👩 ליווי פרטי', `${SITE}/escorts/independent`)
+      // Row 4: More cities
+      .url('⚓ חיפה', `${SITE}/haifa`)
+      .url('🏙 נתניה', `${SITE}/netanya`)
+      .url('🌊 בת ים', `${SITE}/bat-yam`)
       .row()
-      .url('🏠 Outcall — אליך', `${SITE}/escorts/outcall`)
-      .url('🏨 Incall — אליה', `${SITE}/escorts/incall`)
-      .row()
-      .url(`👑 כל ${count}+ הפרופילים`, SITE)
+      // Row 5: All profiles
+      .url(`🔥 כל ${count} הפרופילים באתר`, SITE)
 
     await ctx.reply(
       `היי! זה הבוט של פרויקט *Tahles* 💥\n\n` +
       `הדרך הכי מהירה, דיסקרטית ואמינה לפינוק אמיתי וכיף מטורף עם בנות מהממות בלי בלגן ובלי רעש מיותר! 🔥\n\n` +
-      `✅ *${count}+* פרופילים מאומתים\n` +
+      `✅ *${count}* פרופילים מאומתים\n` +
       `✅ תמונות אמיתיות 100%\n` +
       `✅ WhatsApp ישיר — בלי מתווכים\n\n` +
       `👇 *בחר מה בא לך עכשיו:*`,
