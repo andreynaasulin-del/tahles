@@ -160,9 +160,10 @@ export default async function FilterPage({ params }: { params: { filter: string 
           <div className="max-w-[1100px] mx-auto space-y-6">
             <div className="flex flex-wrap gap-2 justify-center">
               <a href="/faq" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">FAQ</a>
-              <a href="/escorts/vip" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">VIP</a>
-              <a href="/escorts/verified" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">Verified</a>
-              <a href="/escorts/new" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">New</a>
+              <a href="/escorts/european" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">🇪🇺 European</a>
+              <a href="/escorts/latina" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">💃 Latina</a>
+              <a href="/escorts/asian" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">🌸 Asian</a>
+              <a href="/escorts/independent" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">👩 Independent</a>
             </div>
             <div className="text-center text-[10px] text-white/15">
               &copy; {new Date().getFullYear()} Tahles — Premium Escort Directory Israel

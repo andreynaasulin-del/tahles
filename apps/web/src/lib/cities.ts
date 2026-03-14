@@ -186,48 +186,9 @@ export interface FilterConfig {
 
 export const FILTERS: FilterConfig[] = [
   {
-    slug: 'vip',
-    nameEn: 'VIP Escorts',
-    nameHe: 'ליווי VIP',
-    nameRu: 'VIP эскорт',
-    searchParams: { sheet: 'vip' },
-    seo: {
-      titleEn: 'VIP Escort Israel — Premium Verified Profiles',
-      titleHe: 'שירותי ליווי VIP בישראל — פרופילים פרמיום',
-      descEn: 'Browse VIP escort profiles in Israel. Premium verified companions with real photos and reviews. Updated daily on Tahles.',
-      descHe: 'גלה פרופילים VIP של נערות ליווי בישראל. שירות פרמיום עם תמונות אמיתיות. מתעדכן יומיומית.',
-    },
-  },
-  {
-    slug: 'verified',
-    nameEn: 'Verified Escorts',
-    nameHe: 'ליווי מאומת',
-    nameRu: 'Проверенные',
-    searchParams: { sheet: 'verified' },
-    seo: {
-      titleEn: 'Verified Escort Israel — Real Photos & Reviews',
-      titleHe: 'נערות ליווי מאומתות בישראל — תמונות אמיתיות',
-      descEn: 'Browse verified escort profiles in Israel. Confirmed real photos, identity checked. Safe and trusted directory. Updated daily on Tahles.',
-      descHe: 'גלה פרופילים מאומתים של נערות ליווי בישראל. תמונות ופרופילים מאומתים. מתעדכן יומיומית.',
-    },
-  },
-  {
-    slug: 'new',
-    nameEn: 'New Profiles',
-    nameHe: 'פרופילים חדשים',
-    nameRu: 'Новые анкеты',
-    searchParams: { sort: 'newest' },
-    seo: {
-      titleEn: 'New Escort Profiles in Israel — Just Added',
-      titleHe: 'פרופילים חדשים של נערות ליווי בישראל',
-      descEn: 'Discover the newest escort profiles in Israel. Fresh faces, just added to Tahles. Real photos, verified profiles.',
-      descHe: 'גלה פרופילים חדשים של נערות ליווי בישראל. נוספו לאחרונה עם תמונות אמיתיות.',
-    },
-  },
-  {
     slug: 'european',
-    nameEn: 'European Escorts',
-    nameHe: 'נערות ליווי אירופאיות',
+    nameEn: 'European',
+    nameHe: 'אירופאיות',
     nameRu: 'Европейки',
     searchParams: { ethnicity: 'european' },
     seo: {
@@ -235,6 +196,45 @@ export const FILTERS: FilterConfig[] = [
       titleHe: 'נערות ליווי אירופאיות בישראל — פרופילים מאומתים',
       descEn: 'Browse European escort profiles in Israel. Verified with real photos. Premium companions from Europe. Updated daily on Tahles.',
       descHe: 'גלה נערות ליווי אירופאיות בישראל. פרופילים מאומתים עם תמונות אמיתיות.',
+    },
+  },
+  {
+    slug: 'latina',
+    nameEn: 'Latina',
+    nameHe: 'לטיניות',
+    nameRu: 'Латиноамериканки',
+    searchParams: { ethnicity: 'latina' },
+    seo: {
+      titleEn: 'Latina Escort in Israel — Verified Profiles',
+      titleHe: 'נערות ליווי לטיניות בישראל — פרופילים מאומתים',
+      descEn: 'Browse Latina escort profiles in Israel. Verified with real photos. Updated daily on Tahles.',
+      descHe: 'גלה נערות ליווי לטיניות בישראל. פרופילים מאומתים עם תמונות אמיתיות.',
+    },
+  },
+  {
+    slug: 'asian',
+    nameEn: 'Asian',
+    nameHe: 'אסיאתיות',
+    nameRu: 'Азиатки',
+    searchParams: { ethnicity: 'asian' },
+    seo: {
+      titleEn: 'Asian Escort in Israel — Verified Profiles',
+      titleHe: 'נערות ליווי אסיאתיות בישראל — פרופילים מאומתים',
+      descEn: 'Browse Asian escort profiles in Israel. Verified with real photos. Updated daily on Tahles.',
+      descHe: 'גלה נערות ליווי אסיאתיות בישראל. פרופילים מאומתים עם תמונות אמיתיות.',
+    },
+  },
+  {
+    slug: 'independent',
+    nameEn: 'Independent',
+    nameHe: 'העצמאיות',
+    nameRu: 'Индивидуалки',
+    searchParams: { category: 'individual' },
+    seo: {
+      titleEn: 'Independent Escort in Israel — Verified Profiles',
+      titleHe: 'נערות ליווי עצמאיות בישראל — פרופילים מאומתים',
+      descEn: 'Browse independent escort profiles in Israel. No agencies, direct contact. Verified with real photos on Tahles.',
+      descHe: 'גלה נערות ליווי עצמאיות בישראל. ללא סוכנויות, קשר ישיר. פרופילים מאומתים.',
     },
   },
 ]
