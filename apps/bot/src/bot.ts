@@ -10,17 +10,17 @@ export function createBot(token: string) {
   bot.command('start', async (ctx) => {
     const count = await getProfileCount()
     const kb = new InlineKeyboard()
-      // Row 1: Big button — all ads
-      .url(`🔥 כל המודעות (${count})`, SITE)
+      // Row 1: Big button — all ads (WebApp)
+      .webApp(`🔥 כל המודעות (${count})`, SITE)
       .row()
-      // Row 2: Origin + Individual (small buttons)
-      .url('🇪🇺 אירופאיות', `${SITE}/escorts/european`)
-      .url('💃 לטיניות', `${SITE}/escorts/latina`)
+      // Row 2: Origin + Individual (WebApp)
+      .webApp('🇪🇺 אירופאיות', `${SITE}/escorts/european`)
+      .webApp('💃 לטיניות', `${SITE}/escorts/latina`)
       .row()
-      .url('🌸 אסיאתיות', `${SITE}/escorts/asian`)
-      .url('👩 העצמאיות', `${SITE}/escorts/independent`)
+      .webApp('🌸 אסיאתיות', `${SITE}/escorts/asian`)
+      .webApp('👩 העצמאיות', `${SITE}/escorts/independent`)
       .row()
-      // Row 4: Big button — support
+      // Row 4: Big button — support (regular link to Telegram)
       .url('📞 פנייה לשירות לקוחות', 'https://t.me/tahles_support')
 
     await ctx.reply(
@@ -57,7 +57,7 @@ export function createBot(token: string) {
     const kb = new InlineKeyboard()
     for (let i = 0; i < cities.length; i++) {
       const slug = CITY_SLUGS[cities[i].city] || cities[i].city.toLowerCase().replace(/\s+/g, '-')
-      kb.url(`${cities[i].city} (${cities[i].count})`, `${SITE}/${slug}`)
+      kb.webApp(`${cities[i].city} (${cities[i].count})`, `${SITE}/${slug}`)
       if (i % 2 === 1) kb.row()
     }
 
@@ -161,7 +161,7 @@ function profileButtons(p: Profile): InlineKeyboard {
     const waNum = p.whatsapp.replace(/\D/g, '')
     kb.url('📱 WhatsApp', `https://wa.me/${waNum}`)
   }
-  kb.url('🌐 לאתר', `${SITE}/ad/${p.id}`)
+  kb.webApp('🌐 לאתר', `${SITE}/ad/${p.id}`)
   return kb
 }
 
