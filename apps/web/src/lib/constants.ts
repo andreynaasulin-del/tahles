@@ -33,11 +33,6 @@ export const PRESETS = [
     filter: { gender: 'male', target_audience: ['men'] },
   },
   {
-    id: 'russian',
-    label: 'Russian Girls',
-    filter: { language: ['russian'] },
-  },
-  {
     id: 'latina',
     label: 'Chicas Latinas',
     filter: { language: ['spanish'] },

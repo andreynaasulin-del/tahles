@@ -34,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   }
 
-  // Category/filter pages (6 pages)
+  // Category/filter pages (4 pages)
   for (const filter of FILTERS) {
     entries.push({
       url: `${SITE_URL}/escorts/${filter.slug}`,

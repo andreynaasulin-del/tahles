@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: '%s | Tahles',
   },
   description: 'Israel\'s top escort directory. Browse 65+ verified profiles with real photos, reviews & ratings. Tel Aviv, Haifa, Jerusalem. Safe, discreet, updated daily.',
-  keywords: ['escort Israel', 'escort Tel Aviv', 'escort directory', 'verified escorts', 'premium escorts Israel', 'Tahles', 'escort Haifa', 'escort Jerusalem', 'massage Israel'],
+  keywords: ['escort Israel', 'escort Tel Aviv', 'escort directory', 'verified escorts', 'premium escorts Israel', 'Tahles', 'escort Haifa', 'escort Jerusalem', 'escort Eilat'],
   robots: { index: true, follow: true },
   openGraph: {
     type: 'website',

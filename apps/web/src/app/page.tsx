@@ -737,12 +737,10 @@ export default function HomePage() {
             <h2 className="text-sm font-bold text-white/30 uppercase tracking-widest mb-3">Categories</h2>
             <div className="flex flex-wrap gap-2">
               {[
-                { href: '/escorts/vip', label: 'VIP Escorts' },
-                { href: '/escorts/verified', label: 'Verified' },
-                { href: '/escorts/new', label: 'New Profiles' },
-                { href: '/escorts/european', label: 'European' },
-                { href: '/escorts/russian', label: 'Russian' },
-                { href: '/escorts/massage', label: 'Massage' },
+                { href: '/escorts/european', label: '🇪🇺 European' },
+                { href: '/escorts/latina', label: '💃 Latina' },
+                { href: '/escorts/asian', label: '🌸 Asian' },
+                { href: '/escorts/independent', label: '👩 Independent' },
                 { href: '/faq', label: 'FAQ' },
               ].map(c => (
                 <a key={c.href} href={c.href}
