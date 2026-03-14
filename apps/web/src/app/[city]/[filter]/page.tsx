@@ -1,14 +1,15 @@
 import { notFound } from 'next/navigation'
-import { getCityBySlug, CITIES, FILTERS, SITE_URL } from '@/lib/cities'
+import { getCityBySlug, getFilterBySlug, CITIES, FILTERS, SITE_URL } from '@/lib/cities'
 import { SubpageHeader } from '@/components/layout/SubpageHeader'
-import CityPageClient from './CityPageClient'
+import CrossPageClient from './CrossPageClient'
 
-export default async function CityPage({ params }: { params: { city: string } }) {
+export default async function CityFilterPage({ params }: { params: { city: string; filter: string } }) {
   const city = getCityBySlug(params.city)
-  if (!city) return notFound()
+  const filter = getFilterBySlug(params.filter)
+  if (!city || !filter) return notFound()
 
-  // Fetch profiles for this city from API (server-side)
-  const searchParams = new URLSearchParams({ city: city.nameEn, page: '1' })
+  // Fetch profiles with city + filter combined
+  const searchParams = new URLSearchParams({ ...filter.searchParams, city: city.nameEn, page: '1' })
   let profiles: any[] = []
   let total = 0
 
@@ -23,24 +24,24 @@ export default async function CityPage({ params }: { params: { city: string } })
       total = json.total || 0
     }
   } catch {
-    // Fallback: page renders with 0 profiles
+    // Fallback
   }
 
-  // JSON-LD BreadcrumbList
+  // JSON-LD
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Tahles', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: city.nameEn, item: `${SITE_URL}/${city.slug}` },
+      { '@type': 'ListItem', position: 3, name: filter.nameEn, item: `${SITE_URL}/${city.slug}/${filter.slug}` },
     ],
   }
 
-  // JSON-LD ItemList for profiles
   const itemListLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: `Escort profiles in ${city.nameEn}`,
+    name: `${filter.nameEn} in ${city.nameEn}`,
     numberOfItems: total,
     itemListElement: profiles.slice(0, 10).map((p: any, i: number) => ({
       '@type': 'ListItem',
@@ -51,6 +52,7 @@ export default async function CityPage({ params }: { params: { city: string } })
   }
 
   const otherCities = CITIES.filter(c => c.slug !== city.slug)
+  const otherFilters = FILTERS.filter(f => f.slug !== filter.slug)
 
   return (
     <>
@@ -62,7 +64,8 @@ export default async function CityPage({ params }: { params: { city: string } })
           count={total}
           breadcrumbs={[
             { label: 'Home', href: '/' },
-            { label: city.nameEn },
+            { label: city.nameEn, href: `/${city.slug}` },
+            { label: filter.nameEn },
           ]}
         />
 
@@ -71,23 +74,34 @@ export default async function CityPage({ params }: { params: { city: string } })
           <section className="mt-4 mb-4 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
             <div className="px-5 py-4">
               <h1 className="text-lg font-black text-velvet-300">
-                Escort in {city.nameEn} <span className="text-white/30 text-base">({city.nameHe})</span>
+                {filter.nameEn} in {city.nameEn}{' '}
+                <span className="text-white/30 text-base">({filter.nameHe} ב{city.nameHe})</span>
               </h1>
               <p className="text-sm text-white/50 mt-1">
-                {total} verified profiles in {city.nameEn}. Real photos, reviews &amp; ratings. Updated daily.
+                {total} profiles found. Real photos, reviews &amp; ratings. Updated daily.
               </p>
             </div>
           </section>
 
-          {/* Category Filter Nav — links to city×filter cross-pages */}
+          {/* Category Filter Nav */}
           <section className="mb-2">
             <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">Category</div>
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              <a
+                href={`/${city.slug}`}
+                className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]"
+              >
+                All
+              </a>
               {FILTERS.map((f) => (
                 <a
                   key={f.slug}
                   href={`/${city.slug}/${f.slug}`}
-                  className="shrink-0 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]"
+                  className={`shrink-0 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap ${
+                    f.slug === filter.slug
+                      ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300'
+                      : 'bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]'
+                  }`}
                 >
                   {f.nameEn}
                 </a>
@@ -100,7 +114,7 @@ export default async function CityPage({ params }: { params: { city: string } })
             <div className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-1.5">City</div>
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               <a
-                href="/"
+                href={`/escorts/${filter.slug}`}
                 className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap bg-white/[0.04] border border-white/[0.07] text-white/50 hover:text-white hover:bg-white/[0.08]"
               >
                 All Cities
@@ -108,7 +122,7 @@ export default async function CityPage({ params }: { params: { city: string } })
               {CITIES.map((c) => (
                 <a
                   key={c.slug}
-                  href={`/${c.slug}`}
+                  href={`/${c.slug}/${filter.slug}`}
                   className={`shrink-0 px-3.5 py-2 rounded-xl text-sm font-bold transition-all duration-150 whitespace-nowrap ${
                     c.slug === city.slug
                       ? 'bg-velvet-500/25 border-velvet-500/50 border text-velvet-300'
@@ -122,34 +136,72 @@ export default async function CityPage({ params }: { params: { city: string } })
           </section>
 
           {/* Profiles Grid */}
-          <CityPageClient
-            citySlug={city.slug}
+          <CrossPageClient
             cityNameEn={city.nameEn}
+            searchParams={filter.searchParams}
             initialProfiles={profiles}
             initialTotal={total}
           />
 
           {/* SEO Text Block */}
           <section className="mt-10 p-6 rounded-2xl bg-gradient-to-br from-velvet-500/[0.06] to-transparent border border-velvet-500/[0.12]">
-            <h2 className="text-sm font-black text-velvet-300 mb-3">{city.seo.titleHe}</h2>
+            <h2 className="text-sm font-black text-velvet-300 mb-3">
+              {filter.nameHe} ב{city.nameHe}
+            </h2>
             <p className="text-xs text-white/40 leading-relaxed mb-4" dir="rtl">
-              {city.seo.descHe}
-              {' '}Tahles הוא מאגר המודעות הגדול ביותר בישראל עם פרופילים מאומתים, תמונות אמיתיות, ביקורות ודירוגים.
-              כל הפרופילים מאומתים ומתעדכנים יומיומית. שירותי ליווי ב{city.nameHe} כוללים ליווי לבית, ליווי למלון ועוד.
+              {filter.seo.descHe} Tahles הוא המאגר הגדול ביותר של {filter.nameHe} ב{city.nameHe}.
+              כל הפרופילים מאומתים עם תמונות אמיתיות ומספרי WhatsApp מאומתים. מתעדכן יומיומית.
             </p>
-            <h3 className="text-sm font-black text-velvet-300 mb-3">{city.seo.titleEn}</h3>
+            <h3 className="text-sm font-black text-velvet-300 mb-3">
+              {filter.nameEn} in {city.nameEn}
+            </h3>
             <p className="text-xs text-white/40 leading-relaxed">
-              {city.seo.descEn}
-              {' '}Tahles is Israel&apos;s largest escort directory with verified profiles, real photos, reviews and ratings.
-              All profiles are verified and updated daily. Escort services in {city.nameEn} include incall, outcall and hotel visits.
+              {filter.seo.descEn} Tahles is the largest directory for {filter.nameEn.toLowerCase()} in {city.nameEn}.
+              All profiles are verified with real photos and confirmed WhatsApp numbers. Updated daily.
             </p>
           </section>
 
-          {/* Browse Other Cities */}
+          {/* Browse Other Filters in Same City */}
           <section className="mt-8">
-            <h3 className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-3">Browse other cities</h3>
+            <h3 className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-3">
+              More in {city.nameEn}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {otherFilters.map(f => (
+                <a
+                  key={f.slug}
+                  href={`/${city.slug}/${f.slug}`}
+                  className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs"
+                >
+                  {f.nameEn}
+                </a>
+              ))}
+            </div>
+          </section>
+
+          {/* Browse Same Filter in Other Cities */}
+          <section className="mt-6">
+            <h3 className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-3">
+              {filter.nameEn} in other cities
+            </h3>
             <div className="flex flex-wrap gap-2">
               {otherCities.map(c => (
+                <a
+                  key={c.slug}
+                  href={`/${c.slug}/${filter.slug}`}
+                  className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs"
+                >
+                  {c.nameEn}
+                </a>
+              ))}
+            </div>
+          </section>
+
+          {/* Browse All Cities */}
+          <section className="mt-6">
+            <h3 className="text-xs text-white/50 uppercase tracking-[0.2em] font-black mb-3">All cities</h3>
+            <div className="flex flex-wrap gap-2">
+              {CITIES.map(c => (
                 <a
                   key={c.slug}
                   href={`/${c.slug}`}

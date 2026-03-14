@@ -63,6 +63,7 @@ async function realSearch(
   if (sheet === 'under25')         query = query.lte('age', 25).gt('age', 0)
   if (sheet === '40plus')          query = query.gte('age', 40)
   if (sheet === 'outcall')         query = query.in('service_type', ['outcall', 'both'])
+  if (sheet === 'incall')          query = query.in('service_type', ['incall', 'both'])
 
   // Ethnicity filter via raw_data JSONB
   if (ethnicity) query = query.eq('raw_data->>_ethnicity', ethnicity)
