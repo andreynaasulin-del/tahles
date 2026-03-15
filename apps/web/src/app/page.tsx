@@ -741,6 +741,8 @@ export default function HomePage() {
                 { href: '/escorts/latina', label: '💃 Latina' },
                 { href: '/escorts/asian', label: '🌸 Asian' },
                 { href: '/escorts/independent', label: '👩 Independent' },
+                { href: '/escorts/young', label: '🔥 Young' },
+                { href: '/escorts/vip', label: '👑 VIP' },
                 { href: '/faq', label: 'FAQ' },
               ].map(c => (
                 <a key={c.href} href={c.href}

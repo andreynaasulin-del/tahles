@@ -237,6 +237,32 @@ export const FILTERS: FilterConfig[] = [
       descHe: 'גלה נערות ליווי עצמאיות בישראל. ללא סוכנויות, קשר ישיר. פרופילים מאומתים.',
     },
   },
+  {
+    slug: 'young',
+    nameEn: 'Young',
+    nameHe: 'צעירות',
+    nameRu: 'Молодые',
+    searchParams: { sheet: 'under25' },
+    seo: {
+      titleEn: 'Young Escort in Israel — Under 25, Verified Profiles',
+      titleHe: 'נערות ליווי צעירות בישראל — מתחת ל-25, פרופילים מאומתים',
+      descEn: 'Browse young escort profiles under 25 in Israel. Verified with real photos, WhatsApp contact. Updated daily on Tahles.',
+      descHe: 'גלה נערות ליווי צעירות מתחת לגיל 25 בישראל. פרופילים מאומתים עם תמונות אמיתיות.',
+    },
+  },
+  {
+    slug: 'vip',
+    nameEn: 'VIP',
+    nameHe: 'VIP',
+    nameRu: 'VIP',
+    searchParams: { sheet: 'vip' },
+    seo: {
+      titleEn: 'VIP Escort in Israel — Premium Verified Profiles',
+      titleHe: 'נערות ליווי VIP בישראל — פרופילים מאומתים יוקרתיים',
+      descEn: 'Browse VIP escort profiles in Israel. Premium verified companions with real photos. Exclusive selection on Tahles.',
+      descHe: 'גלה נערות ליווי VIP בישראל. פרופילים מאומתים יוקרתיים עם תמונות אמיתיות.',
+    },
+  },
 ]
 
 export const FILTER_SLUGS = FILTERS.map(f => f.slug)

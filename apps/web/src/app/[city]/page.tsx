@@ -171,6 +171,8 @@ export default async function CityPage({ params }: { params: { city: string } })
               <a href="/escorts/latina" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">💃 Latina</a>
               <a href="/escorts/asian" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">🌸 Asian</a>
               <a href="/escorts/independent" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">👩 Independent</a>
+              <a href="/escorts/young" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">🔥 Young</a>
+              <a href="/escorts/vip" className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">👑 VIP</a>
             </div>
             <div className="text-center text-[10px] text-white/15">
               &copy; {new Date().getFullYear()} Tahles — Premium Escort Directory Israel

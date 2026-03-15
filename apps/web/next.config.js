@@ -27,7 +27,6 @@ const nextConfig = {
   async redirects() {
     return [
       // Deleted filter pages → homepage
-      { source: '/escorts/vip', destination: '/', permanent: true },
       { source: '/escorts/verified', destination: '/', permanent: true },
       { source: '/escorts/new', destination: '/', permanent: true },
       { source: '/escorts/russian', destination: '/', permanent: true },
