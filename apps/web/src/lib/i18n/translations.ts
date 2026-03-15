@@ -40,12 +40,8 @@ export type TranslationKey =
   | 'filter_basic_tip'
   | 'filter_paid'
   | 'filter_paid_tip'
-  | 'filter_vip1500'
-  | 'filter_vip1500_tip'
   | 'filter_up1000'
   | 'filter_up1000_tip'
-  | 'filter_massage'
-  | 'filter_massage_tip'
   | 'filter_striptease'
   | 'filter_striptease_tip'
   | 'filter_domina'
@@ -238,12 +234,8 @@ const en: TranslationDict = {
   filter_basic_tip: 'No promotion. Standard placement.',
   filter_paid: 'Paid',
   filter_paid_tip: 'Priority visibility. Verified placement.',
-  filter_vip1500: 'VIP ₪1500+',
-  filter_vip1500_tip: 'Results from ₪1500 and above.',
   filter_up1000: 'Up to ₪1000',
   filter_up1000_tip: 'Results priced up to ₪1000.',
-  filter_massage: 'Massage',
-  filter_massage_tip: 'Massage services only.',
   filter_striptease: 'Striptease',
   filter_striptease_tip: 'Striptease category.',
   filter_domina: 'Domina',
@@ -425,12 +417,8 @@ const ru: TranslationDict = {
   filter_basic_tip: 'Без продвижения. Стандартное размещение.',
   filter_paid: 'Платные',
   filter_paid_tip: 'Приоритетная видимость. Верифицированное размещение.',
-  filter_vip1500: 'VIP ₪1500+',
-  filter_vip1500_tip: 'Результаты от ₪1500 и выше.',
   filter_up1000: 'До ₪1000',
   filter_up1000_tip: 'Результаты с ценой до ₪1000.',
-  filter_massage: 'Массаж',
-  filter_massage_tip: 'Только услуги массажа.',
   filter_striptease: 'Стриптиз',
   filter_striptease_tip: 'Категория стриптиз.',
   filter_domina: 'Доминация',
@@ -612,12 +600,8 @@ const he: TranslationDict = {
   filter_basic_tip: 'ללא קידום. מיקום סטנדרטי.',
   filter_paid: 'בתשלום',
   filter_paid_tip: 'נראות עדיפה. מיקום מאומת.',
-  filter_vip1500: 'VIP ₪1500+',
-  filter_vip1500_tip: 'תוצאות מ-₪1500 ומעלה.',
   filter_up1000: 'עד ₪1000',
   filter_up1000_tip: 'תוצאות עם מחיר עד ₪1000.',
-  filter_massage: 'עיסוי',
-  filter_massage_tip: 'שירותי עיסוי בלבד.',
   filter_striptease: 'סטריפטיז',
   filter_striptease_tip: 'קטגוריית סטריפטיז.',
   filter_domina: 'דומינה',

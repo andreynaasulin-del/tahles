@@ -12,29 +12,30 @@ async function resolveQuery(q: string): Promise<Record<string, string | number>>
     return res.json()
   }
 
-  if (lower.includes('vip') || lower.includes('nearby') || lower.includes('рядом') || lower.includes('vip')) {
-    const json = await safeJson('/api/search?sheet=vip1500&page=1')
-    return { 'VIP results': json?.total ?? 0, 'Shown': Math.min(json?.data?.length ?? 0, 5), 'Filter': 'VIP ₪1500+' }
+  if (lower.includes('vip') || lower.includes('nearby') || lower.includes('рядом')) {
+    const json = await safeJson('/api/search?sheet=vip&page=1')
+    return { 'VIP': json?.total ?? 0, 'Total': json?.pageSize ?? 0 }
   }
   if (lower.includes('city') || lower.includes('город') || lower.includes('עיר')) {
     const json = await safeJson('/api/stats')
-    return { 'Top city': json?.topCity?.name ?? '—', 'Active in city': json?.topCity?.count ?? 0, 'Total active': json?.total ?? 0 }
+    return { 'Total active': json?.total ?? 0, 'Added 24h': json?.added24h ?? 0, 'Demand': json?.demand ?? '—' }
   }
   if (lower.includes('search') || lower.includes('поиск') || lower.includes('חיפוש') || lower.includes('ищут')) {
     const json = await safeJson('/api/stats')
-    return { 'Searches today': json?.searchesToday ?? 0, 'Checks today': json?.checksToday ?? 0, 'Updates/hr': json?.updatesPerHour ?? 0 }
+    return { 'Total active': json?.total ?? 0, 'Added 24h': json?.added24h ?? 0, 'WhatsApp verified': json?.waVerified ?? 0 }
   }
   if (lower.includes('online') || lower.includes('онлайн') || lower.includes('מחובר') || lower.includes('now') || lower.includes('сейчас')) {
     const json = await safeJson('/api/stats')
-    return { 'Online now': json?.online ?? 0, 'Total active': json?.total ?? 0, 'VIP online': json?.vip ?? 0 }
+    return { 'Total active': json?.total ?? 0, 'Demand': json?.demand ?? '—', 'Added 24h': json?.added24h ?? 0 }
   }
   if (lower.includes('price') || lower.includes('цена') || lower.includes('מחיר') || lower.includes('range')) {
-    const json = await safeJson('/api/stats')
-    return { 'VIP (₪1500+)': json?.vip ?? 0, 'Up to ₪1000': Math.floor((json?.total ?? 0) * 0.6), 'Total': json?.total ?? 0 }
+    const vipJson = await safeJson('/api/search?sheet=vip&page=1')
+    const statsJson = await safeJson('/api/stats')
+    return { 'VIP': vipJson?.total ?? 0, 'Total': statsJson?.total ?? 0, 'WhatsApp verified': statsJson?.waVerified ?? 0 }
   }
   // default
   const json = await safeJson('/api/stats')
-  return { 'Total active': json?.total ?? 0, 'Online': json?.online ?? 0, 'Searches today': json?.searchesToday ?? 0 }
+  return { 'Total active': json?.total ?? 0, 'Added 24h': json?.added24h ?? 0, 'WhatsApp verified': json?.waVerified ?? 0 }
 }
 
 export function AskTahles() {
