@@ -103,6 +103,43 @@ export async function getProfileCount(): Promise<number> {
   return count ?? 0
 }
 
+/** Save a new profile submission (pending moderation) */
+export async function saveSubmission(data: {
+  nickname: string
+  age: number
+  city: string
+  service_type: 'incall' | 'outcall' | 'both'
+  price_min: number
+  price_max: number
+  photos: string[] // Telegram file_ids — will be converted to URLs later
+  whatsapp: string
+  description: string
+  telegram_user_id: number
+  telegram_username: string
+}): Promise<string> {
+  const { data: row, error } = await supabase
+    .from('submissions')
+    .insert({
+      nickname: data.nickname,
+      age: data.age,
+      city: data.city,
+      service_type: data.service_type,
+      price_min: data.price_min,
+      price_max: data.price_max,
+      photo_file_ids: data.photos,
+      whatsapp: data.whatsapp,
+      description: data.description,
+      telegram_user_id: data.telegram_user_id,
+      telegram_username: data.telegram_username,
+      status: 'pending',
+    })
+    .select('id')
+    .single()
+
+  if (error) throw error
+  return row.id
+}
+
 /** Get all cities with profile counts */
 export async function getCitiesWithCounts(): Promise<{ city: string; count: number }[]> {
   const { data } = await supabase

@@ -1,26 +1,38 @@
-import { Bot, InlineKeyboard, InputFile } from 'grammy'
+import { Bot, InlineKeyboard } from 'grammy'
+import { conversations, createConversation } from '@grammyjs/conversations'
 import { searchProfiles, getProfileCount, getCitiesWithCounts, type Profile } from './db.js'
+import { publishConversation, type BotContext } from './publish.js'
 
 const SITE = 'https://tahles.top'
 
 export function createBot(token: string) {
-  const bot = new Bot(token)
+  const bot = new Bot<BotContext>(token)
+
+  // ── Middleware: conversations ──
+  bot.use(conversations())
+  bot.use(createConversation(publishConversation))
 
   // ── /start ──
   bot.command('start', async (ctx) => {
+    // Check if deep-linked from publish button
+    const payload = ctx.match
+    if (payload === 'publish') {
+      await ctx.conversation.enter('publishConversation')
+      return
+    }
+
     const count = await getProfileCount()
     const kb = new InlineKeyboard()
-      // Row 1: Big button — all ads (WebApp)
       .webApp(`🔥 כל המודעות (${count})`, SITE)
       .row()
-      // Row 2: Origin + Individual (WebApp)
       .webApp('🇪🇺 אירופאיות', `${SITE}/escorts/european`)
       .webApp('💃 לטיניות', `${SITE}/escorts/latina`)
       .row()
       .webApp('🌸 אסיאתיות', `${SITE}/escorts/asian`)
       .webApp('👩 העצמאיות', `${SITE}/escorts/independent`)
       .row()
-      // Row 4: Big button — support (regular link to Telegram)
+      .text('📤 פרסום מודעה', 'start_publish')
+      .row()
       .url('📞 פנייה לשירות לקוחות', 'https://t.me/tahles_support')
 
     await ctx.reply(
@@ -30,6 +42,23 @@ export function createBot(token: string) {
       `*בחר עכשיו מה הוייב שלך…*`,
       { parse_mode: 'Markdown', reply_markup: kb }
     )
+  })
+
+  // ── /publish command ──
+  bot.command('publish', async (ctx) => {
+    await ctx.conversation.enter('publishConversation')
+  })
+
+  // ── /cancel command (exits conversation) ──
+  bot.command('cancel', async (ctx) => {
+    await ctx.conversation.exit('publishConversation')
+    await ctx.reply('❌ בוטל')
+  })
+
+  // ── Publish callback from /start button ──
+  bot.callbackQuery('start_publish', async (ctx) => {
+    await ctx.answerCallbackQuery()
+    await ctx.conversation.enter('publishConversation')
   })
 
   // ── /cities ──

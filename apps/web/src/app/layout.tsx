@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Heebo } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 import { I18nProvider } from '@/lib/i18n/context'
 
@@ -111,6 +112,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${heebo.variable} font-sans antialiased`}>
         <I18nProvider>{children}</I18nProvider>
+        <Analytics />
       </body>
     </html>
   )

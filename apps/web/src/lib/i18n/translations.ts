@@ -177,6 +177,8 @@ export type TranslationKey =
   | 'signal_demand_high'
   | 'how_title'
   | 'how_text'
+  | 'publish_title'
+  | 'publish_subtitle'
   | 'rating_title'
   | 'rating_intro'
   | 'rating_wa'
@@ -361,6 +363,8 @@ const en: TranslationDict = {
   signal_demand_high: 'high',
   how_title: 'How Tahles works',
   how_text: 'We collect ads from various sources, remove duplicates, and display them in an organized feed.',
+  publish_title: 'Publish Your Profile',
+  publish_subtitle: 'List your ad on Tahles — quick setup via Telegram bot',
   rating_title: 'Tahles Rating System',
   rating_intro: 'To maintain order and trust, profiles are reviewed and rated.',
   rating_wa: 'WhatsApp verification',
@@ -544,6 +548,8 @@ const ru: TranslationDict = {
   signal_demand_high: 'высокий',
   how_title: 'Как работает Tahles',
   how_text: 'Мы собираем объявления из разных источников, удаляем дубликаты и показываем их в упорядоченном фиде.',
+  publish_title: 'Разместить анкету',
+  publish_subtitle: 'Добавь свою анкету на Tahles — быстро через Telegram-бот',
   rating_title: 'Система рейтинга Tahles',
   rating_intro: 'Для поддержания порядка и доверия, профили проходят проверку и получают рейтинг.',
   rating_wa: 'Подтверждение через WhatsApp',
@@ -727,6 +733,8 @@ const he: TranslationDict = {
   signal_demand_high: 'גבוה',
   how_title: 'איך Tahles עובד',
   how_text: 'אנחנו אוספים מודעות ממקורות שונים, מסירים כפילויות ומציגים אותן בפיד מסודר.',
+  publish_title: 'פרסמי את המודעה שלך',
+  publish_subtitle: 'הוסיפי את המודעה שלך ל-Tahles — תהליך מהיר דרך בוט טלגרם',
   rating_title: 'מערכת דירוג ב-Tahles',
   rating_intro: 'כדי לשמור על סדר ואמינות, פרופילים עוברים בדיקה ומקבלים דירוג.',
   rating_wa: 'אימות דרך WhatsApp',

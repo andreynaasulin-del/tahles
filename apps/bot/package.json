@@ -8,16 +8,18 @@
     "start": "tsx src/index.ts",
     "build": "tsc",
     "parse": "tsx src/gramjs/parser.ts",
-    "outreach": "tsx src/gramjs/outreach.ts"
+    "outreach": "tsx src/gramjs/outreach.ts",
+    "seo-farm": "tsx src/gramjs/seo-farm.ts"
   },
   "dependencies": {
+    "@grammyjs/conversations": "^2.1.1",
     "@supabase/supabase-js": "^2.49.0",
     "@vm/db": "workspace:*",
-    "grammy": "^1.35.0",
-    "telegram": "^2.26.22",
+    "dotenv": "^16.4.7",
+    "grammy": "^1.41.1",
     "input": "^1.0.1",
     "node-cron": "^3.0.3",
-    "dotenv": "^16.4.7"
+    "telegram": "^2.26.22"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
