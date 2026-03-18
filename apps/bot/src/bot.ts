@@ -17,7 +17,7 @@ export function createBot(token: string) {
   bot.command('start', async (ctx) => {
     // Check if deep-linked from publish button
     const payload = ctx.match
-    if (payload === 'publish') {
+    if (payload === 'publish' || payload?.startsWith('publish')) {
       await ctx.conversation.enter('publishConversation')
       return
     }
