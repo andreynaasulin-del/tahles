@@ -9,6 +9,8 @@ const SearchSchema = z.object({
   ethnicity: z.string().max(50).optional().default(''),
   price_min: z.string().regex(/^\d+$/).optional().nullable(),
   price_max: z.string().regex(/^\d+$/).optional().nullable(),
+  hair_color: z.string().max(30).optional().default(''),
+  has_video:  z.string().max(5).optional().default(''),
   page:      z.string().regex(/^\d+$/).transform(Number).optional().default('1'),
 })
 
@@ -27,7 +29,8 @@ const CITY_VARIANTS: Record<string, string[]> = {
 
 async function realSearch(
   q: string, sheet: string, category: string, city: string, ethnicity: string,
-  priceMin: string | null, priceMax: string | null, page: number, limit: number
+  priceMin: string | null, priceMax: string | null, page: number, limit: number,
+  hairColor: string = '', hasVideo: string = ''
 ) {
   const { createServiceRoleClient } = await import('@vm/db')
   const supabase = createServiceRoleClient()
@@ -67,6 +70,10 @@ async function realSearch(
 
   // Ethnicity filter via raw_data JSONB
   if (ethnicity) query = query.eq('raw_data->>_ethnicity', ethnicity)
+
+  // Sugar baby extra filters
+  if (hairColor) query = query.eq('raw_data->>hair_color', hairColor)
+  if (hasVideo === 'true') query = query.eq('raw_data->>has_video', 'true')
 
   // City filter with Hebrew variants
   if (city) {
@@ -148,9 +155,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const validated = SearchSchema.parse(Object.fromEntries(searchParams.entries()))
     const { q, sheet, category, city, ethnicity, price_min: priceMin, price_max: priceMax, page } = validated
+    const hairColor = validated.hair_color || ''
+    const hasVideo = validated.has_video || ''
     const { DEFAULT_PAGE_SIZE } = await import('@/lib/constants')
 
-    const result = await realSearch(q, sheet, category, city, ethnicity, priceMin ?? null, priceMax ?? null, page, DEFAULT_PAGE_SIZE)
+    const result = await realSearch(q, sheet, category, city, ethnicity, priceMin ?? null, priceMax ?? null, page, DEFAULT_PAGE_SIZE, hairColor, hasVideo)
 
     return NextResponse.json(result, {
       headers: {

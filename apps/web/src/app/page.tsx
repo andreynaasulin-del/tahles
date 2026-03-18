@@ -747,6 +747,7 @@ export default function HomePage() {
                 { href: '/escorts/independent', label: '👩 Independent' },
                 { href: '/escorts/young', label: '🔥 Young' },
                 { href: '/escorts/vip', label: '👑 VIP' },
+                { href: '/sugar-babies', label: '💎 Sugar Babies' },
                 { href: '/faq', label: 'FAQ' },
               ].map(c => (
                 <a key={c.href} href={c.href}

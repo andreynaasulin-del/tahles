@@ -96,6 +96,17 @@ export async function GET(
       registrationDate: enriched.registrationDate || null,
       showsCount: enriched.showsCount || null,
       commentsCount: enriched.commentsCount || comments?.length || 0,
+      // Sugar baby category fields
+      category: record.raw_data?._category || null,
+      hair_color: record.raw_data?.hair_color || null,
+      height_weight: record.raw_data?.height_weight || null,
+      breast_size: record.raw_data?.breast_size || null,
+      waist: record.raw_data?.waist || null,
+      hobbies: record.raw_data?.hobbies || null,
+      working_hours: record.raw_data?.working_hours || null,
+      asks_selfie: record.raw_data?.asks_selfie || false,
+      has_video: record.raw_data?.has_video || false,
+      pricing_text: record.raw_data?.pricing_text || null,
     })
   } catch (err) {
     console.error('Ad detail error:', err)
