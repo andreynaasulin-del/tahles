@@ -186,7 +186,7 @@ Keep it classy, no explicit content. Return ONLY the description text, nothing e
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: 'grok-4.20-beta-0309-reasoning',
+        model: 'grok-4-0709',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 200,
         temperature: 0.7,
@@ -404,8 +404,7 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
     // Notify admins with approve/reject buttons
     try {
       const { Bot: BotClass } = await import('grammy')
-      const token = process.env.BOT_TOKEN!
-      const tempBot = new BotClass<BotContext>(token)
+      const tempBot = new BotClass<BotContext>(process.env.BOT_TOKEN!)
       await notifyAdmins(tempBot, {
         id: submissionId,
         nickname,
