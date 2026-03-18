@@ -2,6 +2,7 @@ import { Bot, InlineKeyboard } from 'grammy'
 import { conversations, createConversation } from '@grammyjs/conversations'
 import { searchProfiles, getProfileCount, getCitiesWithCounts, type Profile } from './db.js'
 import { publishConversation, type BotContext } from './publish.js'
+import { registerAdminHandlers } from './admin.js'
 
 const SITE = 'https://tahles.top'
 
@@ -161,6 +162,9 @@ export function createBot(token: string) {
 
     await ctx.answerInlineQuery(results, { cache_time: 60 })
   })
+
+  // ── Admin handlers ──
+  registerAdminHandlers(bot)
 
   return bot
 }

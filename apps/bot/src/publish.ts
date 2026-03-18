@@ -1,7 +1,8 @@
 import type { Conversation, ConversationFlavor } from '@grammyjs/conversations'
-import type { Context } from 'grammy'
+import type { Context, Bot } from 'grammy'
 import { InlineKeyboard } from 'grammy'
 import { saveSubmission } from './db.js'
+import { notifyAdmins } from './admin.js'
 
 export type BotContext = ConversationFlavor<Context>
 export type BotConversation = Conversation<BotContext>
@@ -185,7 +186,7 @@ Keep it classy, no explicit content. Return ONLY the description text, nothing e
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: 'grok-3-mini',
+        model: 'grok-4.20-beta-0309-reasoning',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 200,
         temperature: 0.7,
@@ -210,7 +211,7 @@ const SITE = 'https://tahles.top'
 /**
  * Publish profile conversation — full wizard flow inside Telegram bot.
  */
-export async function publishConversation(conversation: BotConversation, ctx: BotContext) {
+export async function publishConversation(conversation: BotConversation, ctx: BotContext, botInstance?: Bot<BotContext>) {
   const userId = ctx.from?.id
 
   // Parse language from deep link: "publish_ru" → "ru", "publish" → "he" (default)
@@ -400,19 +401,27 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
         .url(t('share_wa', lang), `https://wa.me/?text=${shareText}`),
     })
 
-    // Notify admin
-    const adminId = process.env.ADMIN_TELEGRAM_ID
-    if (adminId) {
-      try {
-        await ctx.api.sendMessage(
-          parseInt(adminId),
-          `🆕 *New submission pending*\n\n` +
-          `👤 ${nickname}, ${age}\n📍 ${city}\n💰 ${priceMin}–${priceMax}₪\n📸 ${photos.length} photos\n` +
-          `📱 WA: ${whatsapp}\n👤 TG: @${ctx.from?.username || 'no_username'}\n` +
-          `🌐 Lang: ${lang}\n\nID: \`${submissionId}\``,
-          { parse_mode: 'Markdown' }
-        )
-      } catch { /* admin notification failed, not critical */ }
+    // Notify admins with approve/reject buttons
+    try {
+      const { Bot: BotClass } = await import('grammy')
+      const token = process.env.BOT_TOKEN!
+      const tempBot = new BotClass<BotContext>(token)
+      await notifyAdmins(tempBot, {
+        id: submissionId,
+        nickname,
+        age,
+        city,
+        serviceType,
+        priceMin,
+        priceMax,
+        whatsapp,
+        description,
+        photos,
+        telegramId: userId,
+        telegramUsername: ctx.from?.username,
+      })
+    } catch (e) {
+      console.error('[publish] Admin notify failed:', e)
     }
 
   } catch (err) {
