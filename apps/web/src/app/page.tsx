@@ -708,76 +708,10 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* ── SEO Section: Internal Links & Description ────────────────── */}
-      <footer className="border-t border-white/[0.04] mt-12 pt-10 pb-8 px-4">
-        <div className="max-w-5xl mx-auto space-y-8">
-          {/* City Links */}
-          <div>
-            <h2 className="text-sm font-bold text-white/30 uppercase tracking-widest mb-3">Browse by City</h2>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { href: '/tel-aviv', label: 'Tel Aviv' },
-                { href: '/haifa', label: 'Haifa' },
-                { href: '/jerusalem', label: 'Jerusalem' },
-                { href: '/eilat', label: 'Eilat' },
-                { href: '/netanya', label: 'Netanya' },
-                { href: '/bat-yam', label: 'Bat Yam' },
-                { href: '/beer-sheva', label: 'Beer Sheva' },
-                { href: '/ashdod', label: 'Ashdod' },
-                { href: '/rishon-lezion', label: 'Rishon LeZion' },
-                { href: '/herzliya', label: 'Herzliya' },
-                { href: '/hadera', label: 'Hadera' },
-              ].map(c => (
-                <a key={c.href} href={c.href}
-                  className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">
-                  {c.label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Category Links */}
-          <div>
-            <h2 className="text-sm font-bold text-white/30 uppercase tracking-widest mb-3">Categories</h2>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { href: '/escorts/european', label: '🇪🇺 European' },
-                { href: '/escorts/latina', label: '💃 Latina' },
-                { href: '/escorts/asian', label: '🌸 Asian' },
-                { href: '/escorts/independent', label: '👩 Independent' },
-                { href: '/escorts/young', label: '🔥 Young' },
-                { href: '/escorts/vip', label: '👑 VIP' },
-                { href: '/sugar-babies', label: '💎 Sugar Babies' },
-                { href: '/faq', label: 'FAQ' },
-              ].map(c => (
-                <a key={c.href} href={c.href}
-                  className="px-3 py-1.5 rounded-full bg-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition text-xs">
-                  {c.label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* SEO Description Text */}
-          <div className="text-xs text-white/20 leading-relaxed space-y-3 max-w-3xl">
-            <p>
-              Tahles is Israel&apos;s premier escort directory featuring verified profiles with real photos, ratings and reviews.
-              Browse escorts in Tel Aviv, Haifa, Jerusalem, Eilat, Netanya and other cities across Israel. All profiles are verified
-              and updated daily from multiple trusted sources.
-            </p>
-            <p dir="rtl">
-              Tahles הוא מאגר שירותי הליווי המוביל בישראל עם פרופילים מאומתים, תמונות אמיתיות, דירוגים וביקורות.
-              גלה נערות ליווי בתל אביב, חיפה, ירושלים, אילת, נתניה וערים נוספות. כל הפרופילים מאומתים ומתעדכנים יומיומית.
-            </p>
-            <p>
-              Tahles — ведущий каталог эскорт-услуг Израиля с верифицированными профилями, реальными фото, рейтингами и отзывами.
-              Тель-Авив, Хайфа, Иерусалим, Эйлат, Нетания и другие города. Все профили проверены и обновляются ежедневно.
-            </p>
-          </div>
-
-          <div className="text-center text-[10px] text-white/15 pt-4">
-            &copy; {new Date().getFullYear()} Tahles — Premium Escort Directory Israel
-          </div>
+      {/* ── Footer ── */}
+      <footer className="border-t border-white/[0.04] mt-12 pt-6 pb-6 px-4">
+        <div className="text-center text-[10px] text-white/15">
+          &copy; {new Date().getFullYear()} Tahles
         </div>
       </footer>
 

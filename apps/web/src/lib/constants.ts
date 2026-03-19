@@ -7,6 +7,7 @@ export type SheetId = (typeof SHEETS)[number]['id']
 export const CATEGORIES = [
   { slug: 'individual', name: 'Individual',   icon: '🌺' },
   { slug: 'agency',     name: 'Agency',       icon: '🏢' },
+  { slug: 'sugar_baby', name: 'Sugar Babies', icon: '💎' },
 ] as const
 
 export type CategorySlug = (typeof CATEGORIES)[number]['slug']
