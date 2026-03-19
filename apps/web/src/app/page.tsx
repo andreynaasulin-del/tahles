@@ -693,24 +693,10 @@ export default function HomePage() {
           <RatingBlock />
         )}
 
-        {/* Warning now appears inline between HOT and non-HOT profiles */}
-
-        <div className="mt-8 border-t border-white/[0.05] pt-8 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 opacity-30 hover:opacity-70 transition-opacity cursor-pointer" onClick={handleReset}>
-            <TahlesLogo size={20} />
-            <span className="text-xs text-white/50 font-black uppercase tracking-[0.3em]">Tahles</span>
-          </div>
-          {started && (
-            <div className="text-xs text-white/20 font-black uppercase tracking-widest tabular-nums">
-              {t('showing')} <span className="text-white/35">{ads.length}</span> {t('of')} <span className="text-white/35">{fmtNum(meta.total)}</span>
-            </div>
-          )}
-        </div>
       </main>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-white/[0.04] mt-12 pt-6 pb-6 px-4">
-        <div className="text-center text-[10px] text-white/15">
+      <footer className="mt-4 pb-4 px-4">
+        <div className="text-center text-[10px] text-white/10">
           &copy; {new Date().getFullYear()} Tahles
         </div>
       </footer>
