@@ -110,6 +110,7 @@ export type TranslationKey =
   | 'sheet_video'
   | 'cat_individual'
   | 'cat_agency'
+  | 'cat_sugar_baby'
   | 'preset_mfw'
   | 'preset_mfm'
   | 'preset_russian'
@@ -297,6 +298,7 @@ const en: TranslationDict = {
   sheet_video: 'With Video',
   cat_individual: 'Individual',
   cat_agency: 'Agency',
+  cat_sugar_baby: 'Sugar Babies',
   preset_mfw: 'Men for Women & Couples',
   preset_mfm: 'Men for Men',
   preset_russian: 'Russian Girls',
@@ -482,6 +484,7 @@ const ru: TranslationDict = {
   sheet_video: 'С видео',
   cat_individual: 'Индивидуалка',
   cat_agency: 'Агентство',
+  cat_sugar_baby: 'Sugar Babies',
   preset_mfw: 'Мужчины для женщин и пар',
   preset_mfm: 'Мужчины для мужчин',
   preset_russian: 'Русские девушки',
@@ -667,6 +670,7 @@ const he: TranslationDict = {
   sheet_video: 'עם וידאו',
   cat_individual: 'עצמאית',
   cat_agency: 'סוכנות',
+  cat_sugar_baby: 'Sugar Babies',
   preset_mfw: 'גברים לנשים וזוגות',
   preset_mfm: 'גברים לגברים',
   preset_russian: 'בנות רוסיות',
