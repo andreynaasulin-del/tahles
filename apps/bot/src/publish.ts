@@ -256,55 +256,55 @@ const SERVICE_OPTIONS: Record<Lang, string[]> = {
   en: ['Private apt', 'Escort', 'Massage', 'Domination', 'Couples', 'Striptease', 'BDSM', 'GFE'],
 }
 
-// ── Hair color options ──
+// ── Hair color options (values stored in Hebrew for site display) ──
 const HAIR_OPTIONS: Record<Lang, { label: string; value: string }[]> = {
   he: [
-    { label: '🖤 שחור', value: 'Black' },
-    { label: '🤎 חום', value: 'Brown' },
-    { label: '💛 בלונד', value: 'Blonde' },
-    { label: '❤️ ג\'ינג\'י', value: 'Red' },
+    { label: '🖤 שחור', value: 'שחור' },
+    { label: '🤎 חום', value: 'חום' },
+    { label: '💛 בלונד', value: 'בלונד' },
+    { label: '❤️ ג\'ינג\'י', value: "ג'ינג'י" },
   ],
   ru: [
-    { label: '🖤 Чёрные', value: 'Black' },
-    { label: '🤎 Каштан', value: 'Brown' },
-    { label: '💛 Блонд', value: 'Blonde' },
-    { label: '❤️ Рыжие', value: 'Red' },
+    { label: '🖤 Чёрные', value: 'שחור' },
+    { label: '🤎 Каштан', value: 'חום' },
+    { label: '💛 Блонд', value: 'בלונד' },
+    { label: '❤️ Рыжие', value: "ג'ינג'י" },
   ],
   en: [
-    { label: '🖤 Black', value: 'Black' },
-    { label: '🤎 Brown', value: 'Brown' },
-    { label: '💛 Blonde', value: 'Blonde' },
-    { label: '❤️ Red', value: 'Red' },
+    { label: '🖤 Black', value: 'שחור' },
+    { label: '🤎 Brown', value: 'חום' },
+    { label: '💛 Blonde', value: 'בלונד' },
+    { label: '❤️ Red', value: "ג'ינג'י" },
   ],
 }
 
-// ── Breast size options ──
+// ── Breast size options (values in Hebrew) ──
 const BREAST_OPTIONS: Record<Lang, { label: string; value: string }[]> = {
   he: [
-    { label: 'קטן', value: 'Small' },
-    { label: 'בינוני', value: 'Medium' },
-    { label: 'גדול', value: 'Large' },
+    { label: 'קטן', value: 'קטן' },
+    { label: 'בינוני', value: 'בינוני' },
+    { label: 'גדול', value: 'גדול' },
   ],
   ru: [
-    { label: 'Маленькая', value: 'Small' },
-    { label: 'Средняя', value: 'Medium' },
-    { label: 'Большая', value: 'Large' },
+    { label: 'Маленькая', value: 'קטן' },
+    { label: 'Средняя', value: 'בינוני' },
+    { label: 'Большая', value: 'גדול' },
   ],
   en: [
-    { label: 'Small', value: 'Small' },
-    { label: 'Medium', value: 'Medium' },
-    { label: 'Large', value: 'Large' },
+    { label: 'Small', value: 'קטן' },
+    { label: 'Medium', value: 'בינוני' },
+    { label: 'Large', value: 'גדול' },
   ],
 }
 
-// ── Language options ──
+// ── Language options (values in Hebrew for site display) ──
 const LANG_OPTIONS = [
-  { label: '🇮🇱 עברית', value: 'Hebrew' },
-  { label: '🇷🇺 Русский', value: 'Russian' },
-  { label: '🇬🇧 English', value: 'English' },
-  { label: '🇪🇸 Español', value: 'Spanish' },
-  { label: '🇷🇴 Română', value: 'Romanian' },
-  { label: '🇹🇭 ไทย', value: 'Thai' },
+  { label: '🇮🇱 עברית', value: 'עברית' },
+  { label: '🇷🇺 Русский', value: 'רוסית' },
+  { label: '🇬🇧 English', value: 'אנגלית' },
+  { label: '🇪🇸 Español', value: 'ספרדית' },
+  { label: '🇷🇴 Română', value: 'רומנית' },
+  { label: '🇹🇭 ไทย', value: 'תאית' },
 ]
 
 const SITE = 'https://tahles.top'
