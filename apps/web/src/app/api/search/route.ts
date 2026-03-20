@@ -52,7 +52,6 @@ async function realSearch(
       { count: 'exact' }
     )
     .not('photos', 'is', null)
-    .neq('photos', '[]')
     .eq('raw_data->>_verified', 'true')
 
   // Category filter via raw_data JSONB
@@ -113,7 +112,10 @@ async function realSearch(
     }
   }
 
-  const mappedData = (data || []).map((ad: any) => {
+  // Filter out profiles with empty photos array
+  const withPhotos = (data || []).filter((ad: any) => ad.photos && ad.photos.length > 0)
+
+  const mappedData = withPhotos.map((ad: any) => {
     const contact = extractContact(ad)
     const rawData = ad.raw_data as any
     const enriched = rawData?._enriched ?? {}
