@@ -113,7 +113,7 @@ async function realSearch(
   }
 
   // Filter out profiles with empty photos array
-  const withPhotos = (data || []).filter((ad: any) => ad.photos && ad.photos.length > 0)
+  const withPhotos = (data || []).filter((ad: any) => Array.isArray(ad.photos) && ad.photos.length > 0)
 
   const mappedData = withPhotos.map((ad: any) => {
     const contact = extractContact(ad)

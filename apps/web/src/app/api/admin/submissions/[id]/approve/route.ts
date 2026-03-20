@@ -89,7 +89,7 @@ export async function POST(
         online_status: true,
         raw_data: {
           _verified: 'true',
-          _category: 'individual',
+          _category: detectSubmissionCategory(sub),
           _source: 'telegram_bot',
           _submission_id: submissionId,
         },
@@ -169,10 +169,12 @@ async function downloadTelegramPhoto(
   }
 
   const buffer = Buffer.from(await downloadRes.arrayBuffer())
-  const contentType = downloadRes.headers.get('content-type') || 'image/jpeg'
+  // Telegram often returns application/octet-stream — force correct mime type
+  const ext = filePath.split('.').pop()?.toLowerCase() || 'jpg'
+  const mimeMap: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' }
+  const contentType = mimeMap[ext] || 'image/jpeg'
 
   // Step 3: Upload to Supabase Storage
-  const ext = filePath.split('.').pop() || 'jpg'
   const storagePath = `${submissionId}/${Date.now()}_${index}.${ext}`
 
   const { error: uploadErr } = await supabase.storage
@@ -224,6 +226,12 @@ async function getOrCreateUser(
     .eq('id', authUser.user.id)
 
   return authUser.user.id
+}
+
+function detectSubmissionCategory(sub: any): string {
+  const text = [sub.nickname, sub.description, sub.service_type].filter(Boolean).join(' ').toLowerCase()
+  if (/\btrans\b|\bטרנס\b|\bshemale\b|\bladyboy\b|\bt\.?s\.?\b/.test(text)) return 'trans'
+  return 'individual'
 }
 
 async function notifyTelegram(chatId: number, text: string) {
