@@ -239,11 +239,6 @@ export function detectCategories(rawData: any): string[] {
         cats.add('massage')
     }
 
-    // Sugar baby / GFE / Dating detection
-    if (/\bsugar\s*baby\b|\bsugar\s*daddy\b|\bgirlfriend\s*experience\b|\bgfe\b|\bcompanion\b|\btravel\s*companion\b|\bescort\s*dating\b/.test(allText)) {
-        cats.add('sugar-baby')
-    }
-
     // Dating / Companion
     if (/\bdating\b|\bdate\b|\bdinners?\b|\bcompanion(ship)?\b|\bovernight\b/.test(allText)) {
         cats.add('dating')

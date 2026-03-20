@@ -71,7 +71,7 @@ async function realSearch(
   // Ethnicity filter via raw_data JSONB
   if (ethnicity) query = query.eq('raw_data->>_ethnicity', ethnicity)
 
-  // Sugar baby extra filters
+  // Extra filters
   if (hairColor) query = query.eq('raw_data->>hair_color', hairColor)
   if (hasVideo === 'true') query = query.eq('raw_data->>has_video', 'true')
 
