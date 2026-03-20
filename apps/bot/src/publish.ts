@@ -249,11 +249,38 @@ const CITIES = [
   'בת ים', 'באר שבע', 'אשדוד', 'ראשון לציון', 'הרצליה', 'חדרה',
 ]
 
-// ── Service options for multi-select ──
-const SERVICE_OPTIONS: Record<Lang, string[]> = {
-  he: ['דירה פרטית', 'ליווי', 'עיסוי', 'דומינציה', 'זוגות', 'סטריפטיז', 'BDSM', 'GFE'],
-  ru: ['Квартира', 'Эскорт', 'Массаж', 'Доминация', 'Для пар', 'Стриптиз', 'BDSM', 'GFE'],
-  en: ['Private apt', 'Escort', 'Massage', 'Domination', 'Couples', 'Striptease', 'BDSM', 'GFE'],
+// ── Service options for multi-select (values always Hebrew for site) ──
+const SERVICE_OPTIONS: Record<Lang, { label: string; value: string }[]> = {
+  he: [
+    { label: 'דירה פרטית', value: 'דירה פרטית' },
+    { label: 'ליווי', value: 'ליווי' },
+    { label: 'עיסוי', value: 'עיסוי' },
+    { label: 'דומינציה', value: 'דומינציה' },
+    { label: 'זוגות', value: 'זוגות' },
+    { label: 'סטריפטיז', value: 'סטריפטיז' },
+    { label: 'BDSM', value: 'BDSM' },
+    { label: 'GFE', value: 'GFE' },
+  ],
+  ru: [
+    { label: 'Квартира', value: 'דירה פרטית' },
+    { label: 'Эскорт', value: 'ליווי' },
+    { label: 'Массаж', value: 'עיסוי' },
+    { label: 'Доминация', value: 'דומינציה' },
+    { label: 'Для пар', value: 'זוגות' },
+    { label: 'Стриптиз', value: 'סטריפטיז' },
+    { label: 'BDSM', value: 'BDSM' },
+    { label: 'GFE', value: 'GFE' },
+  ],
+  en: [
+    { label: 'Private apt', value: 'דירה פרטית' },
+    { label: 'Escort', value: 'ליווי' },
+    { label: 'Massage', value: 'עיסוי' },
+    { label: 'Domination', value: 'דומינציה' },
+    { label: 'Couples', value: 'זוגות' },
+    { label: 'Striptease', value: 'סטריפטיז' },
+    { label: 'BDSM', value: 'BDSM' },
+    { label: 'GFE', value: 'GFE' },
+  ],
 }
 
 // ── Hair color options (values stored in Hebrew for site display) ──
@@ -386,13 +413,13 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
   }
 
   // ── Step 5b: Services offered (multi-select) ──
-  const selectedServices: string[] = []
+  const selectedServices: string[] = [] // stores Hebrew values
   const svcOptions = SERVICE_OPTIONS[lang]
   const buildSvcKb = () => {
     const kb = new InlineKeyboard()
     for (let i = 0; i < svcOptions.length; i++) {
-      const sel = selectedServices.includes(svcOptions[i])
-      kb.text(sel ? `✅ ${svcOptions[i]}` : svcOptions[i], `pub_svc:${i}`)
+      const sel = selectedServices.includes(svcOptions[i].value)
+      kb.text(sel ? `✅ ${svcOptions[i].label}` : svcOptions[i].label, `pub_svc:${i}`)
       if (i % 2 === 1) kb.row()
     }
     kb.row().text(t('services_done', lang), 'pub_svc_done')
@@ -408,9 +435,9 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
     const idx = parseInt(cbData.replace('pub_svc:', ''), 10)
     const svc = svcOptions[idx]
     if (svc) {
-      const pos = selectedServices.indexOf(svc)
+      const pos = selectedServices.indexOf(svc.value)
       if (pos >= 0) selectedServices.splice(pos, 1)
-      else selectedServices.push(svc)
+      else selectedServices.push(svc.value)
     }
     try {
       await svcCtx.editMessageReplyMarkup({ reply_markup: buildSvcKb() })
@@ -580,7 +607,7 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
     t('summary_city', lang, { v: city }),
     t('summary_service', lang, { v: serviceLabel }),
     t('summary_price', lang, { v: `${priceMin}–${priceMax}` }),
-    selectedServices.length > 0 ? t('summary_services', lang, { v: selectedServices.join(', ') }) : '',
+    selectedServices.length > 0 ? t('summary_services', lang, { v: selectedServices.map(v => svcOptions.find(o => o.value === v)?.label ?? v).join(', ') }) : '',
     paramParts.length > 0 ? t('summary_params', lang, { v: paramParts.join(' | ') }) : '',
     selectedLangs.length > 0 ? t('summary_langs', lang, { v: selectedLangs.join(', ') }) : '',
     t('summary_photos', lang, { v: photos.length }),
