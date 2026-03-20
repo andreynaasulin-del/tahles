@@ -235,42 +235,51 @@ export function registerAdminHandlers(bot: Bot<BotContext>) {
 
 // ── Approve helper ─────────────────────────────────────────────────────
 async function handleApprove(bot: Bot<BotContext>, ctx: BotContext, id: string) {
-  const { data, error } = await supabase
+  // First check that submission exists and is pending
+  const { data: sub, error: subErr } = await supabase
     .from('submissions')
-    .update({ status: 'approved' })
+    .select('nickname, telegram_id, id, status')
     .eq('id', id)
-    .select('nickname, telegram_id, id')
     .single()
 
-  if (error || !data) {
+  if (subErr || !sub) {
     await ctx.reply(`❌ Не найдено: \`${id}\``, { parse_mode: 'Markdown' })
     return
   }
 
-  // Also insert into profiles table if exists
-  const { data: sub } = await supabase.from('submissions').select('*').eq('id', id).single()
-  if (sub) {
-    await supabase.from('profiles').upsert({
-      id: sub.id,
-      nickname: sub.nickname,
-      age: sub.age,
-      city: sub.city,
-      service_type: sub.service_type,
-      price_min: sub.price_min,
-      price_max: sub.price_max,
-      whatsapp: sub.whatsapp,
-      description: sub.description,
-      photos: sub.photos,
-      status: 'active',
-      created_at: new Date().toISOString(),
-    }).catch(() => {})
+  if (sub.status === 'approved') {
+    await ctx.reply(`⚠️ *${sub.nickname}* уже одобрена`, { parse_mode: 'Markdown' })
+    return
   }
 
-  await ctx.reply(`✅ *${data.nickname}* одобрена и опубликована!`, { parse_mode: 'Markdown' })
+  // Call the web API that downloads photos, creates advertisement + contacts
+  const apiBase = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://tahles.top'
+  const cronSecret = process.env.CRON_SECRET || ''
 
-  // Notify the girl
-  if (data.telegram_id) {
-    await notifyGirlApproved(bot, data.telegram_id, data.id)
+  try {
+    await ctx.reply(`⏳ Обрабатываю *${sub.nickname}*: скачиваю фото, создаю профиль...`, { parse_mode: 'Markdown' })
+
+    const res = await fetch(`${apiBase}/api/admin/submissions/${id}/approve`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${cronSecret}` },
+    })
+
+    const json = await res.json()
+
+    if (!res.ok) {
+      await ctx.reply(`❌ Ошибка: ${json.error || res.statusText}\n\nID: \`${id}\``, { parse_mode: 'Markdown' })
+      return
+    }
+
+    await ctx.reply(
+      `✅ *${sub.nickname}* одобрена и опубликована!\n` +
+      `📸 Фото загружено: ${json.photos_uploaded}\n` +
+      `🆔 Ad: \`${json.ad_id}\``,
+      { parse_mode: 'Markdown' }
+    )
+  } catch (err) {
+    console.error('[approve] API call failed:', err)
+    await ctx.reply(`❌ Ошибка API: ${err}\n\nID: \`${id}\``, { parse_mode: 'Markdown' })
   }
 }
 
