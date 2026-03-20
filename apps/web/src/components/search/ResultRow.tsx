@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import { translateCity, translateServiceType, translateEthnicity } from '@/lib/i18n/translations'
+import { translateCity, translateServiceType, translateEthnicity, translateHairColor, translateBreastSize, translateLanguage, translateService, translatePriceType, translateSexuality } from '@/lib/i18n/translations'
 import type { TranslationKey } from '@/lib/i18n/translations'
 
 interface PriceEntry { type: string; amount: number; duration: string }
@@ -98,7 +98,7 @@ function InfoSlide({
             {(price_table ?? []).map((p, i) => (
               <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06]">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-white/30 uppercase font-bold">{p.type}</span>
+                  <span className="text-xs text-white/30 uppercase font-bold">{translatePriceType(p.type, locale)}</span>
                   <span className="text-xs text-white/60 font-bold">{p.duration}</span>
                 </div>
                 <span className="text-sm font-black text-velvet-300 tabular-nums">{p.amount} ₪</span>
@@ -116,7 +116,11 @@ function InfoSlide({
             {Object.entries(params)
               .filter(([k]) => PARAM_KEYS[k])
               .map(([k, v]) => {
-                const displayVal = (k === 'ethnicity' || k === 'nationality') ? translateEthnicity(v, locale) : v
+                const displayVal = (k === 'ethnicity' || k === 'nationality') ? translateEthnicity(v, locale)
+                  : k === 'hair_color' ? translateHairColor(v, locale)
+                  : k === 'breast_size' ? translateBreastSize(v, locale)
+                  : k === 'sexuality' ? translateSexuality(v, locale)
+                  : v
                 return (
                   <div key={k} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05]">
                     <span className="text-xs">{PARAM_ICONS[k] || '•'}</span>
@@ -135,7 +139,7 @@ function InfoSlide({
           <div className="flex flex-wrap gap-1.5">
             {(services ?? []).slice(0, 8).map((s, i) => (
               <span key={i} className="px-2.5 py-1 rounded-full bg-velvet-500/10 border border-velvet-500/15 text-xs text-velvet-300/80 font-bold">
-                {s}
+                {translateService(s, locale)}
               </span>
             ))}
             {(services ?? []).length > 8 && (
@@ -154,7 +158,7 @@ function InfoSlide({
           <div className="flex gap-1.5">
             {(languages ?? []).map((l, i) => (
               <span key={i} className="px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-white/50 font-bold">
-                🗣️ {l}
+                🗣️ {translateLanguage(l, locale)}
               </span>
             ))}
           </div>

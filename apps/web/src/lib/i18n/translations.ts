@@ -829,3 +829,113 @@ export function translateEthnicity(eth: string | null, locale: Locale): string {
   if (!eth) return ''
   return ETHNICITY_MAP[eth]?.[locale] || eth
 }
+
+/* ── Hair color translation map (Hebrew DB values → display) ── */
+export const HAIR_COLOR_MAP: Record<string, Record<Locale, string>> = {
+  'שחור':    { en: 'Black',   ru: 'Чёрные',  he: 'שחור' },
+  'חום':     { en: 'Brown',   ru: 'Каштан',   he: 'חום' },
+  'בלונד':   { en: 'Blonde',  ru: 'Блонд',    he: 'בלונד' },
+  "ג'ינג'י": { en: 'Red',     ru: 'Рыжие',    he: "ג'ינג'י" },
+  // English fallbacks for crawled data
+  'Black':   { en: 'Black',   ru: 'Чёрные',   he: 'שחור' },
+  'Brown':   { en: 'Brown',   ru: 'Каштан',   he: 'חום' },
+  'Blonde':  { en: 'Blonde',  ru: 'Блонд',    he: 'בלונד' },
+  'Red':     { en: 'Red',     ru: 'Рыжие',    he: "ג'ינג'י" },
+}
+
+export function translateHairColor(v: string | null, locale: Locale): string {
+  if (!v) return ''
+  return HAIR_COLOR_MAP[v]?.[locale] || v
+}
+
+/* ── Breast size translation map ── */
+export const BREAST_SIZE_MAP: Record<string, Record<Locale, string>> = {
+  'קטן':   { en: 'Small',  ru: 'Маленькая', he: 'קטן' },
+  'בינוני': { en: 'Medium', ru: 'Средняя',   he: 'בינוני' },
+  'גדול':  { en: 'Large',  ru: 'Большая',   he: 'גדול' },
+  'Small':  { en: 'Small',  ru: 'Маленькая', he: 'קטן' },
+  'Medium': { en: 'Medium', ru: 'Средняя',   he: 'בינוני' },
+  'Large':  { en: 'Large',  ru: 'Большая',   he: 'גדול' },
+}
+
+export function translateBreastSize(v: string | null, locale: Locale): string {
+  if (!v) return ''
+  return BREAST_SIZE_MAP[v]?.[locale] || v
+}
+
+/* ── Language name translation map ── */
+export const LANGUAGE_MAP: Record<string, Record<Locale, string>> = {
+  'עברית':  { en: 'Hebrew',   ru: 'Иврит',      he: 'עברית' },
+  'רוסית':  { en: 'Russian',  ru: 'Русский',     he: 'רוסית' },
+  'אנגלית': { en: 'English',  ru: 'Английский',  he: 'אנגלית' },
+  'ספרדית':  { en: 'Spanish',  ru: 'Испанский',   he: 'ספרדית' },
+  'רומנית':  { en: 'Romanian', ru: 'Румынский',   he: 'רומנית' },
+  'תאית':   { en: 'Thai',     ru: 'Тайский',     he: 'תאית' },
+  // English fallbacks
+  'Hebrew':   { en: 'Hebrew',   ru: 'Иврит',      he: 'עברית' },
+  'Russian':  { en: 'Russian',  ru: 'Русский',     he: 'רוסית' },
+  'English':  { en: 'English',  ru: 'Английский',  he: 'אנגלית' },
+  'Spanish':  { en: 'Spanish',  ru: 'Испанский',   he: 'ספרדית' },
+  'Romanian': { en: 'Romanian', ru: 'Румынский',   he: 'רומנית' },
+  'Thai':     { en: 'Thai',     ru: 'Тайский',     he: 'תאית' },
+}
+
+export function translateLanguage(v: string | null, locale: Locale): string {
+  if (!v) return ''
+  return LANGUAGE_MAP[v]?.[locale] || v
+}
+
+/* ── Service name translation map ── */
+export const SERVICE_NAME_MAP: Record<string, Record<Locale, string>> = {
+  'דירה פרטית': { en: 'Private apt',  ru: 'Квартира',   he: 'דירה פרטית' },
+  'ליווי':      { en: 'Escort',       ru: 'Эскорт',     he: 'ליווי' },
+  'עיסוי':      { en: 'Massage',      ru: 'Массаж',     he: 'עיסוי' },
+  'דומינציה':   { en: 'Domination',   ru: 'Доминация',  he: 'דומינציה' },
+  'זוגות':      { en: 'Couples',      ru: 'Для пар',    he: 'זוגות' },
+  'סטריפטיז':   { en: 'Striptease',   ru: 'Стриптиз',   he: 'סטריפטיז' },
+  'BDSM':       { en: 'BDSM',         ru: 'БДСМ',       he: 'BDSM' },
+  'GFE':        { en: 'GFE',          ru: 'GFE',         he: 'GFE' },
+  // Additional Hebrew services from manual/crawled data
+  'דיסקרטיות מלאה': { en: 'Full discretion', ru: 'Полная дискретность', he: 'דיסקרטיות מלאה' },
+  'אירוח':          { en: 'Hosting',         ru: 'Приём',              he: 'אירוח' },
+  'עיסוי ארוטי':    { en: 'Erotic massage',  ru: 'Эротический массаж', he: 'עיסוי ארוטי' },
+  'עיסוי אירוטי':   { en: 'Erotic massage',  ru: 'Эротический массаж', he: 'עיסוי אירוטי' },
+  'סטילה':          { en: 'Style',           ru: 'Стиль',             he: 'סטילה' },
+  // English fallbacks for crawled data
+  'Private apt': { en: 'Private apt',  ru: 'Квартира',   he: 'דירה פרטית' },
+  'Escort':      { en: 'Escort',       ru: 'Эскорт',     he: 'ליווי' },
+  'Massage':     { en: 'Massage',      ru: 'Массаж',     he: 'עיסוי' },
+  'Domination':  { en: 'Domination',   ru: 'Доминация',  he: 'דומינציה' },
+  'Couples':     { en: 'Couples',      ru: 'Для пар',    he: 'זוגות' },
+  'Striptease':  { en: 'Striptease',   ru: 'Стриптиз',   he: 'סטריפטיז' },
+}
+
+export function translateService(v: string | null, locale: Locale): string {
+  if (!v) return ''
+  return SERVICE_NAME_MAP[v]?.[locale] || v
+}
+
+/* ── Price table type translation ── */
+/* ── Sexuality translation map ── */
+export const SEXUALITY_MAP: Record<string, Record<Locale, string>> = {
+  'טרנס':  { en: 'Trans',      ru: 'Транс',      he: 'טרנס' },
+  'Trans':  { en: 'Trans',      ru: 'Транс',      he: 'טרנס' },
+  'ביסקסואל': { en: 'Bisexual', ru: 'Бисексуал',  he: 'ביסקסואל' },
+  'Bisexual': { en: 'Bisexual', ru: 'Бисексуал',  he: 'ביסקסואל' },
+}
+
+export function translateSexuality(v: string | null, locale: Locale): string {
+  if (!v) return ''
+  return SEXUALITY_MAP[v]?.[locale] || v
+}
+
+export function translatePriceType(v: string | null, locale: Locale): string {
+  if (!v) return ''
+  const map: Record<string, Record<Locale, string>> = {
+    'incall':  { en: 'Incall',  ru: 'В апартаментах', he: 'בדירה' },
+    'outcall': { en: 'Outcall', ru: 'Выезд',         he: 'יוצאת' },
+    'INCALL':  { en: 'Incall',  ru: 'В апартаментах', he: 'בדירה' },
+    'OUTCALL': { en: 'Outcall', ru: 'Выезд',         he: 'יוצאת' },
+  }
+  return map[v]?.[locale] || v
+}
