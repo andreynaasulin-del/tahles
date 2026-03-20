@@ -120,13 +120,31 @@ export async function POST(
     const whatsapp = sub.whatsapp || null
     const phone = whatsapp ? `+${whatsapp}` : null
 
+    // ── 4b. Parse structured extra data from description ──
+    const DATA_SEP = '\n---DATA---\n'
+    let cleanDescription = sub.description || ''
+    let enriched: Record<string, any> = {}
+    if (cleanDescription.includes(DATA_SEP)) {
+      const [descPart, jsonPart] = cleanDescription.split(DATA_SEP)
+      cleanDescription = descPart.trim()
+      try { enriched = JSON.parse(jsonPart) } catch { enriched = {} }
+    }
+
+    // Build _enriched block matching crawled profile format
+    const enrichedBlock: Record<string, any> = {
+      services: enriched.services ?? [],
+      priceTable: enriched.priceTable ?? [],
+      physicalParams: enriched.physicalParams ?? {},
+      shortDescription: cleanDescription.split('\n')[0] || sub.nickname,
+    }
+
     // ── 5. Create advertisement with full raw_data ──
     const { data: ad, error: adErr } = await supabase
       .from('advertisements')
       .insert({
         user_id: userId,
         nickname: sub.nickname,
-        description: sub.description || null,
+        description: cleanDescription || null,
         age: sub.age,
         city,
         service_type: sub.service_type,
@@ -141,14 +159,14 @@ export async function POST(
           _category: category,
           _source: 'telegram_bot',
           _submission_id: submissionId,
-          // Contacts embedded in raw_data for search API
+          _enriched: enrichedBlock,
+          languages: enriched.languages ?? [],
           contacts: {
             phone,
             whatsapp,
             telegram: sub.telegram_username || null,
           },
-          // Description for profile detail
-          description: sub.description || null,
+          description: cleanDescription || null,
         },
       })
       .select('id')

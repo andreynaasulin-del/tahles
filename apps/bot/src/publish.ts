@@ -76,6 +76,46 @@ const i18n: Record<string, Record<Lang, string>> = {
     ru: '⚠️ Неверный формат. Отправь как: `500-1000`',
     he: '⚠️ פורמט לא נכון. שלחי כמו: `500-1000`',
   },
+  ask_services: {
+    en: '5️⃣b *What services do you offer?*\n\nSelect all that apply, then tap "Done" 👇',
+    ru: '5️⃣b *Какие услуги ты предлагаешь?*\n\nВыбери всё подходящее, затем нажми "Готово" 👇',
+    he: '5️⃣b *אילו שירותים את מציעה?*\n\nבחרי את כל מה שמתאים, ואז לחצי "סיימתי" 👇',
+  },
+  services_done: {
+    en: '✅ Done',
+    ru: '✅ Готово',
+    he: '✅ סיימתי',
+  },
+  services_selected: {
+    en: '✔ {s} selected. Pick more or tap "Done"',
+    ru: '✔ {s} выбрано. Выбери ещё или нажми "Готово"',
+    he: '✔ {s} נבחרו. בחרי עוד או לחצי "סיימתי"',
+  },
+  ask_height: {
+    en: '📏 *Height (cm)?* (or Skip)',
+    ru: '📏 *Рост (см)?* (или Пропустить)',
+    he: '📏 *גובה (ס"מ)?* (או דלגי)',
+  },
+  ask_breast: {
+    en: '👙 *Breast size?*',
+    ru: '👙 *Размер груди?*',
+    he: '👙 *מידת חזה?*',
+  },
+  ask_hair: {
+    en: '💇 *Hair color?*',
+    ru: '💇 *Цвет волос?*',
+    he: '💇 *צבע שיער?*',
+  },
+  ask_languages: {
+    en: '🗣 *Languages you speak?*\n\nSelect all, then tap "Done"',
+    ru: '🗣 *На каких языках говоришь?*\n\nВыбери все, затем "Готово"',
+    he: '🗣 *באילו שפות את מדברת?*\n\nבחרי הכל, ואז "סיימתי"',
+  },
+  skip: {
+    en: '⏭ Skip',
+    ru: '⏭ Пропустить',
+    he: '⏭ דלגי',
+  },
   ask_photos: {
     en: '6️⃣ *Send photos* (1-10)\n\nSend one or more photos, then tap "Done" 👇',
     ru: '6️⃣ *Отправь фото* (1-10)\n\nОтправь одно или несколько фото, затем нажми "Готово" 👇',
@@ -134,6 +174,9 @@ const i18n: Record<string, Record<Lang, string>> = {
   summary_photos: { en: '📸 Photos: *{v}*', ru: '📸 Фото: *{v}*', he: '📸 תמונות: *{v}*' },
   summary_wa: { en: '📱 WhatsApp: *{v}*', ru: '📱 WhatsApp: *{v}*', he: '📱 WhatsApp: *{v}*' },
   summary_desc: { en: '📝 Description: {v}', ru: '📝 Описание: {v}', he: '📝 תיאור: {v}' },
+  summary_services: { en: '🎯 Services: *{v}*', ru: '🎯 Услуги: *{v}*', he: '🎯 שירותים: *{v}*' },
+  summary_params: { en: '📐 Details: *{v}*', ru: '📐 Параметры: *{v}*', he: '📐 פרטים: *{v}*' },
+  summary_langs: { en: '🗣 Languages: *{v}*', ru: '🗣 Языки: *{v}*', he: '🗣 שפות: *{v}*' },
   confirm_q: { en: '\n✅ *All correct?*', ru: '\n✅ *Всё верно?*', he: '\n✅ *הכל נכון?*' },
   btn_confirm: { en: '✅ Confirm & publish', ru: '✅ Подтвердить', he: '✅ אישור ופרסום' },
   btn_cancel: { en: '❌ Cancel', ru: '❌ Отмена', he: '❌ ביטול' },
@@ -206,7 +249,66 @@ const CITIES = [
   'בת ים', 'באר שבע', 'אשדוד', 'ראשון לציון', 'הרצליה', 'חדרה',
 ]
 
+// ── Service options for multi-select ──
+const SERVICE_OPTIONS: Record<Lang, string[]> = {
+  he: ['דירה פרטית', 'ליווי', 'עיסוי', 'דומינציה', 'זוגות', 'סטריפטיז', 'BDSM', 'GFE'],
+  ru: ['Квартира', 'Эскорт', 'Массаж', 'Доминация', 'Для пар', 'Стриптиз', 'BDSM', 'GFE'],
+  en: ['Private apt', 'Escort', 'Massage', 'Domination', 'Couples', 'Striptease', 'BDSM', 'GFE'],
+}
+
+// ── Hair color options ──
+const HAIR_OPTIONS: Record<Lang, { label: string; value: string }[]> = {
+  he: [
+    { label: '🖤 שחור', value: 'Black' },
+    { label: '🤎 חום', value: 'Brown' },
+    { label: '💛 בלונד', value: 'Blonde' },
+    { label: '❤️ ג\'ינג\'י', value: 'Red' },
+  ],
+  ru: [
+    { label: '🖤 Чёрные', value: 'Black' },
+    { label: '🤎 Каштан', value: 'Brown' },
+    { label: '💛 Блонд', value: 'Blonde' },
+    { label: '❤️ Рыжие', value: 'Red' },
+  ],
+  en: [
+    { label: '🖤 Black', value: 'Black' },
+    { label: '🤎 Brown', value: 'Brown' },
+    { label: '💛 Blonde', value: 'Blonde' },
+    { label: '❤️ Red', value: 'Red' },
+  ],
+}
+
+// ── Breast size options ──
+const BREAST_OPTIONS: Record<Lang, { label: string; value: string }[]> = {
+  he: [
+    { label: 'קטן', value: 'Small' },
+    { label: 'בינוני', value: 'Medium' },
+    { label: 'גדול', value: 'Large' },
+  ],
+  ru: [
+    { label: 'Маленькая', value: 'Small' },
+    { label: 'Средняя', value: 'Medium' },
+    { label: 'Большая', value: 'Large' },
+  ],
+  en: [
+    { label: 'Small', value: 'Small' },
+    { label: 'Medium', value: 'Medium' },
+    { label: 'Large', value: 'Large' },
+  ],
+}
+
+// ── Language options ──
+const LANG_OPTIONS = [
+  { label: '🇮🇱 עברית', value: 'Hebrew' },
+  { label: '🇷🇺 Русский', value: 'Russian' },
+  { label: '🇬🇧 English', value: 'English' },
+  { label: '🇪🇸 Español', value: 'Spanish' },
+  { label: '🇷🇴 Română', value: 'Romanian' },
+  { label: '🇹🇭 ไทย', value: 'Thai' },
+]
+
 const SITE = 'https://tahles.top'
+const DATA_SEPARATOR = '\n---DATA---\n'
 
 /**
  * Publish profile conversation — full wizard flow inside Telegram bot.
@@ -283,6 +385,106 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
     await ctx.reply(t('price_invalid', lang), { parse_mode: 'Markdown' })
   }
 
+  // ── Step 5b: Services offered (multi-select) ──
+  const selectedServices: string[] = []
+  const svcOptions = SERVICE_OPTIONS[lang]
+  const buildSvcKb = () => {
+    const kb = new InlineKeyboard()
+    for (let i = 0; i < svcOptions.length; i++) {
+      const sel = selectedServices.includes(svcOptions[i])
+      kb.text(sel ? `✅ ${svcOptions[i]}` : svcOptions[i], `pub_svc:${i}`)
+      if (i % 2 === 1) kb.row()
+    }
+    kb.row().text(t('services_done', lang), 'pub_svc_done')
+    return kb
+  }
+
+  await ctx.reply(t('ask_services', lang), { parse_mode: 'Markdown', reply_markup: buildSvcKb() })
+  while (true) {
+    const svcCtx = await conversation.waitForCallbackQuery(/^pub_svc/)
+    await svcCtx.answerCallbackQuery()
+    const cbData = svcCtx.match![0]
+    if (cbData === 'pub_svc_done') break
+    const idx = parseInt(cbData.replace('pub_svc:', ''), 10)
+    const svc = svcOptions[idx]
+    if (svc) {
+      const pos = selectedServices.indexOf(svc)
+      if (pos >= 0) selectedServices.splice(pos, 1)
+      else selectedServices.push(svc)
+    }
+    try {
+      await svcCtx.editMessageReplyMarkup({ reply_markup: buildSvcKb() })
+    } catch { /* ignore edit errors */ }
+  }
+
+  // ── Step 5c: Physical params ──
+  // Height
+  const heightKb = new InlineKeyboard().text(t('skip', lang), 'pub_height_skip')
+  await ctx.reply(t('ask_height', lang), { parse_mode: 'Markdown', reply_markup: heightKb })
+  let height = ''
+  const heightCtx = await conversation.wait()
+  if (heightCtx.callbackQuery?.data === 'pub_height_skip') {
+    await heightCtx.answerCallbackQuery()
+  } else if (heightCtx.message?.text && heightCtx.message.text !== '/cancel') {
+    const h = parseInt(heightCtx.message.text, 10)
+    if (h >= 140 && h <= 210) height = `${h} cm`
+  } else if (heightCtx.message?.text === '/cancel') {
+    return await ctx.reply(t('cancelled', lang))
+  }
+
+  // Breast size
+  const breastKb = new InlineKeyboard()
+  for (const opt of BREAST_OPTIONS[lang]) {
+    breastKb.text(opt.label, `pub_breast:${opt.value}`)
+  }
+  breastKb.row().text(t('skip', lang), 'pub_breast:skip')
+  await ctx.reply(t('ask_breast', lang), { parse_mode: 'Markdown', reply_markup: breastKb })
+  const breastCtx = await conversation.waitForCallbackQuery(/^pub_breast:/)
+  await breastCtx.answerCallbackQuery()
+  const breastSize = breastCtx.match![0].replace('pub_breast:', '')
+
+  // Hair color
+  const hairKb = new InlineKeyboard()
+  for (const opt of HAIR_OPTIONS[lang]) {
+    hairKb.text(opt.label, `pub_hair:${opt.value}`)
+  }
+  hairKb.row().text(t('skip', lang), 'pub_hair:skip')
+  await ctx.reply(t('ask_hair', lang), { parse_mode: 'Markdown', reply_markup: hairKb })
+  const hairCtx = await conversation.waitForCallbackQuery(/^pub_hair:/)
+  await hairCtx.answerCallbackQuery()
+  const hairColor = hairCtx.match![0].replace('pub_hair:', '')
+
+  // ── Step 5d: Languages ──
+  const selectedLangs: string[] = []
+  const buildLangKb = () => {
+    const kb = new InlineKeyboard()
+    for (let i = 0; i < LANG_OPTIONS.length; i++) {
+      const sel = selectedLangs.includes(LANG_OPTIONS[i].value)
+      kb.text(sel ? `✅ ${LANG_OPTIONS[i].label}` : LANG_OPTIONS[i].label, `pub_lang:${i}`)
+      if (i % 2 === 1) kb.row()
+    }
+    kb.row().text(t('services_done', lang), 'pub_lang_done')
+    return kb
+  }
+
+  await ctx.reply(t('ask_languages', lang), { parse_mode: 'Markdown', reply_markup: buildLangKb() })
+  while (true) {
+    const langCtx = await conversation.waitForCallbackQuery(/^pub_lang/)
+    await langCtx.answerCallbackQuery()
+    const cbData = langCtx.match![0]
+    if (cbData === 'pub_lang_done') break
+    const idx = parseInt(cbData.replace('pub_lang:', ''), 10)
+    const langVal = LANG_OPTIONS[idx]?.value
+    if (langVal) {
+      const pos = selectedLangs.indexOf(langVal)
+      if (pos >= 0) selectedLangs.splice(pos, 1)
+      else selectedLangs.push(langVal)
+    }
+    try {
+      await langCtx.editMessageReplyMarkup({ reply_markup: buildLangKb() })
+    } catch { /* ignore edit errors */ }
+  }
+
   // ── Step 6: Photos ──
   await ctx.reply(t('ask_photos', lang), {
     parse_mode: 'Markdown',
@@ -345,8 +547,32 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
     return await ctx.reply(t('cancelled', lang))
   }
 
+  // ── Build structured extra data ──
+  const extraData: Record<string, any> = {
+    services: selectedServices,
+    physicalParams: {} as Record<string, string>,
+    languages: selectedLangs,
+    priceTable: [
+      { type: serviceType === 'outcall' ? 'outcall' : 'incall', amount: priceMin, duration: '1h' },
+      ...(priceMax > priceMin ? [{ type: serviceType === 'outcall' ? 'outcall' : 'incall', amount: priceMax, duration: '2h' }] : []),
+    ],
+  }
+  if (height) extraData.physicalParams.height = height
+  if (breastSize && breastSize !== 'skip') extraData.physicalParams.breast_size = breastSize
+  if (hairColor && hairColor !== 'skip') extraData.physicalParams.hair_color = hairColor
+
+  // Pack extra data into description with separator
+  const fullDescription = description
+    ? description + DATA_SEPARATOR + JSON.stringify(extraData)
+    : DATA_SEPARATOR + JSON.stringify(extraData)
+
   // ── Step 9: Confirmation ──
   const serviceLabel = t(`service_${serviceType}`, lang)
+  const paramParts: string[] = []
+  if (height) paramParts.push(height)
+  if (breastSize && breastSize !== 'skip') paramParts.push(breastSize)
+  if (hairColor && hairColor !== 'skip') paramParts.push(hairColor)
+
   const summary = [
     t('summary_header', lang),
     t('summary_name', lang, { v: nickname }),
@@ -354,6 +580,9 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
     t('summary_city', lang, { v: city }),
     t('summary_service', lang, { v: serviceLabel }),
     t('summary_price', lang, { v: `${priceMin}–${priceMax}` }),
+    selectedServices.length > 0 ? t('summary_services', lang, { v: selectedServices.join(', ') }) : '',
+    paramParts.length > 0 ? t('summary_params', lang, { v: paramParts.join(' | ') }) : '',
+    selectedLangs.length > 0 ? t('summary_langs', lang, { v: selectedLangs.join(', ') }) : '',
     t('summary_photos', lang, { v: photos.length }),
     t('summary_wa', lang, { v: whatsapp }),
     description ? t('summary_desc', lang, { v: description }) : '',
@@ -386,7 +615,7 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
       price_max: priceMax,
       photos,
       whatsapp,
-      description,
+      description: fullDescription,
       telegram_user_id: userId || 0,
       telegram_username: ctx.from?.username || '',
     })
