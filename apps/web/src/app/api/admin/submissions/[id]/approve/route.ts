@@ -5,16 +5,59 @@ const ADMIN_SECRET = process.env.CRON_SECRET || ''
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
 const SITE = 'https://tahles.top'
 
+// City normalization: Hebrew bot input → English DB value
+const CITY_MAP: Record<string, string> = {
+  'תל אביב': 'Tel Aviv',
+  'Tel Aviv': 'Tel Aviv',
+  'חיפה': 'Haifa',
+  'Haifa': 'Haifa',
+  'ירושלים': 'Jerusalem',
+  'Jerusalem': 'Jerusalem',
+  'אילת': 'Eilat',
+  'Eilat': 'Eilat',
+  'נתניה': 'Netanya',
+  'Netanya': 'Netanya',
+  'בת ים': 'Bat Yam',
+  'Bat Yam': 'Bat Yam',
+  'באר שבע': 'Beer Sheva',
+  'Beer Sheva': 'Beer Sheva',
+  'אשדוד': 'Ashdod',
+  'Ashdod': 'Ashdod',
+  'ראשון לציון': 'Rishon LeZion',
+  'Rishon LeZion': 'Rishon LeZion',
+  'הרצליה': 'Herzliya',
+  'Herzliya': 'Herzliya',
+  'חדרה': 'Hadera',
+  'Hadera': 'Hadera',
+  'פתח תקווה': 'Petah Tikva',
+  'Petah Tikva': 'Petah Tikva',
+  'רמת גן': 'Ramat Gan',
+  'Ramat Gan': 'Ramat Gan',
+  'אשקלון': 'Ashkelon',
+  'Ashkelon': 'Ashkelon',
+  'כפר סבא': 'Kfar Saba',
+  'רחובות': 'Rehovot',
+}
+
+function normalizeCity(city: string | null): string | null {
+  if (!city) return null
+  return CITY_MAP[city.trim()] || city.trim()
+}
+
+function detectCategory(sub: any): string {
+  const text = [sub.nickname, sub.description, sub.service_type].filter(Boolean).join(' ').toLowerCase()
+  if (/\btrans\b|\bטרנס\b|\bshemale\b|\bladyboy\b|\bt\.?s\.?\b|\bטרנסית\b/.test(text)) return 'trans'
+  return 'individual'
+}
+
 /**
  * POST /api/admin/submissions/[id]/approve
  *
  * 1. Fetch submission
- * 2. Download photos from Telegram by file_id → upload to Supabase Storage
- * 3. Create user (if needed) + advertisement + contacts row
- * 4. Mark submission as approved
- * 5. Notify user via Telegram
- *
- * Auth: Bearer CRON_SECRET
+ * 2. Download photos from Telegram → Supabase Storage
+ * 3. Create user + advertisement + contacts
+ * 4. Mark submission approved
+ * 5. Notify via Telegram
  */
 export async function POST(
   request: NextRequest,
@@ -71,7 +114,13 @@ export async function POST(
     // ── 3. Create or find user ──
     const userId = await getOrCreateUser(supabase, sub.telegram_user_id, sub.telegram_username)
 
-    // ── 4. Create advertisement ──
+    // ── 4. Normalize data ──
+    const city = normalizeCity(sub.city)
+    const category = detectCategory(sub)
+    const whatsapp = sub.whatsapp || null
+    const phone = whatsapp ? `+${whatsapp}` : null
+
+    // ── 5. Create advertisement with full raw_data ──
     const { data: ad, error: adErr } = await supabase
       .from('advertisements')
       .insert({
@@ -79,19 +128,27 @@ export async function POST(
         nickname: sub.nickname,
         description: sub.description || null,
         age: sub.age,
-        city: sub.city,
+        city,
         service_type: sub.service_type,
-        price_min: sub.price_min,
-        price_max: sub.price_max,
+        price_min: sub.price_min || null,
+        price_max: sub.price_max || null,
         photos: photoUrls,
         verified: false,
         gender: 'female',
         online_status: true,
         raw_data: {
           _verified: 'true',
-          _category: detectSubmissionCategory(sub),
+          _category: category,
           _source: 'telegram_bot',
           _submission_id: submissionId,
+          // Contacts embedded in raw_data for search API
+          contacts: {
+            phone,
+            whatsapp,
+            telegram: sub.telegram_username || null,
+          },
+          // Description for profile detail
+          description: sub.description || null,
         },
       })
       .select('id')
@@ -102,32 +159,35 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to create advertisement' }, { status: 500 })
     }
 
-    // ── 5. Create contacts row ──
+    // ── 6. Create contacts row ──
     await supabase.from('contacts').insert({
       ad_id: ad.id,
-      whatsapp: sub.whatsapp,
+      phone,
+      whatsapp,
       telegram_username: sub.telegram_username || null,
     })
 
-    // ── 6. Mark submission approved ──
+    // ── 7. Mark submission approved ──
     await supabase
       .from('submissions')
       .update({ status: 'approved', updated_at: new Date().toISOString() })
       .eq('id', submissionId)
 
-    // ── 7. Notify user via Telegram ──
+    // ── 8. Notify user via Telegram ──
     await notifyTelegram(
       sub.telegram_user_id,
-      `🎉 *Your ad has been approved!*\n\n` +
-      `👤 ${sub.nickname}\n📍 ${sub.city}\n\n` +
-      `🔗 View your profile: ${SITE}/ad/${ad.id}\n\n` +
-      `Share with your clients! 💎`
+      `🎉 *המודעה שלך אושרה ועלתה לאתר!*\n\n` +
+      `👤 ${sub.nickname}\n📍 ${city}\n\n` +
+      `🔗 צפי בפרופיל: ${SITE}/ad/${ad.id}\n\n` +
+      `שתפי את הלינק עם הלקוחות שלך! 💎`
     )
 
     return NextResponse.json({
       ok: true,
       ad_id: ad.id,
       photos_uploaded: photoUrls.length,
+      category,
+      city,
     })
 
   } catch (err) {
@@ -146,7 +206,6 @@ async function downloadTelegramPhoto(
 ): Promise<string | null> {
   if (!BOT_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN not set')
 
-  // Step 1: Get file path from Telegram
   const fileRes = await fetch(
     `https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`
   )
@@ -158,8 +217,6 @@ async function downloadTelegramPhoto(
   }
 
   const filePath = fileJson.result.file_path as string
-
-  // Step 2: Download the file
   const downloadUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`
   const downloadRes = await fetch(downloadUrl)
 
@@ -169,12 +226,10 @@ async function downloadTelegramPhoto(
   }
 
   const buffer = Buffer.from(await downloadRes.arrayBuffer())
-  // Telegram often returns application/octet-stream — force correct mime type
   const ext = filePath.split('.').pop()?.toLowerCase() || 'jpg'
   const mimeMap: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' }
   const contentType = mimeMap[ext] || 'image/jpeg'
 
-  // Step 3: Upload to Supabase Storage
   const storagePath = `${submissionId}/${Date.now()}_${index}.${ext}`
 
   const { error: uploadErr } = await supabase.storage
@@ -198,7 +253,6 @@ async function getOrCreateUser(
   telegramUserId: number,
   telegramUsername: string
 ): Promise<string> {
-  // Check if user exists by tg_id
   const { data: existing } = await supabase
     .from('users')
     .select('id')
@@ -207,7 +261,6 @@ async function getOrCreateUser(
 
   if (existing) return existing.id
 
-  // Create auth user first, then public.users trigger fills the rest
   const email = `tg_${telegramUserId}@tahles.bot`
   const { data: authUser, error: authErr } = await supabase.auth.admin.createUser({
     email,
@@ -219,19 +272,12 @@ async function getOrCreateUser(
     throw new Error(`Failed to create auth user: ${authErr?.message}`)
   }
 
-  // Update tg_id on public.users (trigger creates the row)
   await supabase
     .from('users')
     .update({ tg_id: telegramUserId, role: 'advertiser' })
     .eq('id', authUser.user.id)
 
   return authUser.user.id
-}
-
-function detectSubmissionCategory(sub: any): string {
-  const text = [sub.nickname, sub.description, sub.service_type].filter(Boolean).join(' ').toLowerCase()
-  if (/\btrans\b|\bטרנס\b|\bshemale\b|\bladyboy\b|\bt\.?s\.?\b/.test(text)) return 'trans'
-  return 'individual'
 }
 
 async function notifyTelegram(chatId: number, text: string) {
