@@ -52,6 +52,7 @@ async function realSearch(
       { count: 'exact' }
     )
     .not('photos', 'is', null)
+    .neq('photos', '[]')
     .eq('raw_data->>_verified', 'true')
 
   // Category filter via raw_data JSONB
