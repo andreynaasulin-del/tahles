@@ -105,10 +105,11 @@ async function realSearch(
     const rdContacts = rawData?.contacts || {}
     const phone = rdContacts?.phone || rawData?.phone || null
     const wa = rdContacts?.whatsapp || rawData?.wa || phone
+    const tg = rdContacts?.telegram || rawData?.telegram_username || null
     return {
       whatsapp: wa || null,
       phone: phone || null,
-      telegram: null,
+      telegram: tg || null,
     }
   }
 
@@ -134,6 +135,7 @@ async function realSearch(
       },
       languages:     rawData?.languages ?? [],
       videos:        (enriched.videos ?? []).slice(0, 5),
+      description:   ad.description || rawData?.description || null,
       category:      rawData?._category || rawData?.category || null,
       score:         rawData?._score ?? 0,
       score_category: rawData?._score_category ?? null,

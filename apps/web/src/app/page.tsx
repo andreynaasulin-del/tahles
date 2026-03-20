@@ -46,6 +46,7 @@ interface Ad {
   price_table?: { type: string; amount: number; duration: string }[]
   physical_params?: Record<string, string>
   languages?: string[]
+  description?: string | null
   category?: string | null
   score?: number
   score_category?: string | null

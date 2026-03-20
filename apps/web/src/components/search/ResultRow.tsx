@@ -35,6 +35,7 @@ interface ResultRowProps {
   price_table?: PriceEntry[]
   physical_params?: Record<string, string>
   languages?: string[]
+  description?: string | null
   category?: string | null
   priority?: boolean
 }
@@ -57,8 +58,8 @@ const PARAM_ICONS: Record<string, string> = {
 /* ── Infographic Slide ────────────────────────────────── */
 function InfoSlide({
   nickname, age, city, address, service_type, price_min,
-  services, price_table, physical_params, languages
-}: Pick<ResultRowProps, 'nickname' | 'age' | 'city' | 'address' | 'service_type' | 'price_min' | 'services' | 'price_table' | 'physical_params' | 'languages'>) {
+  services, price_table, physical_params, languages, description
+}: Pick<ResultRowProps, 'nickname' | 'age' | 'city' | 'address' | 'service_type' | 'price_min' | 'services' | 'price_table' | 'physical_params' | 'languages' | 'description'>) {
   const { t, locale } = useTranslation()
   const params = physical_params ?? {}
   const hasParams = Object.keys(params).length > 0
@@ -81,6 +82,13 @@ function InfoSlide({
           <p className="text-xs text-white/40 mt-0.5">📍 {displayLocation}</p>
         )}
       </div>
+
+      {/* Description */}
+      {description && (
+        <div className="mb-4">
+          <p className="text-xs text-white/50 leading-relaxed whitespace-pre-line line-clamp-6">{description}</p>
+        </div>
+      )}
 
       {/* Price Table */}
       {hasPrices && (
@@ -154,7 +162,7 @@ function InfoSlide({
       )}
 
       {/* Minimal fallback — when no detailed data is available */}
-      {!hasPrices && !hasParams && !hasServices && !hasLangs && (
+      {!hasPrices && !hasParams && !hasServices && !hasLangs && !description && (
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <div className="w-16 h-16 rounded-full bg-white/[0.06] border border-white/[0.1] flex items-center justify-center">
             <span className="text-2xl font-black text-white/30">{(nickname || '?').charAt(0).toUpperCase()}</span>
@@ -284,7 +292,7 @@ function ContactPopup({
 export const ResultRow = memo(function ResultRow({
   id, nickname, age, price_min, city, photos = [], videos = [], address,
   online_status, whatsapp, phone, telegram, service_type,
-  services, price_table, physical_params, languages, category, priority
+  services, price_table, physical_params, languages, description, category, priority
 }: ResultRowProps) {
   const { t, locale } = useTranslation()
 
@@ -432,6 +440,7 @@ export const ResultRow = memo(function ResultRow({
             service_type={service_type} price_min={price_min}
             services={services} price_table={price_table}
             physical_params={physical_params} languages={languages}
+            description={description}
           />
         ) : isVideoSlide && currentUrl ? (
           /* Video slide */
