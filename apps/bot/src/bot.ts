@@ -1,7 +1,7 @@
 import { Bot, InlineKeyboard } from 'grammy'
 import { conversations, createConversation } from '@grammyjs/conversations'
 import { searchProfiles, getProfileCount, getCitiesWithCounts, type Profile } from './db.js'
-import { publishConversation, type BotContext } from './publish.js'
+import { publishConversation, type BotContext, pendingCategories } from './publish.js'
 import { registerAdminHandlers } from './admin.js'
 
 const SITE = 'https://tahles.top'
@@ -13,12 +13,18 @@ export function createBot(token: string) {
   bot.use(conversations())
   bot.use(createConversation(publishConversation))
 
+  // ── Error handler — log and answer stale callbacks ──
+  bot.catch((err) => {
+    console.error('[bot] Error:', err.message)
+    try { err.ctx?.answerCallbackQuery?.() } catch {}
+  })
+
   // ── /start ──
   bot.command('start', async (ctx) => {
-    // Check if deep-linked from publish button
     const payload = ctx.match
     if (payload === 'publish' || payload?.startsWith('publish')) {
-      await ctx.conversation.enter('publishConversation')
+      // Deep link: show category selection first
+      await showCategorySelection(ctx, payload)
       return
     }
 
@@ -32,7 +38,7 @@ export function createBot(token: string) {
       .webApp('🌸 אסיאתיות', `${SITE}/escorts/asian`)
       .webApp('👩 העצמאיות', `${SITE}/escorts/independent`)
       .row()
-      .text('📤 פרסום מודעה', 'start_publish')
+      .text('⭐ פרסום מודעה', 'start_publish')
       .row()
       .url('📞 פנייה לשירות לקוחות', 'https://t.me/tahles_support')
 
@@ -47,18 +53,42 @@ export function createBot(token: string) {
 
   // ── /publish command ──
   bot.command('publish', async (ctx) => {
-    await ctx.conversation.enter('publishConversation')
+    await showCategorySelection(ctx)
   })
 
   // ── /cancel command (exits conversation) ──
   bot.command('cancel', async (ctx) => {
-    await ctx.conversation.exit('publishConversation')
+    try { await ctx.conversation.exit('publishConversation') } catch {}
+    const userId = ctx.from?.id
+    if (userId) pendingCategories.delete(userId)
     await ctx.reply('❌ בוטל')
   })
 
-  // ── Publish callback from /start button ──
+  // ── "Add Profile" button → show category selection ──
   bot.callbackQuery('start_publish', async (ctx) => {
     await ctx.answerCallbackQuery()
+    try { await ctx.conversation.exit('publishConversation') } catch {}
+    await showCategorySelection(ctx)
+  })
+
+  // ── Category selected → enter conversation ──
+  bot.callbackQuery(/^pub_cat:/, async (ctx) => {
+    await ctx.answerCallbackQuery()
+    const userId = ctx.from?.id
+    if (!userId) return
+
+    const category = ctx.callbackQuery.data.replace('pub_cat:', '')
+    console.log(`[bot] User ${userId} selected category: ${category}`)
+
+    // Read stored language (set during showCategorySelection)
+    const prev = pendingCategories.get(userId)
+    const lang = prev?.startsWith('__lang:') ? prev.replace('__lang:', '') : 'he'
+
+    // Store category + language for the conversation to pick up
+    pendingCategories.set(userId, `${category}|${lang}`)
+
+    // Exit any existing conversation, then enter fresh
+    try { await ctx.conversation.exit('publishConversation') } catch {}
     await ctx.conversation.enter('publishConversation')
   })
 
@@ -94,19 +124,17 @@ export function createBot(token: string) {
     await ctx.reply('🏙 *בחר עיר — פתח ישר באתר:*', { parse_mode: 'Markdown', reply_markup: kb })
   }
 
-  // ── Search prompt callback (legacy, still handle) ──
+  // ── Legacy callbacks ──
   bot.callbackQuery('search_prompt', async (ctx) => {
     await ctx.answerCallbackQuery()
     await ctx.reply('🔍 שלח שם, עיר או קטגוריה לחיפוש:')
   })
 
-  // ── Cities callback (legacy, still handle) ──
   bot.callbackQuery('cities', async (ctx) => {
     await ctx.answerCallbackQuery()
     await handleCities(ctx)
   })
 
-  // ── City callback (legacy, still handle) ──
   bot.callbackQuery(/^city:(.+)$/, async (ctx) => {
     await ctx.answerCallbackQuery()
     const city = ctx.match[1]
@@ -131,7 +159,7 @@ export function createBot(token: string) {
   // ── Free text search ──
   bot.on('message:text', async (ctx) => {
     const text = ctx.message.text
-    if (text.startsWith('/')) return // skip commands
+    if (text.startsWith('/')) return
 
     const profiles = await searchProfiles({ query: text, limit: 5 })
     if (profiles.length === 0) {
@@ -163,10 +191,55 @@ export function createBot(token: string) {
     await ctx.answerInlineQuery(results, { cache_time: 60 })
   })
 
-  // ── Admin handlers ──
+  // ── Admin handlers (MUST be before catch-all) ──
   registerAdminHandlers(bot)
 
+  // ── Catch-all for any unhandled callback queries (MUST be LAST — prevents hanging) ──
+  bot.on('callback_query:data', async (ctx) => {
+    console.log(`[bot] Unhandled callback: ${ctx.callbackQuery.data}`)
+    await ctx.answerCallbackQuery()
+  })
+
   return bot
+}
+
+// ── Show category selection (before entering conversation) ──
+async function showCategorySelection(ctx: any, payload?: string) {
+  // Detect language from deep link payload
+  const langMap: Record<string, Record<string, string>> = {
+    welcome: {
+      en: '📤 *Publish your ad on Tahles*\n\nWe\'ll go through a few quick steps to create your profile.\nYou can cancel anytime with /cancel\n\nLet\'s start! 👇',
+      ru: '📤 *Размещение анкеты на Tahles*\n\nСейчас пройдём несколько шагов для создания вашего профиля.\nОтменить можно в любой момент — /cancel\n\nНачнём! 👇',
+      he: '📤 *פרסום מודעה ב-Tahles*\n\nעכשיו נעבור על כמה שלבים קצרים כדי ליצור את הפרופיל שלך.\nאפשר לבטל בכל שלב עם /cancel\n\nבואי נתחיל! 👇',
+    },
+    ask_category: {
+      en: '📂 *Choose ad category:*',
+      ru: '📂 *Выберите категорию объявления:*',
+      he: '📂 *בחרי קטגוריה למודעה:*',
+    },
+    cat_sugar: { en: '💎 Sugar Baby', ru: '💎 Sugar Baby', he: '💎 Sugar Baby' },
+    cat_regular: { en: '📋 Regular ad', ru: '📋 Обычное объявление', he: '📋 מודעה רגילה' },
+  }
+
+  const langMatch = (payload || '').match(/publish_(\w+)/)
+  const lang = (['en', 'ru', 'he'].includes(langMatch?.[1] || '') ? langMatch![1] : 'he') as string
+
+  // Store language for conversation to pick up
+  const userId = ctx.from?.id
+  if (userId) {
+    pendingCategories.set(userId, `__lang:${lang}`)
+  }
+
+  await ctx.reply(langMap.welcome[lang] || langMap.welcome.he, { parse_mode: 'Markdown' })
+
+  const catKb = new InlineKeyboard()
+    .text(langMap.cat_sugar[lang] || langMap.cat_sugar.he, 'pub_cat:sugar_baby').row()
+    .text(langMap.cat_regular[lang] || langMap.cat_regular.he, 'pub_cat:regular')
+
+  await ctx.reply(langMap.ask_category[lang] || langMap.ask_category.he, {
+    parse_mode: 'Markdown',
+    reply_markup: catKb,
+  })
 }
 
 // ── Helpers ──
@@ -213,7 +286,6 @@ async function sendProfileCard(ctx: any, p: Profile) {
       await ctx.reply(text, { parse_mode: 'Markdown', reply_markup: kb })
     }
   } catch (err) {
-    // Photo might fail (URL expired), fallback to text
     await ctx.reply(text, { parse_mode: 'Markdown', reply_markup: kb })
   }
 }

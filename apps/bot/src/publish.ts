@@ -9,6 +9,10 @@ export type BotConversation = Conversation<BotContext>
 
 type Lang = 'en' | 'ru' | 'he'
 
+// ── Shared state: category selected before entering conversation ──
+// Key = userId, Value = "category" or "__lang:xx" (pre-selection)
+export const pendingCategories = new Map<number, string>()
+
 // ── i18n ──────────────────────────────────────────────────────────────
 const i18n: Record<string, Record<Lang, string>> = {
   welcome: {
@@ -199,6 +203,16 @@ const i18n: Record<string, Record<Lang, string>> = {
     ru: '❌ Отменено. Начать заново — /publish',
     he: '❌ בוטל. אפשר להתחיל מחדש עם /publish',
   },
+  cat_sugar: {
+    en: '💎 Sugar Baby',
+    ru: '💎 Sugar Baby',
+    he: '💎 Sugar Baby',
+  },
+  cat_regular: {
+    en: '📋 Regular ad',
+    ru: '📋 Обычное объявление',
+    he: '📋 מודעה רגילה',
+  },
 }
 
 function t(key: string, lang: Lang, vars?: Record<string, string | number>): string {
@@ -343,12 +357,27 @@ const DATA_SEPARATOR = '\n---DATA---\n'
 export async function publishConversation(conversation: BotConversation, ctx: BotContext, botInstance?: Bot<BotContext>) {
   const userId = ctx.from?.id
 
-  // Parse language from deep link: "publish_ru" → "ru", "publish" → "he" (default)
-  const startPayload = (ctx.match as string) || ''
-  const langMatch = startPayload.match(/publish_(\w+)/)
-  const lang: Lang = (['en', 'ru', 'he'].includes(langMatch?.[1] || '') ? langMatch![1] : 'he') as Lang
+  // ── Read category & language from pre-conversation state ──
+  // Format: "category|lang" (e.g. "sugar_baby|en") or "__lang:xx"
+  const stored = userId ? pendingCategories.get(userId) : undefined
+  let adCategory = 'regular'
+  let lang: Lang = 'he'
 
-  await ctx.reply(t('welcome', lang), { parse_mode: 'Markdown' })
+  if (stored && stored.includes('|')) {
+    const [cat, lng] = stored.split('|')
+    adCategory = cat
+    if (['en', 'ru', 'he'].includes(lng)) lang = lng as Lang
+  } else {
+    // Fallback: parse from deep link
+    const startPayload = (ctx.match as string) || ''
+    const langMatch = startPayload.match(/publish_(\w+)/)
+    if (langMatch && ['en', 'ru', 'he'].includes(langMatch[1])) lang = langMatch[1] as Lang
+  }
+
+  // Clean up stored state
+  if (userId) pendingCategories.delete(userId)
+
+  console.log(`[publish] Started for user ${userId}, category=${adCategory}, lang=${lang}`)
 
   // ── Step 1: Nickname ──
   await ctx.reply(t('ask_name', lang), { parse_mode: 'Markdown' })
@@ -576,6 +605,7 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
 
   // ── Build structured extra data ──
   const extraData: Record<string, any> = {
+    _category: adCategory,
     services: selectedServices,
     physicalParams: {} as Record<string, string>,
     languages: selectedLangs,
@@ -600,8 +630,10 @@ export async function publishConversation(conversation: BotConversation, ctx: Bo
   if (breastSize && breastSize !== 'skip') paramParts.push(breastSize)
   if (hairColor && hairColor !== 'skip') paramParts.push(hairColor)
 
+  const catLabel = adCategory === 'sugar_baby' ? t('cat_sugar', lang) : t('cat_regular', lang)
   const summary = [
     t('summary_header', lang),
+    `📂 ${catLabel}`,
     t('summary_name', lang, { v: nickname }),
     t('summary_age', lang, { v: age }),
     t('summary_city', lang, { v: city }),
