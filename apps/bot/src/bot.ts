@@ -23,8 +23,15 @@ export function createBot(token: string) {
   bot.command('start', async (ctx) => {
     const payload = ctx.match
     if (payload === 'publish' || payload?.startsWith('publish')) {
-      // Deep link: show category selection first
-      await showCategorySelection(ctx, payload)
+      // Deep link with language: publish_en, publish_ru → skip language step
+      const langMatch = payload.match(/publish_(\w+)/)
+      if (langMatch && ['en', 'ru', 'he'].includes(langMatch[1])) {
+        const userId = ctx.from?.id
+        if (userId) pendingCategories.set(userId, `__lang:${langMatch[1]}`)
+        await showCategorySelection(ctx, langMatch[1])
+      } else {
+        await showLanguageSelection(ctx)
+      }
       return
     }
 
@@ -53,7 +60,7 @@ export function createBot(token: string) {
 
   // ── /publish command ──
   bot.command('publish', async (ctx) => {
-    await showCategorySelection(ctx)
+    await showLanguageSelection(ctx)
   })
 
   // ── /cancel command (exits conversation) ──
@@ -64,11 +71,22 @@ export function createBot(token: string) {
     await ctx.reply('❌ בוטל')
   })
 
-  // ── "Add Profile" button → show category selection ──
+  // ── "Add Profile" button → show language selection ──
   bot.callbackQuery('start_publish', async (ctx) => {
     await ctx.answerCallbackQuery()
     try { await ctx.conversation.exit('publishConversation') } catch {}
-    await showCategorySelection(ctx)
+    await showLanguageSelection(ctx)
+  })
+
+  // ── Language selected → show category selection ──
+  bot.callbackQuery(/^pub_lang_sel:/, async (ctx) => {
+    await ctx.answerCallbackQuery()
+    const userId = ctx.from?.id
+    if (!userId) return
+    const lang = ctx.callbackQuery.data.replace('pub_lang_sel:', '')
+    console.log(`[bot] User ${userId} selected language: ${lang}`)
+    pendingCategories.set(userId, `__lang:${lang}`)
+    await showCategorySelection(ctx, lang)
   })
 
   // ── Category selected → enter conversation ──
@@ -203,10 +221,22 @@ export function createBot(token: string) {
   return bot
 }
 
-// ── Show category selection (before entering conversation) ──
-async function showCategorySelection(ctx: any, payload?: string) {
-  // Detect language from deep link payload
-  const langMap: Record<string, Record<string, string>> = {
+// ── Show language selection ──
+async function showLanguageSelection(ctx: any) {
+  const kb = new InlineKeyboard()
+    .text('🇮🇱 עברית', 'pub_lang_sel:he')
+    .text('🇷🇺 Русский', 'pub_lang_sel:ru')
+    .text('🇬🇧 English', 'pub_lang_sel:en')
+
+  await ctx.reply('🌐 *Choose your language / בחרי שפה / Выбери язык:*', {
+    parse_mode: 'Markdown',
+    reply_markup: kb,
+  })
+}
+
+// ── Show category selection (after language is chosen) ──
+async function showCategorySelection(ctx: any, lang: string = 'he') {
+  const texts: Record<string, Record<string, string>> = {
     welcome: {
       en: '📤 *Publish your ad on Tahles*\n\nWe\'ll go through a few quick steps to create your profile.\nYou can cancel anytime with /cancel\n\nLet\'s start! 👇',
       ru: '📤 *Размещение анкеты на Tahles*\n\nСейчас пройдём несколько шагов для создания вашего профиля.\nОтменить можно в любой момент — /cancel\n\nНачнём! 👇',
@@ -221,22 +251,13 @@ async function showCategorySelection(ctx: any, payload?: string) {
     cat_regular: { en: '📋 Regular ad', ru: '📋 Обычное объявление', he: '📋 מודעה רגילה' },
   }
 
-  const langMatch = (payload || '').match(/publish_(\w+)/)
-  const lang = (['en', 'ru', 'he'].includes(langMatch?.[1] || '') ? langMatch![1] : 'he') as string
-
-  // Store language for conversation to pick up
-  const userId = ctx.from?.id
-  if (userId) {
-    pendingCategories.set(userId, `__lang:${lang}`)
-  }
-
-  await ctx.reply(langMap.welcome[lang] || langMap.welcome.he, { parse_mode: 'Markdown' })
+  await ctx.reply(texts.welcome[lang] || texts.welcome.he, { parse_mode: 'Markdown' })
 
   const catKb = new InlineKeyboard()
-    .text(langMap.cat_sugar[lang] || langMap.cat_sugar.he, 'pub_cat:sugar_baby').row()
-    .text(langMap.cat_regular[lang] || langMap.cat_regular.he, 'pub_cat:regular')
+    .text(texts.cat_sugar[lang] || texts.cat_sugar.he, 'pub_cat:sugar_baby').row()
+    .text(texts.cat_regular[lang] || texts.cat_regular.he, 'pub_cat:regular')
 
-  await ctx.reply(langMap.ask_category[lang] || langMap.ask_category.he, {
+  await ctx.reply(texts.ask_category[lang] || texts.ask_category.he, {
     parse_mode: 'Markdown',
     reply_markup: catKb,
   })
