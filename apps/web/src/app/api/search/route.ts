@@ -117,7 +117,14 @@ async function realSearch(
   // Filter out profiles with empty photos array
   const withPhotos = (data || []).filter((ad: any) => Array.isArray(ad.photos) && ad.photos.length > 0)
 
-  const mappedData = withPhotos.map((ad: any) => {
+  // Filter out profiles where ALL photos are from titi (have watermark)
+  // wa-media photos = no watermark, profile-photos = titi watermark
+  const noWatermark = withPhotos.filter((ad: any) => {
+    const photos: string[] = ad.photos || []
+    return photos.some((p: string) => p.includes('wa-media') || p.includes('bot-photos'))
+  })
+
+  const mappedData = noWatermark.map((ad: any) => {
     const contact = extractContact(ad)
     const rawData = ad.raw_data as any
     const enriched = rawData?._enriched ?? {}
@@ -143,7 +150,7 @@ async function realSearch(
       rating_count:  undefined,
       quality_score: undefined,
       raw_data:      undefined,
-      photos: (ad.photos || []).slice(0, 15),
+      photos: (ad.photos || []).filter((p: string) => p.includes('wa-media') || p.includes('bot-photos')).slice(0, 15),
     }
   })
 
