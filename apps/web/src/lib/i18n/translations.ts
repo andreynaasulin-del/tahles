@@ -193,6 +193,11 @@ export type TranslationKey =
   | 'cookie_text'
   | 'cookie_accept'
   | 'cookie_decline'
+  | 'see_more_title'
+  | 'see_more_subtitle'
+  | 'see_more_wa'
+  | 'see_more_tg'
+  | 'see_more_msg'
   // ── city names ──
   | 'city_tel_aviv'
   | 'city_jerusalem'
@@ -380,6 +385,11 @@ const en: TranslationDict = {
   cookie_text: 'We use cookies to improve your experience.',
   cookie_accept: 'Accept',
   cookie_decline: 'Decline',
+  see_more_title: 'Want to see more profiles?',
+  see_more_subtitle: 'Send us a message and get access to the full catalog',
+  see_more_wa: 'WhatsApp',
+  see_more_tg: 'Telegram',
+  see_more_msg: 'I want to see more profiles',
   // cities
   city_tel_aviv: 'Tel Aviv',
   city_jerusalem: 'Jerusalem',
@@ -566,6 +576,11 @@ const ru: TranslationDict = {
   cookie_text: 'Мы используем cookies для улучшения вашего опыта.',
   cookie_accept: 'Принять',
   cookie_decline: 'Отклонить',
+  see_more_title: 'Хотите увидеть больше анкет?',
+  see_more_subtitle: 'Напишите нам и получите доступ к полному каталогу',
+  see_more_wa: 'WhatsApp',
+  see_more_tg: 'Telegram',
+  see_more_msg: 'Я хочу видеть больше анкет',
   // cities
   city_tel_aviv: 'Тель-Авив',
   city_jerusalem: 'Иерусалим',
@@ -752,6 +767,11 @@ const he: TranslationDict = {
   cookie_text: 'אנחנו משתמשים בעוגיות כדי לשפר את חוויית השימוש.',
   cookie_accept: 'אישור',
   cookie_decline: 'דחייה',
+  see_more_title: 'רוצה לראות עוד פרופילים?',
+  see_more_subtitle: 'שלח לנו הודעה וקבל גישה לקטלוג המלא',
+  see_more_wa: 'WhatsApp',
+  see_more_tg: 'Telegram',
+  see_more_msg: 'אני רוצה לראות עוד פרופילים',
   // cities
   city_tel_aviv: 'תל אביב',
   city_jerusalem: 'ירושלים',
