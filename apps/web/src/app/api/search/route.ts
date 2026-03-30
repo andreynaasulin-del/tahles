@@ -73,7 +73,7 @@ async function realSearch(
 
   // Extra filters
   if (hairColor) query = query.eq('raw_data->>hair_color', hairColor)
-  if (hasVideo === 'true') query = query.eq('raw_data->>has_video', 'true')
+  if (hasVideo === 'true') query = query.not('raw_data->_enriched->videos', 'eq', '[]').not('raw_data->_enriched->videos', 'is', null)
 
   // City filter with Hebrew variants
   if (city) {

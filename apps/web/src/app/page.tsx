@@ -194,6 +194,7 @@ export default function HomePage() {
     setStarted(true)
 
     const params = new URLSearchParams()
+    params.set('has_video', 'true')
     params.set('page', '1')
 
     fetch(`/api/search?${params}`, { signal: controller.signal })
