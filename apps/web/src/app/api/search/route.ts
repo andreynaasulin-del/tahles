@@ -12,6 +12,7 @@ const SearchSchema = z.object({
   hair_color: z.string().max(30).optional().default(''),
   has_video:  z.string().max(5).optional().default(''),
   page:      z.string().regex(/^\d+$/).transform(Number).optional().default('1'),
+  limit:     z.string().regex(/^\d+$/).transform(Number).optional(),
 })
 
 // Hebrew/alternate equivalents for city OR-search
@@ -163,8 +164,9 @@ export async function GET(request: NextRequest) {
     const hairColor = validated.hair_color || ''
     const hasVideo = validated.has_video || ''
     const { DEFAULT_PAGE_SIZE } = await import('@/lib/constants')
+    const pageSize = validated.limit ? Math.min(validated.limit, 100) : DEFAULT_PAGE_SIZE
 
-    const result = await realSearch(q, sheet, category, city, ethnicity, priceMin ?? null, priceMax ?? null, page, DEFAULT_PAGE_SIZE, hairColor, hasVideo)
+    const result = await realSearch(q, sheet, category, city, ethnicity, priceMin ?? null, priceMax ?? null, page, pageSize, hairColor, hasVideo)
 
     return NextResponse.json(result, {
       headers: {

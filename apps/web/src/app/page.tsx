@@ -194,13 +194,21 @@ export default function HomePage() {
     setStarted(true)
 
     const params = new URLSearchParams()
-    params.set('has_video', 'true')
     params.set('page', '1')
+    // Fetch enough to find profiles with video across all quality tiers
+    params.set('limit', '100')
 
     fetch(`/api/search?${params}`, { signal: controller.signal })
       .then(res => res.ok ? res.json() : Promise.reject())
       .then(json => {
-        setAds((json.data ?? []).slice(0, MAX_PROFILES))
+        const all: Ad[] = json.data ?? []
+        // Sort: profiles with video first, then by original quality order
+        const sorted = [...all].sort((a, b) => {
+          const aHasVideo = (a.videos?.length ?? 0) > 0 ? 1 : 0
+          const bHasVideo = (b.videos?.length ?? 0) > 0 ? 1 : 0
+          return bHasVideo - aHasVideo
+        })
+        setAds(sorted.slice(0, MAX_PROFILES))
       })
       .catch(err => {
         if (err instanceof DOMException && err.name === 'AbortError') return
