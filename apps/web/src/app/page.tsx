@@ -57,7 +57,7 @@ interface SignalStats {
   demand: 'low' | 'medium' | 'high'
 }
 
-const SUPPORT_WA = '972000000000' // TODO: replace with real WhatsApp number
+const SUPPORT_WA = '972559760152'
 const SUPPORT_TG = 'tahles_support'
 
 function fmtNum(n: number) {
